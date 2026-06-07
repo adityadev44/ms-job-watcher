@@ -1,0 +1,164 @@
+"""Reads config, fetches live jobs, and applies location / level / skill filters."""
+
+from __future__ import annotations
+
+import html as html_mod
+import re
+import warnings
+from pathlib import Path
+from typing import Any
+
+import requests
+import yaml
+
+from fetcher import _HEADERS, fetch_jobs
+
+_DETAIL_BASE = "https://apply.careers.microsoft.com/api/apply/v2/jobs"
+
+# ---------------------------------------------------------------------------
+# Config helpers
+# ---------------------------------------------------------------------------
+
+
+def load_config(path: str | Path) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+# ---------------------------------------------------------------------------
+# Text helpers
+# ---------------------------------------------------------------------------
+
+
+def _strip_html(raw: str) -> str:
+    """Strip HTML tags and decode entities, returning a single whitespace-normalised string."""
+    text = re.sub(r"<[^>]+>", " ", raw)
+    text = html_mod.unescape(text)
+    return " ".join(text.split())
+
+
+def _contains_any(text: str, terms: list[str]) -> bool:
+    """Case-insensitive check: does *text* contain at least one item from *terms*?"""
+    lowered = text.lower()
+    return any(t.lower() in lowered for t in terms)
+
+
+# ---------------------------------------------------------------------------
+# Individual filter predicates (pure functions, easy to unit-test)
+# ---------------------------------------------------------------------------
+
+
+def is_india_job(job: dict) -> bool:
+    """True if the job's location string mentions India."""
+    return "india" in job["location"].lower()
+
+
+def passes_level_check(job: dict, level_keywords: list[str]) -> bool:
+    """True if the job title contains at least one of the configured level keywords."""
+    return _contains_any(job["title"], level_keywords)
+
+
+def passes_exclude_check(job: dict, exclude_terms: list[str]) -> bool:
+    """True if the job title contains *none* of the configured exclude terms."""
+    return not _contains_any(job["title"], exclude_terms)
+
+
+def matches_skills(description: str, skills: list[str]) -> bool:
+    """True if the plain-text description mentions at least one required skill."""
+    return _contains_any(description, skills)
+
+
+# ---------------------------------------------------------------------------
+# Detail fetcher
+# ---------------------------------------------------------------------------
+
+
+def _ef_id_from_url(application_url: str) -> str:
+    """Extract the numeric Eightfold job ID from the application URL.
+
+    e.g. 'https://apply.careers.microsoft.com/careers/job/12345?domain=...' → '12345'
+    """
+    return application_url.split("/careers/job/")[1].split("?")[0]
+
+
+def fetch_job_description(application_url: str, timeout: int = 20) -> str:
+    """Fetch the full job description (plain text) for a single job.
+
+    Uses the Eightfold detail endpoint; strips HTML before returning.
+    """
+    ef_id = _ef_id_from_url(application_url)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        r = requests.get(
+            f"{_DETAIL_BASE}/{ef_id}",
+            headers=_HEADERS,
+            params={"domain": "microsoft.com"},
+            timeout=timeout,
+            verify=False,
+        )
+    r.raise_for_status()
+    raw_html = r.json().get("job_description", "")
+    return _strip_html(raw_html)
+
+
+# ---------------------------------------------------------------------------
+# Main orchestrator
+# ---------------------------------------------------------------------------
+
+
+def find_matching_jobs(
+    config_path: str | Path,
+) -> tuple[int, list[dict]]:
+    """Fetch all jobs from the API, apply every filter, and return results.
+
+    Returns
+    -------
+    total_fetched : int
+        Total unique jobs retrieved across all keyword/location combinations.
+    matched : list[dict]
+        Jobs that passed every filter.  Each dict has the standard five fields
+        plus a ``description`` key with the plain-text job description.
+    """
+    cfg = load_config(config_path)
+    keywords: list[str] = cfg["search"]["keywords"]
+    locations: list[str] = cfg["search"].get("locations", [])
+    matching: dict = cfg.get("matching", {})
+    skills: list[str] = matching.get("skills", [])
+    level_kw: list[str] = matching.get("level_keywords", [])
+    exclude: list[str] = matching.get("exclude_terms", [])
+
+    # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
+    seen_ids: set[str] = set()
+    all_jobs: list[dict] = []
+    for keyword in keywords:
+        for location in locations:
+            for job in fetch_jobs(keyword, location, num=20):
+                if job["id"] not in seen_ids:
+                    seen_ids.add(job["id"])
+                    all_jobs.append(job)
+
+    total_fetched = len(all_jobs)
+
+    # --- Step 2: Quick title/location filters (no extra HTTP calls) ---
+    candidates: list[dict] = []
+    for job in all_jobs:
+        if not is_india_job(job):
+            continue
+        if not passes_exclude_check(job, exclude):
+            continue
+        if not passes_level_check(job, level_kw):
+            continue
+        candidates.append(job)
+
+    # --- Step 3: Skill filter — fetch description only for remaining candidates ---
+    matched: list[dict] = []
+    for job in candidates:
+        try:
+            description = fetch_job_description(job["application_url"])
+        except Exception:
+            continue  # skip if the detail call fails (network blip, job removed, etc.)
+        if matches_skills(description, skills):
+            job = {**job, "description": description}
+            matched.append(job)
+
+    return total_fetched, matched
