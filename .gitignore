@@ -5,7 +5,6 @@ env/
 
 # Secrets — NEVER commit these
 .env
-config.yaml
 
 # Python cache files
 __pycache__/

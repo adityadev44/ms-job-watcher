@@ -1,0 +1,47 @@
+# Job Watcher Configuration
+# Do NOT commit this file to git — it may contain notification secrets.
+
+search:
+  keywords:
+    - "software engineer"
+    - "full stack engineer"
+    - "backend engineer"
+  locations:
+    - "India"
+
+matching:
+  # Keep a job only if its description mentions at least one of these skills.
+  skills:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "SQL Server"
+    - "Angular"
+    - "TypeScript"
+    - "Azure"
+    - "full stack"
+    - "backend"
+
+  # Keep a job only if its title contains at least one of these level strings.
+  level_keywords:
+    - "Software Engineer II"
+    - "SWE II"
+    - "Senior Software Engineer"
+    - "SSE"
+
+  # Reject a job immediately if its title contains any of these terms.
+  exclude_terms:
+    - "intern"
+    - "internship"
+    - "new grad"
+    - "principal"
+    - "director"
+    - "data scientist"
+
+notifications:
+  email:
+    recipient: ""     # e.g. "you@example.com"
+
+  telegram:
+    bot_token: ""     # e.g. "123456:ABC-DEF..."
+    chat_id: ""       # e.g. "987654321"
