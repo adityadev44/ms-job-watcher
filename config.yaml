@@ -11,8 +11,7 @@ search:
     - "backend engineer"
     - ".NET developer"
     - "C# developer"
-  locations:
-    - "India"
+  locations: []
 
 optum_search:
   keywords:

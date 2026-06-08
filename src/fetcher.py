@@ -75,11 +75,12 @@ def fetch_jobs(
     params = {
         "domain": "microsoft.com",
         "q": keyword,
-        "location": location,
         "start": start,
         "num": num,
         "sortBy": sort_by,
     }
+    if location:
+        params["location"] = location
     _MAX_ATTEMPTS = 3
     for attempt in range(_MAX_ATTEMPTS):
         try:

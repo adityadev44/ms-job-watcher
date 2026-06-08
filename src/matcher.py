@@ -171,17 +171,16 @@ def find_matching_jobs(
     exclude: list[str] = matching.get("exclude_terms", [])
 
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
-    # Results are sorted newest-first so deep pagination adds stale jobs, not fresh
-    # ones. Two pages (~40 results) is enough coverage; it also keeps us well under
-    # Microsoft's rate limit.
-    _PAGE_SIZE = 20          # requested; API returns ≤10 with location
+    # Empty locations list means fetch without a location filter (date sort works).
+    # A non-empty list drives one search pass per location value.
+    _PAGE_SIZE = 20          # results requested per page
     _MAX_PAGES = 2           # at most 2 pages per keyword/location pair
     _INTER_PAGE_DELAY = 1.5  # seconds between consecutive search API calls
 
     seen_ids: set[str] = set()
     all_jobs: list[dict] = []
     for keyword in keywords:
-        for location in locations:
+        for location in (locations or [""]):
             start = 0
             for page_num in range(_MAX_PAGES):
                 if page_num > 0:
