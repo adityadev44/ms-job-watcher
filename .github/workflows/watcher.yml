@@ -46,7 +46,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add seen_jobs.json seen_jobs_optum.json
+          git add seen_jobs.json
+          test -f seen_jobs_optum.json && git add seen_jobs_optum.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else
