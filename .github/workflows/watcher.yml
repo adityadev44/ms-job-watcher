@@ -52,5 +52,6 @@ jobs:
             echo "No new jobs this run"
           else
             git commit -m "chore: update seen_jobs.json [skip ci]"
+            git pull --rebase origin master
             git push
           fi
