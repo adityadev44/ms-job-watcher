@@ -22,8 +22,8 @@ _SMTP_HOST = "smtp.gmail.com"
 _SMTP_PORT = 587
 
 
-def format_message(jobs: list[dict]) -> str:
-    lines = ["Microsoft job matches:\n"]
+def format_message(jobs: list[dict], source: str = "Microsoft") -> str:
+    lines = [f"{source} job matches:\n"]
     for job in jobs:
         lines.append(f"- {job['title']}")
         lines.append(f"  Location:  {job['location']}")
@@ -33,7 +33,7 @@ def format_message(jobs: list[dict]) -> str:
     return "\n".join(lines).strip()
 
 
-def _build_telegram_chunks(jobs: list[dict], limit: int = _TELEGRAM_LIMIT) -> list[str]:
+def _build_telegram_chunks(jobs: list[dict], limit: int = _TELEGRAM_LIMIT, source: str = "Microsoft") -> list[str]:
     """Format jobs into plain-text chunks each shorter than *limit* characters.
 
     Splits on job boundaries so no individual job is truncated mid-way.
@@ -43,14 +43,14 @@ def _build_telegram_chunks(jobs: list[dict], limit: int = _TELEGRAM_LIMIT) -> li
     chunks: list[str] = []
     pending: list[dict] = []
     for job in jobs:
-        trial = format_message(pending + [job])
+        trial = format_message(pending + [job], source)
         if len(trial) > limit and pending:
-            chunks.append(format_message(pending))
+            chunks.append(format_message(pending, source))
             pending = [job]
         else:
             pending.append(job)
     if pending:
-        chunks.append(format_message(pending))
+        chunks.append(format_message(pending, source))
     return chunks
 
 
@@ -71,9 +71,9 @@ def send_telegram(message: str, token: str, chat_id: str) -> None:
     response.raise_for_status()
 
 
-def send_email(message: str, gmail_user: str, gmail_password: str, recipients: list[str]) -> None:
+def send_email(message: str, gmail_user: str, gmail_password: str, recipients: list[str], *, source: str = "Microsoft") -> None:
     msg = EmailMessage()
-    msg["Subject"] = "Microsoft job matches"
+    msg["Subject"] = f"{source} job matches"
     msg["From"] = gmail_user
     msg["To"] = ", ".join(recipients)
     msg.set_content(message)
@@ -85,11 +85,11 @@ def send_email(message: str, gmail_user: str, gmail_password: str, recipients: l
         smtp.send_message(msg)
 
 
-def notify(jobs: list[dict]) -> None:
+def notify(jobs: list[dict], source: str = "Microsoft") -> None:
     if not jobs:
         return
 
-    message = format_message(jobs)
+    message = format_message(jobs, source)
 
     token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
@@ -99,7 +99,7 @@ def notify(jobs: list[dict]) -> None:
 
     if token and chat_id:
         try:
-            chunks = _build_telegram_chunks(jobs)
+            chunks = _build_telegram_chunks(jobs, source=source)
             for chunk in chunks:
                 send_telegram(chunk, token, chat_id)
             print(f"Telegram alert sent ({len(chunks)} message(s)).")
@@ -110,7 +110,7 @@ def notify(jobs: list[dict]) -> None:
 
     if gmail_user and gmail_password and recipients:
         try:
-            send_email(message, gmail_user, gmail_password, recipients)
+            send_email(message, gmail_user, gmail_password, recipients, source=source)
             print(f"Email alert sent to: {', '.join(recipients)}")
         except Exception as exc:
             print(f"[warn] Email alert failed: {exc}")

@@ -42,6 +42,19 @@ class RateLimitError(Exception):
     """Raised when the API rate-limits after all retries are exhausted."""
 
 
+def _normalize_date(date_str: str) -> str:
+    """Normalize 'YYYY-M-D' (TalentBrew format) to 'YYYY-MM-DD'."""
+    if not date_str:
+        return ""
+    parts = date_str.split("-")
+    if len(parts) == 3:
+        try:
+            return f"{int(parts[0]):04d}-{int(parts[1]):02d}-{int(parts[2]):02d}"
+        except ValueError:
+            pass
+    return date_str
+
+
 def _strip_html(raw: str) -> str:
     text = re.sub(r"<[^>]+>", " ", raw)
     text = html_mod.unescape(text)
@@ -138,10 +151,11 @@ def fetch_jobs(
     raise RateLimitError(f"Rate-limited after {_MAX_ATTEMPTS} attempts")
 
 
-def fetch_job_description(application_url: str, timeout: int = 20) -> str:
-    """Fetch the full job description (plain text) for a single Optum/UHG job.
+def fetch_job_description(application_url: str, timeout: int = 20) -> tuple[str, str]:
+    """Fetch the full job description and posting date for a single Optum/UHG job.
 
-    Parses the JSON-LD JobPosting schema embedded in the detail page.
+    Returns a (description, posting_date) tuple. description is plain text;
+    posting_date is ISO-formatted 'YYYY-MM-DD' (empty string if unavailable).
     """
     _MAX_ATTEMPTS = 3
     for attempt in range(_MAX_ATTEMPTS):
@@ -169,10 +183,11 @@ def fetch_job_description(application_url: str, timeout: int = 20) -> str:
             try:
                 ld = json.loads(ld_script.string)
                 raw_html = ld.get("description", "")
-                if raw_html:
-                    return _strip_html(raw_html)
+                posting_date = _normalize_date(ld.get("datePosted", ""))
+                description = _strip_html(raw_html) if raw_html else ""
+                return description, posting_date
             except (json.JSONDecodeError, AttributeError):
                 pass
-        return ""
+        return "", ""
 
     raise RateLimitError(f"Rate-limited after {_MAX_ATTEMPTS} attempts")

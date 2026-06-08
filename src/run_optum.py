@@ -41,7 +41,7 @@ def run_optum_pipeline(
 
     alert_sent = False
     if new_matches:
-        notify(new_matches)
+        notify(new_matches, source="Optum")
         seen_ids.update(j["id"] for j in new_matches)
         save_seen_ids(seen_path, seen_ids)
         alert_sent = True

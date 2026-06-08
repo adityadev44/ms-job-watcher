@@ -216,13 +216,14 @@ def test_fetch_job_description_parses_json_ld(monkeypatch):
         "optum_fetcher.requests.get",
         lambda *a, **kw: _FakeResponse(_DETAIL_HTML),
     )
-    desc = fetch_job_description(
+    desc, posting_date = fetch_job_description(
         "https://careers.unitedhealthgroup.com/job/hyderabad/senior-se/34088/12345"
     )
     assert isinstance(desc, str)
     assert "Senior Software Engineer" in desc
     assert "C#" in desc
     assert "<" not in desc  # HTML stripped
+    assert posting_date == "2026-06-08"  # normalized from "2026-6-8"
 
 
 def test_fetch_job_description_returns_empty_on_missing_json_ld(monkeypatch):
@@ -230,4 +231,4 @@ def test_fetch_job_description_returns_empty_on_missing_json_ld(monkeypatch):
         "optum_fetcher.requests.get",
         lambda *a, **kw: _FakeResponse("<html><body>No JSON-LD here</body></html>"),
     )
-    assert fetch_job_description("https://careers.unitedhealthgroup.com/job/x/y/34088/1") == ""
+    assert fetch_job_description("https://careers.unitedhealthgroup.com/job/x/y/34088/1") == ("", "")

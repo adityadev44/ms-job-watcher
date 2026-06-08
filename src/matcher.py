@@ -241,12 +241,13 @@ def find_matching_jobs(
         if i > 0:
             time.sleep(_INTER_DELAY)
 
-        # Fetch with retry; description stays None if all attempts fail.
-        description: str | None = None
+        # Fetch with retry; stays None if all attempts fail.
+        # optum_fetcher returns (description, posting_date); MS fetcher returns str.
+        _fetch_result = None
         last_exc: Exception | None = None
         for attempt in range(1 + _RETRIES):
             try:
-                description = _fetch_desc(
+                _fetch_result = _fetch_desc(
                     job["application_url"], timeout=_TIMEOUT
                 )
                 break
@@ -254,6 +255,13 @@ def find_matching_jobs(
                 last_exc = exc
                 if attempt < _RETRIES:
                     time.sleep(_RETRY_DELAY)
+
+        if isinstance(_fetch_result, tuple):
+            description, fetched_date = _fetch_result
+            if fetched_date:
+                job["posting_date"] = fetched_date
+        else:
+            description = _fetch_result
 
         if not description:
             # Fetch failed or returned empty — keep the job rather than risk
