@@ -1,4 +1,4 @@
-name: MS Job Watcher
+name: MS and Optum Job Watcher
 
 on:
   schedule:
@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run watcher
+      - name: Run Microsoft watcher
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -33,13 +33,22 @@ jobs:
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
         run: python src/main.py
 
-      - name: Save updated seen_jobs.json
+      - name: Run Optum watcher
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
+        run: python src/run_optum.py
+
+      - name: Save updated seen_jobs files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add seen_jobs.json
+          git add seen_jobs.json seen_jobs_optum.json
           if git diff --staged --quiet; then
-            echo "seen_jobs.json unchanged — no new jobs this run"
+            echo "No new jobs this run"
           else
             git commit -m "chore: update seen_jobs.json [skip ci]"
             git push

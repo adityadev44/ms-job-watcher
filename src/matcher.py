@@ -142,7 +142,8 @@ def fetch_job_description(application_url: str, timeout: int = 20) -> str:
 
 
 def find_matching_jobs(
-    config_path: str | Path,
+    config_path_or_cfg,   # str | Path for existing callers; dict for new multi-board callers
+    fetcher=None,         # None → use module-level MS functions; pass optum_fetcher for Optum
 ) -> tuple[int, list[dict]]:
     """Fetch all jobs from the API, apply every filter, and return results.
 
@@ -154,7 +155,14 @@ def find_matching_jobs(
         Jobs that passed every filter.  Each dict has the standard five fields
         plus a ``description`` key with the plain-text job description.
     """
-    cfg = load_config(config_path)
+    cfg = (
+        config_path_or_cfg
+        if isinstance(config_path_or_cfg, dict)
+        else load_config(config_path_or_cfg)
+    )
+    _fetch_jobs     = fetcher.fetch_jobs            if fetcher else fetch_jobs
+    _fetch_desc     = fetcher.fetch_job_description if fetcher else fetch_job_description
+    _RateLimitError = fetcher.RateLimitError        if fetcher else RateLimitError
     keywords: list[str] = cfg["search"]["keywords"]
     locations: list[str] = cfg["search"].get("locations", [])
     matching: dict = cfg.get("matching", {})
@@ -179,8 +187,8 @@ def find_matching_jobs(
                 if page_num > 0:
                     time.sleep(_INTER_PAGE_DELAY)
                 try:
-                    page = fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
-                except RateLimitError as exc:
+                    page = _fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
+                except _RateLimitError as exc:
                     print(
                         f"  [warn] rate-limited for '{keyword}' / '{location}' "
                         f"after {page_num} page(s) — {exc}; skipping remaining pages"
@@ -238,7 +246,7 @@ def find_matching_jobs(
         last_exc: Exception | None = None
         for attempt in range(1 + _RETRIES):
             try:
-                description = fetch_job_description(
+                description = _fetch_desc(
                     job["application_url"], timeout=_TIMEOUT
                 )
                 break
