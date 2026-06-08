@@ -2,7 +2,7 @@ name: MS Job Watcher
 
 on:
   schedule:
-    - cron: '*/30 * * * *'   # every 30 minutes
+    - cron: '*/3000000000000 * * * *'   # every 30 minutes
   workflow_dispatch:           # also runnable manually from the GitHub UI
 
 permissions:
