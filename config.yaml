@@ -4,43 +4,83 @@
 search:
   keywords:
     - "software engineer"
+    - "senior software engineer"
+    - "software development engineer"
+    - "SDE"
     - "full stack engineer"
     - "backend engineer"
+    - ".NET developer"
+    - "C# developer"
   locations:
     - "India"
 
 matching:
+  # Include a job if its title belongs to the software-engineer family.
+  # Matching is normalised: case, hyphens, C#/CSharp/.NET/dotnet, and
+  # Roman numerals (II/III) are treated as equal to Arabic (2/3).
+  # No specific seniority is required — any level in the family passes.
+  title_family:
+    - "software engineer"
+    - "software development engineer"
+    - "SDE"
+    - "SWE"
+    - "full stack engineer"
+    - "backend engineer"
+    - "full-stack developer"
+    - "backend developer"
+    - ".NET developer"
+    - "application developer"
+    - "application engineer"
+
   # Keep a job only if its description mentions at least one of these skills.
   skills:
     - ".NET"
+    - ".NET Core"
+    - ".NET Framework"
+    - "dotnet"
     - "C#"
     - "ASP.NET"
+    - "Web API"
+    - "REST"
     - "SQL Server"
+    - "T-SQL"
+    - "SQL"
+    - "Azure"
     - "Angular"
     - "TypeScript"
-    - "Azure"
-    - "full stack"
-    - "backend"
-
-  # Keep a job only if its title contains at least one of these level strings.
-  # Roman numerals (II, III) and Arabic numerals (2, 3) are normalised before
-  # matching, so "Software Engineer II" also catches "Software Engineer 2".
-  level_keywords:
-    - "Software Engineer II"   # also matches "Software Engineer 2" via normalisation
-    - "SWE II"                 # also matches "SWE 2"
-    - "SDE II"                 # also matches "SDE 2"
-    - "SDE2"                   # no-space Microsoft variant
-    - "Senior Software Engineer"
-    - "Sr Software Engineer"
-    - "SSE"
+    - "JavaScript"
+    - "React"
+    - "Entity Framework"
 
   # Reject a job immediately if its title contains any of these terms.
   exclude_terms:
     - "intern"
     - "internship"
+    - "trainee"
+    - "apprentice"
+    - "fresher"
+    - "graduate"
     - "new grad"
+    - "university"
     - "principal"
     - "director"
+    - "vice president"
+    - "VP"
+    - "head of"
+    - "engineering manager"
+    - "manager"
+    - "mechanical"
+    - "electrical"
+    - "industrial"
+    - "hardware"
+    - "firmware"
+    - "embedded"
+    - "datacenter technician"
+    - "network engineer"
+    - "sales engineer"
+    - "solutions engineer"
+    - "customer engineer"
+    - "support engineer"
     - "data scientist"
 
 notifications:

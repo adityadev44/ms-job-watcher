@@ -18,8 +18,8 @@ from matcher import (
     is_india_job,
     matches_skills,
     passes_exclude_check,
-    passes_level_check,
-    _normalize_numerals,
+    passes_title_family_check,
+    _normalize_text,
     _strip_html,
 )
 
@@ -27,18 +27,38 @@ from matcher import (
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
-SKILLS      = [".NET", "C#", "ASP.NET", "SQL Server", "Angular",
-               "TypeScript", "Azure", "full stack", "backend"]
-LEVEL_KW    = [
-    "Software Engineer II",   # also matches "Software Engineer 2" via normalization
-    "SWE II",                 # also matches "SWE 2"
-    "SDE II",                 # also matches "SDE 2"
-    "SDE2",
-    "Senior Software Engineer",
-    "Sr Software Engineer",
-    "SSE",
+TITLE_FAMILY = [
+    "software engineer",
+    "software development engineer",
+    "SDE",
+    "SWE",
+    "full stack engineer",
+    "backend engineer",
+    "full-stack developer",
+    "backend developer",
+    ".NET developer",
+    "application developer",
+    "application engineer",
 ]
-EXCLUDE     = ["intern", "internship", "new grad", "principal", "director", "data scientist"]
+
+SKILLS = [
+    ".NET", ".NET Core", ".NET Framework", "dotnet",
+    "C#", "ASP.NET", "Web API", "REST",
+    "SQL Server", "T-SQL", "SQL", "Azure",
+    "Angular", "TypeScript", "JavaScript", "React",
+    "Entity Framework",
+]
+
+EXCLUDE = [
+    "intern", "internship", "trainee", "apprentice", "fresher",
+    "graduate", "new grad", "university",
+    "principal", "director", "vice president", "VP",
+    "head of", "engineering manager", "manager",
+    "mechanical", "electrical", "industrial", "hardware",
+    "firmware", "embedded", "datacenter technician",
+    "network engineer", "sales engineer", "solutions engineer",
+    "customer engineer", "support engineer", "data scientist",
+]
 
 # A job that should pass every filter
 GOOD_JOB = {
@@ -94,6 +114,53 @@ def test_strip_html_decodes_entities():
 
 
 # ---------------------------------------------------------------------------
+# _normalize_text
+# ---------------------------------------------------------------------------
+
+def test_normalize_text_lowercase():
+    assert _normalize_text("Software Engineer") == "software engineer"
+
+
+def test_normalize_text_roman_ii_to_arabic():
+    assert _normalize_text("Software Engineer II") == "software engineer 2"
+    assert _normalize_text("SWE II") == "swe 2"
+
+
+def test_normalize_text_roman_iii_to_arabic():
+    assert _normalize_text("Software Engineer III") == "software engineer 3"
+
+
+def test_normalize_text_arabic_numeral_unchanged():
+    assert _normalize_text("Software Engineer 2") == "software engineer 2"
+
+
+def test_normalize_text_roman_case_insensitive():
+    assert _normalize_text("software engineer ii") == "software engineer 2"
+
+
+def test_normalize_text_dotnet_variants():
+    assert _normalize_text(".NET developer") == "dotnet developer"
+    assert _normalize_text("dot net developer") == "dotnet developer"
+    assert _normalize_text("dotnet developer") == "dotnet developer"
+
+
+def test_normalize_text_aspnet_kept_separate():
+    # ASP.NET must not become "ASPdotnet" — it gets its own canonical form
+    assert _normalize_text("ASP.NET") == "aspnet"
+    assert _normalize_text("asp.net") == "aspnet"
+
+
+def test_normalize_text_csharp_variants():
+    assert _normalize_text("C#") == "csharp"
+    assert _normalize_text("C-Sharp") == "csharp"
+    assert _normalize_text("CSharp") == "csharp"
+
+
+def test_normalize_text_hyphen_to_space():
+    assert _normalize_text("full-stack developer") == "full stack developer"
+
+
+# ---------------------------------------------------------------------------
 # Filter predicates — unit tests
 # ---------------------------------------------------------------------------
 
@@ -105,48 +172,57 @@ def test_is_india_job_false():
     assert is_india_job({**GOOD_JOB, "location": "United States, Washington, Redmond"}) is False
 
 
-def test_passes_level_check_true():
-    assert passes_level_check(GOOD_JOB, LEVEL_KW) is True
+# --- passes_title_family_check ---
+
+def test_title_family_senior_software_engineer():
+    assert passes_title_family_check(GOOD_JOB, TITLE_FAMILY) is True
 
 
-def test_passes_level_check_false_principal():
-    assert passes_level_check({**GOOD_JOB, "title": "Principal Software Engineer"}, LEVEL_KW) is False
+def test_title_family_case_insensitive():
+    assert passes_title_family_check({**GOOD_JOB, "title": "senior software engineer"}, TITLE_FAMILY) is True
 
 
-def test_passes_level_check_case_insensitive():
-    assert passes_level_check({**GOOD_JOB, "title": "senior software engineer"}, LEVEL_KW) is True
+def test_title_family_software_engineer_2_arabic():
+    """'Software Engineer 2' must match via the 'software engineer' family term."""
+    assert passes_title_family_check({**GOOD_JOB, "title": "Software Engineer 2"}, TITLE_FAMILY) is True
 
 
-def test_passes_level_check_arabic_numeral_matches_roman():
-    """'Software Engineer 2' must match keyword 'Software Engineer II' via numeral normalization."""
-    assert passes_level_check({**GOOD_JOB, "title": "Software Engineer 2"}, LEVEL_KW) is True
+def test_title_family_software_development_engineer_ii():
+    """'Software Development Engineer II' must match (Roman numeral normalised to Arabic)."""
+    assert passes_title_family_check(
+        {**GOOD_JOB, "title": "Software Development Engineer II"}, TITLE_FAMILY
+    ) is True
 
 
-def test_passes_level_check_sde2_nospace():
-    assert passes_level_check({**GOOD_JOB, "title": "SDE2 - Backend"}, LEVEL_KW) is True
+def test_title_family_sde2_nospace():
+    """'SDE2' must match the 'SDE' family term (SDE is a prefix of SDE2)."""
+    assert passes_title_family_check({**GOOD_JOB, "title": "SDE2 - Backend"}, TITLE_FAMILY) is True
 
 
-def test_passes_level_check_sde_arabic():
-    assert passes_level_check({**GOOD_JOB, "title": "SDE 2"}, LEVEL_KW) is True
+def test_title_family_sde_arabic():
+    assert passes_title_family_check({**GOOD_JOB, "title": "SDE 2"}, TITLE_FAMILY) is True
 
 
-def test_passes_level_check_sr_software_engineer():
-    assert passes_level_check({**GOOD_JOB, "title": "Sr Software Engineer"}, LEVEL_KW) is True
+def test_title_family_full_stack_hyphenated():
+    assert passes_title_family_check({**GOOD_JOB, "title": "Full-Stack Developer"}, TITLE_FAMILY) is True
 
 
-def test_normalize_numerals_roman_to_arabic():
-    assert _normalize_numerals("Software Engineer II") == "Software Engineer 2"
-    assert _normalize_numerals("Software Engineer III") == "Software Engineer 3"
-    assert _normalize_numerals("SWE II") == "SWE 2"
+def test_title_family_dotnet_developer():
+    assert passes_title_family_check({**GOOD_JOB, "title": ".NET Developer"}, TITLE_FAMILY) is True
 
 
-def test_normalize_numerals_arabic_unchanged():
-    assert _normalize_numerals("Software Engineer 2") == "Software Engineer 2"
+def test_title_family_principal_passes_family_but_caught_by_exclude():
+    """Principal Software Engineer *does* belong to the family — it's the exclude
+    check (not the family check) that gates principal-level roles out."""
+    assert passes_title_family_check(
+        {**GOOD_JOB, "title": "Principal Software Engineer"}, TITLE_FAMILY
+    ) is True
+    assert passes_exclude_check(
+        {**GOOD_JOB, "title": "Principal Software Engineer"}, EXCLUDE
+    ) is False
 
 
-def test_normalize_numerals_case_insensitive():
-    assert _normalize_numerals("software engineer ii") == "software engineer 2"
-
+# --- passes_exclude_check ---
 
 def test_passes_exclude_check_good_job():
     assert passes_exclude_check(GOOD_JOB, EXCLUDE) is True
@@ -160,6 +236,16 @@ def test_passes_exclude_check_rejects_director():
     assert passes_exclude_check({**GOOD_JOB, "title": "Director of Engineering"}, EXCLUDE) is False
 
 
+def test_passes_exclude_check_rejects_principal():
+    assert passes_exclude_check({**GOOD_JOB, "title": "Principal Software Engineer"}, EXCLUDE) is False
+
+
+def test_passes_exclude_check_rejects_manager():
+    assert passes_exclude_check({**GOOD_JOB, "title": "Engineering Manager"}, EXCLUDE) is False
+
+
+# --- matches_skills ---
+
 def test_matches_skills_true():
     assert matches_skills(GOOD_DESCRIPTION, SKILLS) is True
 
@@ -170,6 +256,25 @@ def test_matches_skills_false():
 
 def test_matches_skills_case_insensitive():
     assert matches_skills("experience with c# and asp.net required", SKILLS) is True
+
+
+def test_matches_skills_tsql_only():
+    """A JD that mentions only T-SQL must pass — T-SQL is a valid skill match."""
+    jd = (
+        "The ideal candidate will have strong experience writing complex T-SQL queries, "
+        "stored procedures, and performance-tuning database workloads."
+    )
+    assert matches_skills(jd, SKILLS) is True
+
+
+def test_matches_skills_dotnet_alias():
+    """'dotnet' in a JD must match the '.NET' skill via normalisation."""
+    assert matches_skills("Strong dotnet background required.", SKILLS) is True
+
+
+def test_matches_skills_csharp_alias():
+    """'C-Sharp' in a JD must match the 'C#' skill via normalisation."""
+    assert matches_skills("We need someone fluent in C-Sharp and WPF.", SKILLS) is True
 
 
 # ---------------------------------------------------------------------------

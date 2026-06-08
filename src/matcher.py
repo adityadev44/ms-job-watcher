@@ -1,4 +1,4 @@
-"""Reads config, fetches live jobs, and applies location / level / skill filters."""
+"""Reads config, fetches live jobs, and applies location / title-family / skill filters."""
 
 from __future__ import annotations
 
@@ -37,28 +37,40 @@ def _strip_html(raw: str) -> str:
     return " ".join(text.split())
 
 
-def _contains_any(text: str, terms: list[str]) -> bool:
-    """Case-insensitive check: does *text* contain at least one item from *terms*?"""
-    lowered = text.lower()
-    return any(t.lower() in lowered for t in terms)
+def _normalize_text(text: str) -> str:
+    """Normalise text so equivalent phrasings compare equal.
 
+    Applied to both the job text and every search term before comparison, so
+    whichever side uses an alias the match still fires.
 
-# Compiled once at module load — used by _normalize_numerals.
-_ROMAN_SUBS = [
-    (re.compile(r"\bIII\b", re.IGNORECASE), "3"),
-    (re.compile(r"\bII\b",  re.IGNORECASE), "2"),
-]
-
-
-def _normalize_numerals(text: str) -> str:
-    """Replace Roman numeral level suffixes with Arabic equivalents (whole-word).
-
-    'Software Engineer II' and 'Software Engineer 2' both become 'Software Engineer 2'
-    so they match each other regardless of which spelling the job listing uses.
+    Transformations (in order):
+      - Lowercase
+      - ASP.NET → aspnet  (must precede the general .NET rule)
+      - .NET (and variants) → dotnet
+      - C# / C-Sharp / CSharp → csharp  (must precede hyphen normalisation)
+      - Hyphens → spaces  (full-stack → full stack)
+      - Roman numeral level suffixes: III → 3, II → 2  (whole word)
     """
-    for pattern, replacement in _ROMAN_SUBS:
-        text = pattern.sub(replacement, text)
-    return text
+    t = text.lower()
+    # .NET family — ASP.NET first so it isn't partially consumed by the .NET rule
+    t = t.replace("asp.net", "aspnet")
+    t = re.sub(r"\.net\b", "dotnet", t)
+    t = re.sub(r"\bdot\s+net\b", "dotnet", t)
+    # C# family — before hyphen normalisation so "c-sharp" → "csharp" not "c sharp"
+    t = re.sub(r"\bc#", "csharp", t)
+    t = t.replace("c-sharp", "csharp")
+    # Hyphens → spaces (covers full-stack, full-time, etc.)
+    t = t.replace("-", " ")
+    # Roman numeral level suffixes (whole word, already lowercased)
+    t = re.sub(r"\biii\b", "3", t)
+    t = re.sub(r"\bii\b", "2", t)
+    return t
+
+
+def _contains_any(text: str, terms: list[str]) -> bool:
+    """Normalised substring check: does *text* contain at least one item from *terms*?"""
+    normed = _normalize_text(text)
+    return any(_normalize_text(t) in normed for t in terms)
 
 
 # ---------------------------------------------------------------------------
@@ -71,15 +83,13 @@ def is_india_job(job: dict) -> bool:
     return "india" in job["location"].lower()
 
 
-def passes_level_check(job: dict, level_keywords: list[str]) -> bool:
-    """True if the job title contains at least one of the configured level keywords.
+def passes_title_family_check(job: dict, title_family: list[str]) -> bool:
+    """True if the job title belongs to the software-engineer family.
 
-    Roman numerals (II, III) and Arabic numerals (2, 3) are treated as equivalent,
-    so 'Software Engineer 2' and 'Software Engineer II' both match the same keyword.
+    Matching is fully normalised (case, hyphens, numeral variants, C#/.NET aliases).
+    No specific seniority level is required — any level in the family passes.
     """
-    normalised_title = _normalize_numerals(job["title"])
-    normalised_kws = [_normalize_numerals(kw) for kw in level_keywords]
-    return _contains_any(normalised_title, normalised_kws)
+    return _contains_any(job["title"], title_family)
 
 
 def passes_exclude_check(job: dict, exclude_terms: list[str]) -> bool:
@@ -148,7 +158,7 @@ def find_matching_jobs(
     locations: list[str] = cfg["search"].get("locations", [])
     matching: dict = cfg.get("matching", {})
     skills: list[str] = matching.get("skills", [])
-    level_kw: list[str] = matching.get("level_keywords", [])
+    title_family: list[str] = matching.get("title_family", [])
     exclude: list[str] = matching.get("exclude_terms", [])
 
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
@@ -170,17 +180,12 @@ def find_matching_jobs(
         if not is_india_job(job):
             continue
         if not passes_exclude_check(job, exclude):
-            filtered_out.append(f"[excluded term]   {job['title']}")
+            filtered_out.append(f"[exclude]       {job['title']}")
             continue
-        if not passes_level_check(job, level_kw):
-            filtered_out.append(f"[level mismatch]  {job['title']}")
+        if not passes_title_family_check(job, title_family):
+            filtered_out.append(f"[title family]  {job['title']}")
             continue
         candidates.append(job)
-
-    if filtered_out:
-        print("India jobs filtered out by title checks (near-misses):")
-        for line in filtered_out:
-            print(f"  {line}")
 
     # --- Step 3: Skill filter — fetch description only for remaining candidates ---
     matched: list[dict] = []
@@ -192,5 +197,12 @@ def find_matching_jobs(
         if matches_skills(description, skills):
             job = {**job, "description": description}
             matched.append(job)
+        else:
+            filtered_out.append(f"[skill]         {job['title']}")
+
+    if filtered_out:
+        print("India jobs filtered out (near-misses):")
+        for line in filtered_out:
+            print(f"  {line}")
 
     return total_fetched, matched
