@@ -43,6 +43,24 @@ def _contains_any(text: str, terms: list[str]) -> bool:
     return any(t.lower() in lowered for t in terms)
 
 
+# Compiled once at module load — used by _normalize_numerals.
+_ROMAN_SUBS = [
+    (re.compile(r"\bIII\b", re.IGNORECASE), "3"),
+    (re.compile(r"\bII\b",  re.IGNORECASE), "2"),
+]
+
+
+def _normalize_numerals(text: str) -> str:
+    """Replace Roman numeral level suffixes with Arabic equivalents (whole-word).
+
+    'Software Engineer II' and 'Software Engineer 2' both become 'Software Engineer 2'
+    so they match each other regardless of which spelling the job listing uses.
+    """
+    for pattern, replacement in _ROMAN_SUBS:
+        text = pattern.sub(replacement, text)
+    return text
+
+
 # ---------------------------------------------------------------------------
 # Individual filter predicates (pure functions, easy to unit-test)
 # ---------------------------------------------------------------------------
@@ -54,8 +72,14 @@ def is_india_job(job: dict) -> bool:
 
 
 def passes_level_check(job: dict, level_keywords: list[str]) -> bool:
-    """True if the job title contains at least one of the configured level keywords."""
-    return _contains_any(job["title"], level_keywords)
+    """True if the job title contains at least one of the configured level keywords.
+
+    Roman numerals (II, III) and Arabic numerals (2, 3) are treated as equivalent,
+    so 'Software Engineer 2' and 'Software Engineer II' both match the same keyword.
+    """
+    normalised_title = _normalize_numerals(job["title"])
+    normalised_kws = [_normalize_numerals(kw) for kw in level_keywords]
+    return _contains_any(normalised_title, normalised_kws)
 
 
 def passes_exclude_check(job: dict, exclude_terms: list[str]) -> bool:
@@ -141,14 +165,22 @@ def find_matching_jobs(
 
     # --- Step 2: Quick title/location filters (no extra HTTP calls) ---
     candidates: list[dict] = []
+    filtered_out: list[str] = []
     for job in all_jobs:
         if not is_india_job(job):
             continue
         if not passes_exclude_check(job, exclude):
+            filtered_out.append(f"[excluded term]   {job['title']}")
             continue
         if not passes_level_check(job, level_kw):
+            filtered_out.append(f"[level mismatch]  {job['title']}")
             continue
         candidates.append(job)
+
+    if filtered_out:
+        print("India jobs filtered out by title checks (near-misses):")
+        for line in filtered_out:
+            print(f"  {line}")
 
     # --- Step 3: Skill filter — fetch description only for remaining candidates ---
     matched: list[dict] = []

@@ -19,6 +19,7 @@ from matcher import (
     matches_skills,
     passes_exclude_check,
     passes_level_check,
+    _normalize_numerals,
     _strip_html,
 )
 
@@ -28,7 +29,15 @@ from matcher import (
 
 SKILLS      = [".NET", "C#", "ASP.NET", "SQL Server", "Angular",
                "TypeScript", "Azure", "full stack", "backend"]
-LEVEL_KW    = ["Software Engineer II", "SWE II", "Senior Software Engineer", "SSE"]
+LEVEL_KW    = [
+    "Software Engineer II",   # also matches "Software Engineer 2" via normalization
+    "SWE II",                 # also matches "SWE 2"
+    "SDE II",                 # also matches "SDE 2"
+    "SDE2",
+    "Senior Software Engineer",
+    "Sr Software Engineer",
+    "SSE",
+]
 EXCLUDE     = ["intern", "internship", "new grad", "principal", "director", "data scientist"]
 
 # A job that should pass every filter
@@ -106,6 +115,37 @@ def test_passes_level_check_false_principal():
 
 def test_passes_level_check_case_insensitive():
     assert passes_level_check({**GOOD_JOB, "title": "senior software engineer"}, LEVEL_KW) is True
+
+
+def test_passes_level_check_arabic_numeral_matches_roman():
+    """'Software Engineer 2' must match keyword 'Software Engineer II' via numeral normalization."""
+    assert passes_level_check({**GOOD_JOB, "title": "Software Engineer 2"}, LEVEL_KW) is True
+
+
+def test_passes_level_check_sde2_nospace():
+    assert passes_level_check({**GOOD_JOB, "title": "SDE2 - Backend"}, LEVEL_KW) is True
+
+
+def test_passes_level_check_sde_arabic():
+    assert passes_level_check({**GOOD_JOB, "title": "SDE 2"}, LEVEL_KW) is True
+
+
+def test_passes_level_check_sr_software_engineer():
+    assert passes_level_check({**GOOD_JOB, "title": "Sr Software Engineer"}, LEVEL_KW) is True
+
+
+def test_normalize_numerals_roman_to_arabic():
+    assert _normalize_numerals("Software Engineer II") == "Software Engineer 2"
+    assert _normalize_numerals("Software Engineer III") == "Software Engineer 3"
+    assert _normalize_numerals("SWE II") == "SWE 2"
+
+
+def test_normalize_numerals_arabic_unchanged():
+    assert _normalize_numerals("Software Engineer 2") == "Software Engineer 2"
+
+
+def test_normalize_numerals_case_insensitive():
+    assert _normalize_numerals("software engineer ii") == "software engineer 2"
 
 
 def test_passes_exclude_check_good_job():

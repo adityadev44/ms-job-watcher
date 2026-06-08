@@ -23,10 +23,15 @@ matching:
     - "backend"
 
   # Keep a job only if its title contains at least one of these level strings.
+  # Roman numerals (II, III) and Arabic numerals (2, 3) are normalised before
+  # matching, so "Software Engineer II" also catches "Software Engineer 2".
   level_keywords:
-    - "Software Engineer II"
-    - "SWE II"
+    - "Software Engineer II"   # also matches "Software Engineer 2" via normalisation
+    - "SWE II"                 # also matches "SWE 2"
+    - "SDE II"                 # also matches "SDE 2"
+    - "SDE2"                   # no-space Microsoft variant
     - "Senior Software Engineer"
+    - "Sr Software Engineer"
     - "SSE"
 
   # Reject a job immediately if its title contains any of these terms.
