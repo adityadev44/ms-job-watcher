@@ -162,16 +162,40 @@ def find_matching_jobs(
     exclude: list[str] = matching.get("exclude_terms", [])
 
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
+    # The API caps at ~10 results per page when a location is specified and
+    # ignores sortBy (forces distance sort).  We paginate all pages and sort
+    # locally by posting_date so the freshest jobs surface first.
+    _PAGE_SIZE = 20          # requested; API returns ≤10 with location
+    _MAX_PER_COMBO = 200     # safety ceiling per keyword/location pair
+
     seen_ids: set[str] = set()
     all_jobs: list[dict] = []
     for keyword in keywords:
         for location in locations:
-            for job in fetch_jobs(keyword, location, num=20):
-                if job["id"] not in seen_ids:
-                    seen_ids.add(job["id"])
-                    all_jobs.append(job)
+            fetched_combo = 0
+            start = 0
+            while fetched_combo < _MAX_PER_COMBO:
+                page = fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
+                if not page:
+                    break
+                for job in page:
+                    if job["id"] not in seen_ids:
+                        seen_ids.add(job["id"])
+                        all_jobs.append(job)
+                fetched_combo += len(page)
+                start += len(page)
 
     total_fetched = len(all_jobs)
+
+    # Sort newest-first; YYYY-MM-DD strings are lexicographically correct
+    all_jobs.sort(key=lambda j: j["posting_date"], reverse=True)
+
+    if all_jobs:
+        print(
+            f"Fetched {total_fetched} unique jobs — "
+            f"newest: {all_jobs[0]['posting_date']}, "
+            f"oldest: {all_jobs[-1]['posting_date']}"
+        )
 
     # --- Step 2: Quick title/location filters (no extra HTTP calls) ---
     candidates: list[dict] = []

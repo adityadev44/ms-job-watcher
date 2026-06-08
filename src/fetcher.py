@@ -50,14 +50,22 @@ def fetch_jobs(
     keyword: str,
     location: str,
     *,
-    num: int = 10,
+    num: int = 20,
     start: int = 0,
+    sort_by: str = "date",
     timeout: int = 20,
 ) -> list[dict[str, str]]:
-    """Return a list of Microsoft job listings matching the given keyword and location.
+    """Return one page of Microsoft job listings matching keyword and location.
 
-    Each item in the list has: id, title, location, posting_date, application_url.
-    Raises requests.HTTPError if the API returns a non-2xx status.
+    Each item has: id, title, location, posting_date, application_url.
+
+    Parameters
+    ----------
+    num      : results requested per page (API caps at ~10 when location is set)
+    start    : zero-based offset for pagination
+    sort_by  : passed as ``sortBy`` to the API; ``"date"`` works when no
+               location is given (returns newest-first); with a location the
+               API overrides to distance sort — callers should sort locally.
     """
     params = {
         "domain": "microsoft.com",
@@ -65,6 +73,7 @@ def fetch_jobs(
         "location": location,
         "start": start,
         "num": num,
+        "sortBy": sort_by,
     }
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")  # suppress SSL hostname-mismatch warnings

@@ -109,3 +109,42 @@ def test_fetch_jobs_parses_sample(monkeypatch, sample_response):
         assert job["location"]
         assert job["posting_date"]
         assert job["application_url"].startswith("https://apply.careers.microsoft.com")
+
+
+def test_fetch_jobs_sends_sort_by_param(monkeypatch, sample_response):
+    """sortBy must be included in the request params so the API can date-sort."""
+    captured = {}
+
+    class _FakeResponse:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return sample_response
+
+    def _fake_get(*args, **kwargs):
+        captured["params"] = kwargs.get("params", {})
+        return _FakeResponse()
+
+    monkeypatch.setattr("fetcher.requests.get", _fake_get)
+    fetch_jobs("software engineer", "India")
+
+    assert "sortBy" in captured["params"], "sortBy must be sent to the API"
+    assert captured["params"]["sortBy"] == "date"
+
+
+def test_fetch_jobs_sort_by_override(monkeypatch, sample_response):
+    """Callers can override the sort_by value."""
+    captured = {}
+
+    class _FakeResponse:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return sample_response
+
+    def _fake_get(*args, **kwargs):
+        captured["params"] = kwargs.get("params", {})
+        return _FakeResponse()
+
+    monkeypatch.setattr("fetcher.requests.get", _fake_get)
+    fetch_jobs("software engineer", "India", sort_by="relevance")
+
+    assert captured["params"]["sortBy"] == "relevance"
