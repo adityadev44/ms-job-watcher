@@ -16,6 +16,17 @@ _BASE_URL = "https://careers.unitedhealthgroup.com"
 _ORG_ID = "34088"
 _PAGE_SIZE = 15  # TalentBrew returns 15 results per page
 
+# TalentBrew omits the country name from location strings ("Hyderabad, Telangana").
+# This set lets _parse_card append ", India" so is_india_job() works correctly.
+_INDIA_STATES = {
+    "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh",
+    "goa", "gujarat", "haryana", "himachal pradesh", "jharkhand", "karnataka",
+    "kerala", "madhya pradesh", "maharashtra", "manipur", "meghalaya", "mizoram",
+    "nagaland", "odisha", "punjab", "rajasthan", "sikkim", "tamil nadu",
+    "telangana", "tripura", "uttar pradesh", "uttarakhand", "west bengal",
+    "delhi", "jammu and kashmir", "ladakh",
+}
+
 _HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -55,6 +66,8 @@ def _parse_card(li: Any) -> dict[str, str] | None:
 
     loc_span = a_tag.find("span", class_="job-location")
     location = loc_span.get_text(strip=True) if loc_span else ""
+    if any(s in location.lower() for s in _INDIA_STATES):
+        location = location + ", India"
 
     return {
         "id": job_id,

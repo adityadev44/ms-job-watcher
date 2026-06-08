@@ -95,9 +95,35 @@ def test_parse_card_extracts_all_fields():
     card = _parse_card(li)
     assert card["id"] == "12345678901"
     assert card["title"] == "Senior Software Engineer"
-    assert card["location"] == "Hyderabad, Telangana"
+    assert "india" in card["location"].lower()  # ", India" appended for Telangana
     assert card["application_url"].startswith("https://careers.unitedhealthgroup.com")
     assert card["posting_date"] == ""
+
+
+def test_parse_card_appends_india_for_indian_states():
+    """'Hyderabad, Telangana' must gain ', India' so is_india_job() passes."""
+    from bs4 import BeautifulSoup
+    html = (
+        '<li><a href="/job/hyd/se/34088/1" data-job-id="1" class="brand-facet">'
+        "<div><h2>SE</h2>"
+        '<span class="job-location">Hyderabad, Telangana</span>'
+        "</div></a></li>"
+    )
+    card = _parse_card(BeautifulSoup(html, "html.parser").find("li"))
+    assert "india" in card["location"].lower()
+
+
+def test_parse_card_does_not_append_india_for_us_locations():
+    """US location 'Eden Prairie, MN' must not gain an India suffix."""
+    from bs4 import BeautifulSoup
+    html = (
+        '<li><a href="/job/mn/se/34088/2" data-job-id="2" class="brand-facet">'
+        "<div><h2>SE</h2>"
+        '<span class="job-location">Eden Prairie, MN</span>'
+        "</div></a></li>"
+    )
+    card = _parse_card(BeautifulSoup(html, "html.parser").find("li"))
+    assert "india" not in card["location"].lower()
 
 
 def test_parse_card_returns_none_for_li_without_job_id():
