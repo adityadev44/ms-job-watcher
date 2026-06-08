@@ -113,6 +113,7 @@ def fetch_jobs(
         "l": "India",
         "orgIds": _ORG_ID,
         "pg": pg,
+        "sort": "postdate",
     }
     _MAX_ATTEMPTS = 3
     for attempt in range(_MAX_ATTEMPTS):

@@ -175,6 +175,7 @@ def test_fetch_jobs_page_from_start_offset(monkeypatch):
     monkeypatch.setattr("optum_fetcher.requests.get", _fake_get)
     fetch_jobs("software engineer", "India", start=15)
     assert captured["params"]["pg"] == 2
+    assert captured["params"]["sort"] == "postdate"
 
 
 def test_fetch_jobs_retries_on_429_then_succeeds(monkeypatch):
