@@ -13,7 +13,7 @@ import pytest
 # Make sure the src package is importable when running pytest from the project root.
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from fetcher import _parse_position, fetch_jobs
+from fetcher import RateLimitError, _parse_position, fetch_jobs
 
 SAMPLE_FILE = Path(__file__).parent / "sample_response.json"
 
@@ -148,3 +148,50 @@ def test_fetch_jobs_sort_by_override(monkeypatch, sample_response):
     fetch_jobs("software engineer", "India", sort_by="relevance")
 
     assert captured["params"]["sortBy"] == "relevance"
+
+
+# ---------------------------------------------------------------------------
+# 429 / rate-limit handling
+# ---------------------------------------------------------------------------
+
+
+def test_fetch_jobs_retries_on_429_then_succeeds(monkeypatch, sample_response):
+    """A single 429 is retried; when the retry succeeds no exception is raised."""
+    call_count = 0
+
+    class _FakeRateLimited:
+        status_code = 429
+        def raise_for_status(self): pass
+        def json(self): return {}
+
+    class _FakeOK:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return sample_response
+
+    def _fake_get(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return _FakeRateLimited() if call_count == 1 else _FakeOK()
+
+    monkeypatch.setattr("fetcher.time.sleep", lambda s: None)
+    monkeypatch.setattr("fetcher.requests.get", _fake_get)
+
+    jobs = fetch_jobs("software engineer", "India")
+
+    assert call_count == 2          # retried exactly once
+    assert len(jobs) > 0            # results returned from the successful attempt
+
+
+def test_fetch_jobs_raises_rate_limit_after_all_retries(monkeypatch):
+    """RateLimitError is raised when every attempt returns 429."""
+    class _FakeRateLimited:
+        status_code = 429
+        def raise_for_status(self): pass
+        def json(self): return {}
+
+    monkeypatch.setattr("fetcher.time.sleep", lambda s: None)
+    monkeypatch.setattr("fetcher.requests.get", lambda *a, **kw: _FakeRateLimited())
+
+    with pytest.raises(RateLimitError):
+        fetch_jobs("software engineer", "India")

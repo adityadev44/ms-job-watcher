@@ -12,7 +12,7 @@ from typing import Any
 import requests
 import yaml
 
-from fetcher import _HEADERS, fetch_jobs
+from fetcher import _HEADERS, RateLimitError, fetch_jobs
 
 _DETAIL_BASE = "https://apply.careers.microsoft.com/api/apply/v2/jobs"
 
@@ -163,27 +163,35 @@ def find_matching_jobs(
     exclude: list[str] = matching.get("exclude_terms", [])
 
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
-    # The API caps at ~10 results per page when a location is specified and
-    # ignores sortBy (forces distance sort).  We paginate all pages and sort
-    # locally by posting_date so the freshest jobs surface first.
+    # Results are sorted newest-first so deep pagination adds stale jobs, not fresh
+    # ones. Two pages (~40 results) is enough coverage; it also keeps us well under
+    # Microsoft's rate limit.
     _PAGE_SIZE = 20          # requested; API returns ≤10 with location
-    _MAX_PER_COMBO = 200     # safety ceiling per keyword/location pair
+    _MAX_PAGES = 2           # at most 2 pages per keyword/location pair
+    _INTER_PAGE_DELAY = 1.5  # seconds between consecutive search API calls
 
     seen_ids: set[str] = set()
     all_jobs: list[dict] = []
     for keyword in keywords:
         for location in locations:
-            fetched_combo = 0
             start = 0
-            while fetched_combo < _MAX_PER_COMBO:
-                page = fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
+            for page_num in range(_MAX_PAGES):
+                if page_num > 0:
+                    time.sleep(_INTER_PAGE_DELAY)
+                try:
+                    page = fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
+                except RateLimitError as exc:
+                    print(
+                        f"  [warn] rate-limited for '{keyword}' / '{location}' "
+                        f"after {page_num} page(s) — {exc}; skipping remaining pages"
+                    )
+                    break
                 if not page:
                     break
                 for job in page:
                     if job["id"] not in seen_ids:
                         seen_ids.add(job["id"])
                         all_jobs.append(job)
-                fetched_combo += len(page)
                 start += len(page)
 
     total_fetched = len(all_jobs)

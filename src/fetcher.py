@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import time
 import warnings
 from datetime import datetime, timezone
 from typing import Any
 
 import requests
+
+
+class RateLimitError(Exception):
+    """Raised when the API returns 429 and all retry attempts are exhausted."""
 
 SEARCH_URL = "https://apply.careers.microsoft.com/api/pcsx/search"
 
@@ -75,12 +80,29 @@ def fetch_jobs(
         "num": num,
         "sortBy": sort_by,
     }
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")  # suppress SSL hostname-mismatch warnings
-        response = requests.get(
-            SEARCH_URL, headers=_HEADERS, params=params, timeout=timeout, verify=False
-        )
-    response.raise_for_status()
-    raw_data = response.json()
-    positions = raw_data.get("data", {}).get("positions") or []
-    return [_parse_position(p) for p in positions]
+    _MAX_ATTEMPTS = 3
+    for attempt in range(_MAX_ATTEMPTS):
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")  # suppress SSL hostname-mismatch warnings
+                response = requests.get(
+                    SEARCH_URL, headers=_HEADERS, params=params, timeout=timeout, verify=False
+                )
+        except requests.exceptions.RequestException as exc:
+            if attempt < _MAX_ATTEMPTS - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise RateLimitError(f"Request failed after {_MAX_ATTEMPTS} attempts") from exc
+
+        if response.status_code == 429:
+            if attempt < _MAX_ATTEMPTS - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise RateLimitError(f"Rate-limited after {_MAX_ATTEMPTS} attempts")
+
+        response.raise_for_status()
+        raw_data = response.json()
+        positions = raw_data.get("data", {}).get("positions") or []
+        return [_parse_position(p) for p in positions]
+
+    raise RateLimitError(f"Rate-limited after {_MAX_ATTEMPTS} attempts")
