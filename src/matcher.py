@@ -174,7 +174,7 @@ def find_matching_jobs(
     # Empty locations list means fetch without a location filter (date sort works).
     # A non-empty list drives one search pass per location value.
     _PAGE_SIZE = 20          # results requested per page
-    _MAX_PAGES = 2           # at most 2 pages per keyword/location pair
+    _MAX_PAGES = 5           # at most 5 pages per keyword/location pair
     _INTER_PAGE_DELAY = 1.5  # seconds between consecutive search API calls
 
     seen_ids: set[str] = set()
