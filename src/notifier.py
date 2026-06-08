@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
+_TELEGRAM_LIMIT = 4096   # Telegram's hard cap on message length in characters
 _SMTP_HOST = "smtp.gmail.com"
 _SMTP_PORT = 587
 
@@ -32,9 +33,41 @@ def format_message(jobs: list[dict]) -> str:
     return "\n".join(lines).strip()
 
 
+def _build_telegram_chunks(jobs: list[dict], limit: int = _TELEGRAM_LIMIT) -> list[str]:
+    """Format jobs into plain-text chunks each shorter than *limit* characters.
+
+    Splits on job boundaries so no individual job is truncated mid-way.
+    A single job whose formatted text already exceeds *limit* is sent as-is
+    (unavoidable edge-case; single-job messages are always small in practice).
+    """
+    chunks: list[str] = []
+    pending: list[dict] = []
+    for job in jobs:
+        trial = format_message(pending + [job])
+        if len(trial) > limit and pending:
+            chunks.append(format_message(pending))
+            pending = [job]
+        else:
+            pending.append(job)
+    if pending:
+        chunks.append(format_message(pending))
+    return chunks
+
+
 def send_telegram(message: str, token: str, chat_id: str) -> None:
+    """Send a single plain-text message to a Telegram chat.
+
+    No parse_mode is set, so Telegram treats the content as plain text and
+    special characters (*, _, #, .) in job titles cannot trigger a 400 error.
+    Callers are responsible for keeping *message* under _TELEGRAM_LIMIT chars;
+    notify() handles that automatically via _build_telegram_chunks().
+    """
     url = _TELEGRAM_API.format(token=token)
-    response = requests.post(url, json={"chat_id": chat_id, "text": message}, timeout=20)
+    response = requests.post(
+        url,
+        json={"chat_id": chat_id, "text": message},
+        timeout=20,
+    )
     response.raise_for_status()
 
 
@@ -65,14 +98,22 @@ def notify(jobs: list[dict]) -> None:
     recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
 
     if token and chat_id:
-        send_telegram(message, token, chat_id)
-        print("Telegram alert sent.")
+        try:
+            chunks = _build_telegram_chunks(jobs)
+            for chunk in chunks:
+                send_telegram(chunk, token, chat_id)
+            print(f"Telegram alert sent ({len(chunks)} message(s)).")
+        except Exception as exc:
+            print(f"[warn] Telegram alert failed: {exc}")
     else:
         print("Telegram skipped (TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set).")
 
     if gmail_user and gmail_password and recipients:
-        send_email(message, gmail_user, gmail_password, recipients)
-        print(f"Email alert sent to: {', '.join(recipients)}")
+        try:
+            send_email(message, gmail_user, gmail_password, recipients)
+            print(f"Email alert sent to: {', '.join(recipients)}")
+        except Exception as exc:
+            print(f"[warn] Email alert failed: {exc}")
     else:
         print("Email skipped (GMAIL_USER, GMAIL_APP_PASSWORD, or ALERT_RECIPIENT not set).")
 

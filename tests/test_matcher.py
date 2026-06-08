@@ -286,6 +286,25 @@ def test_matches_skills_csharp_alias():
     assert matches_skills("We need someone fluent in C-Sharp and WPF.", SKILLS) is True
 
 
+def test_matches_skills_azure_standalone():
+    """'Azure' alone in a JD must match — verifies normalisation didn't break plain words."""
+    assert matches_skills("Experience with Azure cloud services required.", SKILLS) is True
+
+
+def test_matches_skills_csharp_and_azure_combined():
+    """Both 'C#' and 'Azure' in the same JD must match after normalisation."""
+    jd = (
+        "We are looking for a developer with strong C# skills who has worked "
+        "extensively on the Azure platform with REST APIs and SQL Server."
+    )
+    assert matches_skills(jd, SKILLS) is True
+
+
+def test_matches_skills_off_stack_still_false():
+    """A Python/ML-only description must still return False (off-stack drop is correct)."""
+    assert matches_skills(OUT_OF_STACK_DESCRIPTION, SKILLS) is False
+
+
 # ---------------------------------------------------------------------------
 # fetch_job_description — monkeypatched (no live API)
 # ---------------------------------------------------------------------------

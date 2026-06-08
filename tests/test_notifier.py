@@ -11,7 +11,13 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from notifier import format_message, notify, send_email, send_telegram
+from notifier import (
+    _build_telegram_chunks,
+    format_message,
+    notify,
+    send_email,
+    send_telegram,
+)
 
 # ---------------------------------------------------------------------------
 # Sample data
@@ -33,6 +39,19 @@ TWO_JOBS = ONE_JOB + [
         "posting_date": "2026-06-05",
         "application_url": "https://apply.careers.microsoft.com/careers/job/888?domain=microsoft.com",
     }
+]
+
+# 30 jobs whose combined message exceeds Telegram's 4096-char limit
+MANY_JOBS = [
+    {
+        "title": f"Software Engineer {i}",
+        "location": "India, Telangana, Hyderabad",
+        "posting_date": "2026-06-08",
+        "application_url": (
+            f"https://apply.careers.microsoft.com/careers/job/{i:06d}?domain=microsoft.com"
+        ),
+    }
+    for i in range(30)
 ]
 
 
@@ -67,6 +86,41 @@ def test_format_message_two_jobs():
 
 
 # ---------------------------------------------------------------------------
+# _build_telegram_chunks
+# ---------------------------------------------------------------------------
+
+def test_build_telegram_chunks_single_chunk_for_small_batch():
+    """A small batch must fit in exactly one chunk."""
+    chunks = _build_telegram_chunks(ONE_JOB)
+    assert len(chunks) == 1
+    assert "Senior Software Engineer" in chunks[0]
+
+
+def test_build_telegram_chunks_all_jobs_present():
+    """Every job must appear in exactly one chunk of the output."""
+    chunks = _build_telegram_chunks(MANY_JOBS)
+    combined = "\n".join(chunks)
+    for job in MANY_JOBS:
+        assert job["title"] in combined
+
+
+def test_build_telegram_chunks_splits_large_batch():
+    """30 jobs must be split into multiple chunks, each within the 4096-char limit."""
+    assert len(format_message(MANY_JOBS)) > 4096, "Precondition: 30 jobs must exceed limit"
+    chunks = _build_telegram_chunks(MANY_JOBS)
+    assert len(chunks) > 1
+    for chunk in chunks:
+        assert len(chunk) <= 4096, f"Chunk length {len(chunk)} exceeds 4096"
+
+
+def test_build_telegram_chunks_custom_limit():
+    """A tight custom limit causes more, smaller chunks."""
+    chunks_tight = _build_telegram_chunks(TWO_JOBS, limit=300)
+    chunks_loose = _build_telegram_chunks(TWO_JOBS, limit=4096)
+    assert len(chunks_tight) >= len(chunks_loose)
+
+
+# ---------------------------------------------------------------------------
 # send_telegram — mock requests.post
 # ---------------------------------------------------------------------------
 
@@ -82,6 +136,18 @@ def test_send_telegram_calls_post():
     assert "fake_token" in call_kwargs[0][0]  # URL contains the token
     assert call_kwargs[1]["json"]["chat_id"] == "12345"
     assert call_kwargs[1]["json"]["text"] == "hello"
+
+
+def test_send_telegram_no_parse_mode():
+    """Telegram payload must not include parse_mode so special chars can't cause a 400."""
+    fake_response = MagicMock()
+    fake_response.raise_for_status = MagicMock()
+
+    with patch("notifier.requests.post", return_value=fake_response) as mock_post:
+        send_telegram("hello", token="fake_token", chat_id="12345")
+
+    payload = mock_post.call_args[1]["json"]
+    assert "parse_mode" not in payload
 
 
 def test_send_telegram_raises_on_http_error():
@@ -215,4 +281,53 @@ def test_notify_message_passed_to_both_channels(monkeypatch):
     tg_message = mock_tg.call_args[0][0]
     em_message = mock_em.call_args[0][0]
     assert "Senior Software Engineer" in tg_message
-    assert tg_message == em_message
+    assert tg_message == em_message  # ONE_JOB fits in a single chunk
+
+
+def test_notify_splits_long_message_into_chunks(monkeypatch):
+    """30 jobs (> 4096 chars combined) must be sent as multiple Telegram messages."""
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "cid")
+    monkeypatch.delenv("GMAIL_USER", raising=False)
+    monkeypatch.delenv("GMAIL_APP_PASSWORD", raising=False)
+    monkeypatch.delenv("ALERT_RECIPIENT", raising=False)
+
+    assert len(format_message(MANY_JOBS)) > 4096, "Precondition: 30 jobs must exceed limit"
+
+    with patch("notifier.send_telegram") as mock_tg:
+        notify(MANY_JOBS)
+
+    assert mock_tg.call_count > 1, "Expected multiple send_telegram calls for large batch"
+    for call in mock_tg.call_args_list:
+        chunk_text = call[0][0]
+        assert len(chunk_text) <= 4096, f"Chunk length {len(chunk_text)} exceeds 4096"
+
+
+def test_notify_telegram_failure_does_not_block_email(monkeypatch):
+    """A Telegram send error must not crash the run or prevent the email being sent."""
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "cid")
+    monkeypatch.setenv("GMAIL_USER", "u@gmail.com")
+    monkeypatch.setenv("GMAIL_APP_PASSWORD", "pw")
+    monkeypatch.setenv("ALERT_RECIPIENT", "r@example.com")
+
+    with patch("notifier.send_telegram", side_effect=Exception("400 Bad Request")), \
+         patch("notifier.send_email") as mock_em:
+        notify(ONE_JOB)   # must not raise
+
+    mock_em.assert_called_once()
+
+
+def test_notify_email_failure_does_not_block_telegram(monkeypatch):
+    """An email send error must not crash the run or prevent the Telegram alert."""
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "cid")
+    monkeypatch.setenv("GMAIL_USER", "u@gmail.com")
+    monkeypatch.setenv("GMAIL_APP_PASSWORD", "pw")
+    monkeypatch.setenv("ALERT_RECIPIENT", "r@example.com")
+
+    with patch("notifier.send_telegram") as mock_tg, \
+         patch("notifier.send_email", side_effect=Exception("SMTP connection refused")):
+        notify(ONE_JOB)   # must not raise
+
+    mock_tg.assert_called_once()
