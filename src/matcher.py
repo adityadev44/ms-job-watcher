@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html as html_mod
 import re
+import time
 import warnings
 from pathlib import Path
 from typing import Any
@@ -212,17 +213,54 @@ def find_matching_jobs(
         candidates.append(job)
 
     # --- Step 3: Skill filter — fetch description only for remaining candidates ---
+    # Each fetch gets one retry and a short inter-request delay to stay friendly
+    # under the heavier load that pagination introduced.
+    _TIMEOUT = 15       # seconds per attempt
+    _RETRIES = 1        # one retry after the initial attempt
+    _INTER_DELAY = 0.5  # seconds between consecutive detail fetches
+    _RETRY_DELAY = 1.0  # seconds to wait before the retry attempt
+
     matched: list[dict] = []
-    for job in candidates:
-        try:
-            description = fetch_job_description(job["application_url"])
-        except Exception:
-            continue  # skip if the detail call fails (network blip, job removed, etc.)
+    for i, job in enumerate(candidates):
+        if i > 0:
+            time.sleep(_INTER_DELAY)
+
+        # Fetch with retry; description stays None if all attempts fail.
+        description: str | None = None
+        last_exc: Exception | None = None
+        for attempt in range(1 + _RETRIES):
+            try:
+                description = fetch_job_description(
+                    job["application_url"], timeout=_TIMEOUT
+                )
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt < _RETRIES:
+                    time.sleep(_RETRY_DELAY)
+
+        if not description:
+            # Fetch failed or returned empty — keep the job rather than risk
+            # silently dropping a real role we can't verify.
+            reason = f": {last_exc}" if last_exc else " (API returned empty body)"
+            print(
+                f"  [warn] description unavailable for '{job['title']}'"
+                f"{reason} — keeping"
+            )
+            matched.append({**job, "description": ""})
+            continue
+
         if matches_skills(description, skills):
-            job = {**job, "description": description}
-            matched.append(job)
+            matched.append({**job, "description": description})
         else:
-            filtered_out.append(f"[skill]         {job['title']}")
+            # Detailed breakdown so near-misses are easy to diagnose.
+            normed = _normalize_text(description)
+            found = [s for s in skills if _normalize_text(s) in normed]
+            filtered_out.append(
+                f"[skill]         {job['title']} "
+                f"(desc={len(description)} chars, "
+                f"skills_found={found if found else 'none'})"
+            )
 
     if filtered_out:
         print("India jobs filtered out (near-misses):")

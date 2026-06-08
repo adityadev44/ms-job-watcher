@@ -12,6 +12,15 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+
+# ---------------------------------------------------------------------------
+# Speed guard: prevent time.sleep from slowing the suite
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def _no_sleep(monkeypatch):
+    monkeypatch.setattr("matcher.time.sleep", lambda *_: None)
+
 from matcher import (
     fetch_job_description,
     find_matching_jobs,
@@ -309,9 +318,9 @@ CONFIG_PATH = Path(__file__).parent.parent / "config.yaml"
 
 
 def _make_fake_fetch_jobs(*jobs):
-    """Return a drop-in replacement for fetch_jobs that always returns *jobs*."""
-    def _fake(keyword, location, *, num=10, start=0, timeout=20):
-        return list(jobs)
+    """Return a drop-in for fetch_jobs: one page of *jobs*, then empty (stops pagination)."""
+    def _fake(keyword, location, *, num=20, start=0, sort_by="date", timeout=20):
+        return [] if start > 0 else list(jobs)
     return _fake
 
 
@@ -354,3 +363,36 @@ def test_find_matching_jobs_deduplicates(monkeypatch):
     total, matched = find_matching_jobs(CONFIG_PATH)
     ids = [j["id"] for j in matched]
     assert len(ids) == len(set(ids)), "Duplicate job IDs found in matched results"
+
+
+def test_find_matching_jobs_keeps_job_when_description_fetch_fails(monkeypatch):
+    """If all fetch attempts for a description fail, the job must still be in results.
+
+    Missing a real role is worse than an extra alert, so we keep unverifiable jobs.
+    """
+    def _always_raise(*a, **kw):
+        raise RuntimeError("simulated network error")
+
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", _always_raise)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    assert any(j["id"] == GOOD_JOB["id"] for j in matched), (
+        "A job whose description could not be fetched must still appear in results"
+    )
+
+
+def test_matches_skills_csharp_literal(monkeypatch):
+    """Literal 'C#' (as it appears in real job descriptions) must match the C# skill."""
+    assert matches_skills("Strong C# and ASP.NET experience required.", SKILLS) is True
+
+
+def test_find_matching_jobs_keeps_job_when_description_empty(monkeypatch):
+    """An empty description (API body had no text) must not cause the job to be dropped."""
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: "")
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    assert any(j["id"] == GOOD_JOB["id"] for j in matched), (
+        "A job with an empty description must still appear in results"
+    )
