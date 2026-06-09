@@ -74,9 +74,9 @@ def _get_ref_num(timeout: int = 20) -> str:
         r.raise_for_status()
         m = _REF_NUM_RE.search(r.text)
         if not m:
-            raise RuntimeError(
+            raise RateLimitError(
                 "Could not extract refNum from Honeywell careers page — "
-                "Phenom may have changed the page structure"
+                "portal may have changed structure or is blocking requests"
             )
         _ref_num_cache = m.group(1)
         return _ref_num_cache

@@ -65,4 +65,8 @@ def run_honeywell_pipeline(
 
 
 if __name__ == "__main__":
-    run_honeywell_pipeline()
+    try:
+        run_honeywell_pipeline()
+    except Exception as exc:
+        print(f"[Honeywell] PIPELINE ERROR: {exc}")
+        print("[Honeywell] Exiting cleanly to avoid blocking other pipelines.")
