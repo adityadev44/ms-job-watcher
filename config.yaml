@@ -25,6 +25,9 @@ optum_search:
     - "angular"
   locations:
     - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
 
 matching:
   # Include a job if its title belongs to the software-engineer family.

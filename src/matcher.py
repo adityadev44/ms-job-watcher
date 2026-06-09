@@ -165,6 +165,7 @@ def find_matching_jobs(
     _RateLimitError = fetcher.RateLimitError        if fetcher else RateLimitError
     keywords: list[str] = cfg["search"]["keywords"]
     locations: list[str] = cfg["search"].get("locations", [])
+    exclude_locs: list[str] = [loc.lower() for loc in cfg["search"].get("exclude_locations", [])]
     matching: dict = cfg.get("matching", {})
     skills: list[str] = matching.get("skills", [])
     title_family: list[str] = matching.get("title_family", [])
@@ -220,6 +221,8 @@ def find_matching_jobs(
     filtered_out: list[str] = []
     for job in all_jobs:
         if not is_india_job(job):
+            continue
+        if exclude_locs and any(loc in job["location"].lower() for loc in exclude_locs):
             continue
         if not passes_exclude_check(job, exclude):
             filtered_out.append(f"[exclude]       {job['title']}")
