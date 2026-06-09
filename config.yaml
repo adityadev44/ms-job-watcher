@@ -14,6 +14,10 @@ search:
     - ".NET developer"
     - "C# developer"
   locations: []
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
 
 optum_search:
   max_listings: 200
@@ -32,6 +36,7 @@ optum_search:
   exclude_locations:
     - "Chennai"
     - "Tamil Nadu"
+    - "Pune"
 
 amazon_search:
   max_listings: 200
@@ -49,6 +54,7 @@ amazon_search:
   exclude_locations:
     - "Chennai"
     - "Tamil Nadu"
+    - "Pune"
 
 matching:
   # Include a job if its title belongs to the software-engineer family.
@@ -139,6 +145,23 @@ siemens_search:
     - "software engineer"
     - "senior software engineer"
     - "software development engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+
+honeywell_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
     - ".NET developer"
     - "C# developer"
     - "dot net"
