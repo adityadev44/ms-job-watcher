@@ -2,6 +2,8 @@
 # Do NOT commit this file to git — it may contain notification secrets.
 
 search:
+  max_listings: 500
+  inter_page_delay: 1.0
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -14,6 +16,8 @@ search:
   locations: []
 
 optum_search:
+  max_listings: 200
+  inter_page_delay: 0.8
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -30,6 +34,8 @@ optum_search:
     - "Tamil Nadu"
 
 amazon_search:
+  max_listings: 200
+  inter_page_delay: 0.5
   keywords:
     - "software engineer"
     - "senior software engineer"

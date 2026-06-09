@@ -174,9 +174,9 @@ def find_matching_jobs(
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
     # Empty locations list means fetch without a location filter (date sort works).
     # A non-empty list drives one search pass per location value.
-    _PAGE_SIZE = 20                # results requested per page
-    _MAX_LISTINGS_PER_COMBO = 500  # stop fetching once this many results retrieved
-    _INTER_PAGE_DELAY = 1.5        # seconds between consecutive search API calls
+    _PAGE_SIZE = 20
+    _MAX_LISTINGS_PER_COMBO: int = cfg["search"].get("max_listings", 500)
+    _INTER_PAGE_DELAY: float = cfg["search"].get("inter_page_delay", 1.5)
 
     seen_ids: set[str] = set()
     all_jobs: list[dict] = []
