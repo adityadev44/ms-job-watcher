@@ -3,7 +3,7 @@
 
 search:
   max_listings: 500
-  inter_page_delay: 1.0
+  inter_page_delay: 0.2
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -17,7 +17,7 @@ search:
 
 optum_search:
   max_listings: 200
-  inter_page_delay: 0.8
+  inter_page_delay: 0.1
   keywords:
     - "software engineer"
     - "senior software engineer"
