@@ -10,13 +10,27 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 ---
 
-## Hard Rules (Apply to Every Company)
+## Filter Layers
 
-- No Chennai, Tamil Nadu, or Pune jobs — enforced via `exclude_locations` in each company's config section
+**3 layers apply to every company. Wells Fargo has a 4th (opt-in only).**
+
+**Layer 1 — Location**
+- Job location must contain "India"
+- Must not be Chennai, Tamil Nadu, or Pune (configured per company via `exclude_locations`)
+
+**Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
 - Title must not match `matching.exclude_terms` (no interns, managers, hardware, etc.)
+
+**Layer 3 — Skills**
 - Description must contain at least one **primary** .NET/C# skill (`.NET`, `C#`, `ASP.NET`, `Web API`, `SQL Server`, `T-SQL`, `Entity Framework`, `dotnet`) — Azure/Angular/TypeScript alone do not pass
-- Jobs already in `seen_jobs_<company>.json` are never re-alerted
+
+**Layer 4 — Tech in title (Wells Fargo only — do not add to new companies by default)**
+- Job title must explicitly contain a .NET/C# tech term (`require_tech_in_title` in config)
+- Added because WF's generic "Senior Software Engineer" titles are mostly Java/Python roles
+- Activated only in `run_wellsfargo.py` as a post-filter — not in `matcher.py`
+
+Deduplication: jobs already in `seen_jobs_<company>.json` are never re-alerted (all companies).
 
 ---
 
@@ -57,12 +71,12 @@ fetch_jobs()
             └─ primary_skills check    [broad-only] / [react-only] / [skill] tags
 ```
 
-**Optional 4th layer (Wells Fargo only — must be explicitly requested):**
+**Layer 4 (Wells Fargo only — opt-in, never added by default):**
 ```
     └─ require_tech_in_title check     [title-tech] tag in near-miss log
 ```
 
-This layer is implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. It is NOT in matcher.py, NOT shared, and does NOT activate for any other company. Only add it to a new company if explicitly asked.
+Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. Not in `matcher.py`, not shared, not active for any other company.
 
 ---
 
@@ -79,7 +93,9 @@ This layer is implemented in `run_wellsfargo.py` as a post-filter after `find_ma
 
 ---
 
-## How to Add a New Company (6 Steps)
+## How to Add a New Company
+
+> **Every company is different.** The steps below capture what worked across 6 past integrations. They are a starting point, not a checklist. Each new ATS will have its own quirks — different API shapes, bot protection, date formats, title conventions, or pagination schemes. Read what the new system actually does before reaching for a copy-paste from an existing fetcher. The goal is always accurate job alerts; the playbook is there to save time, not to constrain good judgment.
 
 ### Step 1 — Identify the ATS (10–20 min)
 
