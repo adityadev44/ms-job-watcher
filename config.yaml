@@ -64,6 +64,7 @@ matching:
   title_family:
     - "software engineer"
     - "software engr"
+    - "software senior engineer"
     - "software developer"
     - "software development engineer"
     - "SDE"
@@ -199,6 +200,23 @@ wellsfargo_search:
     - "ASP.NET"
     - "dotnet"
     - "dot net"
+
+dell_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
 
 notifications:
   email:
