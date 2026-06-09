@@ -235,6 +235,20 @@ oracle_search:
     - "Tamil Nadu"
     - "Pune"
 
+metlife_search:
+  max_listings: 200
+  inter_page_delay: 0.5
+  # MetLife's search engine does not filter reliably by tech keyword.
+  # A single empty keyword fetches all ~95 India jobs; title/skills filters handle the rest.
+  keywords:
+    - ""
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
