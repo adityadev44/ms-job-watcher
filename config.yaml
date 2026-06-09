@@ -86,6 +86,21 @@ matching:
     - "React"
     - "Entity Framework"
 
+  # At least one of these "hard" .NET skills must appear in the description.
+  # Azure/Angular/TypeScript/React alone are NOT sufficient — they appear in too
+  # many non-.NET job postings. Leave this list empty to disable the check.
+  primary_skills:
+    - ".NET"
+    - ".NET Core"
+    - ".NET Framework"
+    - "dotnet"
+    - "C#"
+    - "ASP.NET"
+    - "Entity Framework"
+    - "Web API"
+    - "SQL Server"
+    - "T-SQL"
+
   # Reject a job immediately if its title contains any of these terms.
   exclude_terms:
     - "intern"

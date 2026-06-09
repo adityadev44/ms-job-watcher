@@ -168,6 +168,7 @@ def find_matching_jobs(
     exclude_locs: list[str] = [loc.lower() for loc in cfg["search"].get("exclude_locations", [])]
     matching: dict = cfg.get("matching", {})
     skills: list[str] = matching.get("skills", [])
+    primary_skills: list[str] = matching.get("primary_skills", [])
     title_family: list[str] = matching.get("title_family", [])
     exclude: list[str] = matching.get("exclude_terms", [])
 
@@ -281,8 +282,17 @@ def find_matching_jobs(
         normed_desc = _normalize_text(description)
         found = [s for s in skills if _normalize_text(s) in normed_desc]
         non_react = [s for s in found if _normalize_text(s) != "react"]
-        if non_react:
+        primary_found = (
+            [s for s in primary_skills if _normalize_text(s) in normed_desc]
+            if primary_skills else non_react  # empty primary_skills → no extra check
+        )
+        if non_react and primary_found:
             matched.append({**job, "description": description})
+        elif non_react:  # broad skills only (Azure/Angular/TypeScript etc.)
+            filtered_out.append(
+                f"[broad-only]    {job['title']} "
+                f"(skills={','.join(non_react)})"
+            )
         elif found:  # React is the only match
             filtered_out.append(f"[react-only]    {job['title']}")
         else:
