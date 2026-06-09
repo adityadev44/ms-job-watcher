@@ -33,11 +33,16 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
         run: |
-          python -u src/main.py &
-          python -u src/run_optum.py &
-          python -u src/run_amazon.py &
-          python -u src/run_siemens.py &
-          wait
+          python -u src/main.py & pid1=$!
+          python -u src/run_optum.py & pid2=$!
+          python -u src/run_amazon.py & pid3=$!
+          python -u src/run_siemens.py & pid4=$!
+          fail=0
+          wait $pid1 || fail=1
+          wait $pid2 || fail=1
+          wait $pid3 || fail=1
+          wait $pid4 || fail=1
+          exit $fail
 
       - name: Save updated seen_jobs files
         run: |
