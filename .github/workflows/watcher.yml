@@ -1,4 +1,4 @@
-name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, and Dell Job Watcher
+name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, and Oracle Job Watcher
 
 on:
   schedule:
@@ -54,6 +54,7 @@ jobs:
           python -u src/run_honeywell.py & pid5=$!
           python -u src/run_wellsfargo.py & pid6=$!
           python -u src/run_dell.py & pid7=$!
+          python -u src/run_oracle.py & pid8=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -62,6 +63,7 @@ jobs:
           wait $pid5 || fail=1
           wait $pid6 || fail=1
           wait $pid7 || fail=1
+          wait $pid8 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -75,6 +77,7 @@ jobs:
           test -f seen_jobs_honeywell.json && git add seen_jobs_honeywell.json || true
           test -f seen_jobs_wellsfargo.json && git add seen_jobs_wellsfargo.json || true
           test -f seen_jobs_dell.json && git add seen_jobs_dell.json || true
+          test -f seen_jobs_oracle.json && git add seen_jobs_oracle.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else
