@@ -2,8 +2,8 @@
 # Do NOT commit this file to git — it may contain notification secrets.
 
 search:
-  max_listings: 500
-  inter_page_delay: 0.2
+  max_listings: 350
+  inter_page_delay: 0.1
   keywords:
     - "software engineer"
     - "senior software engineer"
