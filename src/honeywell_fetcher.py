@@ -1,111 +1,223 @@
-"""Fetches Honeywell job listings from careers.honeywell.com (Phenom People ATS)."""
+"""Fetches Honeywell job listings from careers.honeywell.com (Oracle HCM CE).
+
+Honeywell's careers portal is a JavaScript SPA — plain requests return empty
+API bodies. This fetcher uses a headless Firefox browser (Playwright) so the
+page's own KnockoutJS can render job cards; we then extract data from the DOM.
+
+Browser is launched once per process and reused across all fetch calls.
+All India jobs are fetched in a single browser session and cached; subsequent
+fetch_jobs() calls return slices from that cache.
+"""
 
 from __future__ import annotations
 
-import html as html_mod
-import json
+import atexit
 import re
-import time
 from datetime import datetime
 
-import requests
-from bs4 import BeautifulSoup
+try:
+    from playwright.sync_api import sync_playwright, TimeoutError as PWTimeoutError
+    _PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    _PLAYWRIGHT_AVAILABLE = False
 
-_CAREERS_URL = "https://careers.honeywell.com/en/sites/Honeywell/jobs"
-_WIDGETS_URL = "https://careers.honeywell.com/widgets"
+_SEARCH_URL = "https://careers.honeywell.com/en/sites/Honeywell/jobs"
 _INDIA_LOCATION_ID = "300000000469485"
 _PAGE_SIZE = 20
-
-_HEADERS_HTML = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://careers.honeywell.com/en/sites/Honeywell/jobs",
-}
-
-_HEADERS_JSON = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Content-Type": "application/json",
-    "Referer": "https://careers.honeywell.com/en/sites/Honeywell/jobs",
-}
-
-# Cached per-process — only fetched once from the careers page HTML.
-_ref_num_cache: str | None = None
-
-_REF_NUM_RE = re.compile(r'"refNum"\s*:\s*"([^"]+)"')
+_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/125.0.0.0 Safari/537.36"
+)
 
 
 class RateLimitError(Exception):
-    """Raised when the site rate-limits or blocks after all retry attempts."""
+    """Raised when the portal is unreachable or Playwright is unavailable."""
 
 
-def _get_ref_num(timeout: int = 20) -> str:
-    """Fetch and cache the Phenom `refNum` required for all /widgets requests."""
-    global _ref_num_cache
-    if _ref_num_cache:
-        return _ref_num_cache
+# ---------------------------------------------------------------------------
+# Browser singleton — Firefox only (Chromium blocked by Honeywell/Akamai)
+# ---------------------------------------------------------------------------
 
-    _MAX_ATTEMPTS = 3
-    for attempt in range(_MAX_ATTEMPTS):
-        try:
-            r = requests.get(_CAREERS_URL, headers=_HEADERS_HTML, timeout=timeout)
-        except requests.exceptions.RequestException as exc:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError(f"Failed to fetch careers page: {exc}") from exc
-
-        if r.status_code == 429:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError("Rate-limited fetching careers page")
-
-        r.raise_for_status()
-        m = _REF_NUM_RE.search(r.text)
-        if not m:
-            raise RateLimitError(
-                "Could not extract refNum from Honeywell careers page — "
-                "portal may have changed structure or is blocking requests"
-            )
-        _ref_num_cache = m.group(1)
-        return _ref_num_cache
-
-    raise RateLimitError("Failed to fetch careers page after retries")
+_pw = None
+_browser = None
 
 
-def _parse_posted_date(raw: str) -> str:
-    """Normalise various date formats to YYYY-MM-DD; return '' on failure."""
-    if not raw:
-        return ""
-    normalised = " ".join(raw.split())
-    for fmt in ("%B %d, %Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%b %d, %Y"):
-        try:
-            return datetime.strptime(normalised[:len(fmt) + 4], fmt).strftime("%Y-%m-%d")
-        except ValueError:
-            pass
-    # Last-resort: try stripping trailing timezone or milliseconds
+def _ensure_browser() -> None:
+    global _pw, _browser
+    if not _PLAYWRIGHT_AVAILABLE:
+        raise RateLimitError(
+            "playwright not installed — run: pip install playwright && "
+            "playwright install firefox"
+        )
+    if _browser is None:
+        _pw = sync_playwright().start()
+        _browser = _pw.firefox.launch(headless=True)
+        atexit.register(_shutdown_browser)
+
+
+def _shutdown_browser() -> None:
+    global _pw, _browser
     try:
-        return datetime.strptime(normalised[:10], "%Y-%m-%d").strftime("%Y-%m-%d")
-    except ValueError:
-        return ""
+        if _browser:
+            _browser.close()
+        if _pw:
+            _pw.stop()
+    except Exception:
+        pass
+    _browser = None
+    _pw = None
 
 
-def _strip_html(raw: str) -> str:
-    text = re.sub(r"<[^>]+>", " ", raw)
-    text = html_mod.unescape(text)
-    return " ".join(text.split())
+# ---------------------------------------------------------------------------
+# Job-list cache — scrape once, serve slices on every fetch_jobs() call
+# ---------------------------------------------------------------------------
 
+_jobs_cache: list[dict] = []
+_cache_filled: bool = False
+
+
+def _scrape_all_india_jobs() -> list[dict]:
+    """Open a Firefox browser, load the Honeywell India jobs page, return all listings."""
+    _ensure_browser()
+
+    url = (
+        f"{_SEARCH_URL}"
+        f"?location=India&locationId={_INDIA_LOCATION_ID}"
+        f"&locationLevel=country&mode=location"
+    )
+
+    context = _browser.new_context(user_agent=_UA, ignore_https_errors=True)
+    page = context.new_page()
+
+    try:
+        try:
+            page.goto(url, wait_until="networkidle", timeout=45000)
+        except PWTimeoutError:
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            except PWTimeoutError:
+                pass
+            page.wait_for_timeout(5000)
+
+        # Wait for KnockoutJS to render at least one job title
+        try:
+            page.wait_for_selector("span.job-tile__title", timeout=20000)
+        except PWTimeoutError:
+            pass
+
+        # Scroll / load-more pagination loop
+        prev_count = 0
+        for _ in range(30):  # safety cap; each iteration loads ~25 more jobs
+            current_count = page.evaluate(
+                "document.querySelectorAll('a.job-list-item__link').length"
+            )
+            if current_count == prev_count:
+                break
+            prev_count = current_count
+
+            # Try Oracle CE "load more" button first
+            btn = page.query_selector(
+                "[data-ph-at-id='load-more-jobs'], "
+                "button.load-more-jobs, "
+                "button:has-text('Load more'), "
+                "button:has-text('Show more'), "
+                "a:has-text('Load more')"
+            )
+            if btn and btn.is_visible():
+                try:
+                    btn.scroll_into_view_if_needed()
+                    btn.click()
+                    page.wait_for_timeout(3000)
+                except Exception:
+                    break
+            else:
+                # Try infinite scroll
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                page.wait_for_timeout(3000)
+                new_count = page.evaluate(
+                    "document.querySelectorAll('a.job-list-item__link').length"
+                )
+                if new_count == current_count:
+                    break
+
+        jobs = _scrape_dom(page)
+    finally:
+        page.close()
+        context.close()
+
+    return jobs
+
+
+def _scrape_dom(page) -> list[dict]:
+    """Extract job data from the KnockoutJS-rendered DOM via JS evaluate."""
+    raw_jobs = page.evaluate("""
+        () => {
+            const links = document.querySelectorAll('a.job-list-item__link');
+            const jobs = [];
+            for (const a of links) {
+                const href = a.href || '';
+                const idMatch = href.match(/\\/job\\/(\\w+)\\//);
+                if (!idMatch) continue;
+                const jobId = idMatch[1];
+
+                const ariaId = a.getAttribute('aria-labelledby');
+                const card = ariaId ? document.getElementById(ariaId) : null;
+                if (!card) continue;
+
+                const titleEl = card.querySelector('.job-tile__title');
+                const title = titleEl ? titleEl.textContent.trim() : '';
+                if (!title) continue;
+
+                const locEl = card.querySelector('[data-bind*="primaryLocation"]');
+                const location = locEl ? locEl.textContent.trim() : 'India';
+
+                // Extract posting date from the date info item
+                let date = '';
+                const items = card.querySelectorAll('.job-list-item__job-info-item');
+                for (const item of items) {
+                    const lbl = item.querySelector(
+                        '.job-list-item__job-info-label--posting-date'
+                    );
+                    if (lbl) {
+                        const val = item.querySelector('.job-list-item__job-info-value');
+                        if (val) date = val.textContent.trim();
+                        break;
+                    }
+                }
+
+                jobs.push({ id: jobId, title, location, date, href });
+            }
+            return jobs;
+        }
+    """)
+
+    result: list[dict] = []
+    seen: set[str] = set()
+    for j in raw_jobs:
+        job_id = j.get("id", "")
+        title = j.get("title", "")
+        if not job_id or not title or job_id in seen:
+            continue
+        seen.add(job_id)
+
+        href = j.get("href", "")
+        app_url = href if href.startswith("http") else f"https://careers.honeywell.com{href}"
+
+        result.append({
+            "id": job_id,
+            "title": title,
+            "location": j.get("location") or "India",
+            "posting_date": _parse_posted_date(j.get("date", "")),
+            "application_url": app_url,
+        })
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Public API expected by matcher.py
+# ---------------------------------------------------------------------------
 
 def fetch_jobs(
     keyword: str,
@@ -116,127 +228,118 @@ def fetch_jobs(
     sort_by: str = "date",
     timeout: int = 20,
 ) -> list[dict[str, str]]:
-    """Return one page of Honeywell India job listings.
+    """Return a cached slice of Honeywell India jobs.
 
-    location param is ignored — India is hardcoded via locationId in the POST
-    body (consistent with how amazon_fetcher and optum_fetcher handle location).
-    Phenom's keyword filter is server-side and works reliably.
+    The full India job list is scraped once on the first call and held in
+    memory.  Slicing by start/num lets matcher.py's pagination loop work
+    normally; its deduplication handles the same pool across keyword calls.
     """
-    ref_num = _get_ref_num(timeout=timeout)
-
-    payload = {
-        "refNum": ref_num,
-        "ddoKey": "refineSearch",
-        "from": start,
-        "size": num,
-        "lang": "en_global",
-        "deviceType": "desktop",
-        "pageName": "search-results",
-        "sort": {"order": "desc", "field": "postedDate"},
-        "locationData": {
-            "locationId": _INDIA_LOCATION_ID,
-            "locationLevel": "country",
-        },
-        "keyword": keyword,
-    }
-
-    _MAX_ATTEMPTS = 3
-    for attempt in range(_MAX_ATTEMPTS):
+    global _jobs_cache, _cache_filled
+    if not _cache_filled:
+        _cache_filled = True  # Set early to prevent retry storm if scrape fails
         try:
-            r = requests.post(
-                _WIDGETS_URL, headers=_HEADERS_JSON, json=payload, timeout=timeout
-            )
-        except requests.exceptions.RequestException as exc:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError(f"POST /widgets failed: {exc}") from exc
+            _jobs_cache = _scrape_all_india_jobs()
+        except Exception as exc:
+            raise RateLimitError(f"Honeywell Playwright scrape failed: {exc}") from exc
 
-        if r.status_code == 429:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError("Rate-limited on POST /widgets")
-
-        r.raise_for_status()
-
-        data = r.json()
-        jobs_raw = (
-            data.get("refineSearch", {})
-                .get("data", {})
-                .get("jobs") or []
-        )
-
-        results: list[dict[str, str]] = []
-        for job in jobs_raw:
-            job_id = str(job.get("jobId", job.get("reqId", "")))
-            if not job_id:
-                continue
-
-            apply_url = job.get("applyUrl", "")
-            if not apply_url:
-                job_seq = job.get("jobSeqNo", "")
-                title_slug = re.sub(r"[^a-z0-9]+", "-", job.get("title", "").lower()).strip("-")
-                apply_url = f"https://careers.honeywell.com/en/sites/Honeywell/job/{job_seq}/{title_slug}"
-
-            loc = job.get("location", "")
-            if "india" not in loc.lower():
-                loc = f"{loc}, India".strip(", ")
-
-            results.append({
-                "id": job_id,
-                "title": job.get("title", ""),
-                "location": loc,
-                "posting_date": _parse_posted_date(job.get("postedDate", "")),
-                "application_url": apply_url,
-            })
-        return results
-
-    raise RateLimitError("POST /widgets failed after retries")
+    return _jobs_cache[start: start + num]
 
 
-def fetch_job_description(application_url: str, timeout: int = 20) -> tuple[str, str]:
-    """Fetch full description and posting date for a single Honeywell job.
+def fetch_job_description(
+    application_url: str,
+    timeout: int = 30,
+) -> tuple[str, str]:
+    """Fetch the full description for one Honeywell job via headless Firefox.
 
-    Returns (description, posting_date). Tries JSON-LD first (like optum_fetcher),
-    falls back to <main> body text (like siemens_fetcher).
+    Returns (description_text, posting_date).
     """
-    _MAX_ATTEMPTS = 3
-    for attempt in range(_MAX_ATTEMPTS):
+    _ensure_browser()
+    context = _browser.new_context(user_agent=_UA, ignore_https_errors=True)
+    page = context.new_page()
+
+    try:
         try:
-            r = requests.get(application_url, headers=_HEADERS_HTML, timeout=timeout)
-        except requests.exceptions.RequestException as exc:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError(f"Failed to fetch job detail: {exc}") from exc
-
-        if r.status_code == 429:
-            if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(2 ** attempt)
-                continue
-            raise RateLimitError("Rate-limited fetching job detail")
-
-        r.raise_for_status()
-
-        soup = BeautifulSoup(r.text, "html.parser")
-
-        # Try JSON-LD first (Phenom embeds structured data on detail pages)
-        ld_script = soup.find("script", type="application/ld+json")
-        if ld_script and ld_script.string:
+            page.goto(application_url, wait_until="networkidle", timeout=timeout * 1000)
+        except PWTimeoutError:
             try:
-                ld = json.loads(ld_script.string)
-                raw_html = ld.get("description", "")
-                posting_date = _parse_posted_date(ld.get("datePosted", ""))
-                description = _strip_html(raw_html) if raw_html else ""
-                if description:
-                    return description, posting_date
-            except (json.JSONDecodeError, AttributeError):
+                page.goto(
+                    application_url, wait_until="domcontentloaded", timeout=timeout * 1000
+                )
+            except PWTimeoutError:
                 pass
+            page.wait_for_timeout(4000)
 
-        # Fallback: extract from <main> body text
-        content = soup.find("main") or soup.body
-        text = " ".join((content or soup).get_text(separator=" ", strip=True).split())
-        return text, ""
+        # Wait for job description content to render
+        try:
+            page.wait_for_selector(
+                ".job-description, [data-ph-at-id*='description' i], "
+                "[class*='job-content' i], article, main",
+                timeout=15000,
+            )
+        except PWTimeoutError:
+            pass
 
-    raise RateLimitError("Failed to fetch job detail after retries")
+        # Prefer specific description containers; avoid tiny "description label" divs
+        raw_text = ""
+        for sel in (
+            "[data-ph-at-id*='description' i]",
+            ".job-description",
+            "[class*='job-content' i]",
+            "article",
+            "main",
+        ):
+            el = page.query_selector(sel)
+            if el:
+                t = el.inner_text().strip()
+                if len(t) > 100:  # ignore short/label elements
+                    raw_text = t
+                    break
+
+        if not raw_text:
+            raw_text = page.inner_text("body")
+
+        text = " ".join(raw_text.split())
+
+        date_m = re.search(
+            r"\b(\d{4}-\d{2}-\d{2}|[A-Za-z]+ \d{1,2},? \d{4}|\d{1,2} [A-Za-z]+ \d{4})\b",
+            text,
+        )
+        posting_date = _parse_posted_date(date_m.group(1)) if date_m else ""
+
+        return text, posting_date
+
+    except Exception as exc:
+        raise RateLimitError(f"Honeywell description fetch failed: {exc}") from exc
+    finally:
+        page.close()
+        context.close()
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _parse_posted_date(raw: str) -> str:
+    """Normalise any date string to YYYY-MM-DD; return '' on failure."""
+    if not raw:
+        return ""
+    s = " ".join(raw.split())
+    iso_m = re.match(r"(\d{4}-\d{2}-\d{2})", s)
+    if iso_m:
+        return iso_m.group(1)
+    for fmt in (
+        "%m/%d/%Y",     # 06/09/2026  ← Oracle CE format
+        "%B %d, %Y",    # June 9, 2026
+        "%B %d %Y",
+        "%b %d, %Y",
+        "%b %d %Y",
+        "%d %B %Y",
+        "%d %b %Y",
+        "%d/%m/%Y",
+        "%m/%d/%y",
+    ):
+        try:
+            return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            pass
+    return ""

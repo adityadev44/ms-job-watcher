@@ -63,6 +63,7 @@ matching:
   # No specific seniority is required — any level in the family passes.
   title_family:
     - "software engineer"
+    - "software engr"
     - "software developer"
     - "software development engineer"
     - "SDE"
