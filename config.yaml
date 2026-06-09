@@ -35,7 +35,7 @@ optum_search:
 
 amazon_search:
   max_listings: 200
-  inter_page_delay: 0.5
+  inter_page_delay: 0.1
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -57,6 +57,7 @@ matching:
   # No specific seniority is required — any level in the family passes.
   title_family:
     - "software engineer"
+    - "software developer"
     - "software development engineer"
     - "SDE"
     - "SWE"
@@ -77,14 +78,11 @@ matching:
     - "C#"
     - "ASP.NET"
     - "Web API"
-    - "REST"
     - "SQL Server"
     - "T-SQL"
-    - "SQL"
     - "Azure"
     - "Angular"
     - "TypeScript"
-    - "JavaScript"
     - "React"
     - "Entity Framework"
 
@@ -118,6 +116,24 @@ matching:
     - "customer engineer"
     - "support engineer"
     - "data scientist"
+
+siemens_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - "software development engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
 
 notifications:
   email:
