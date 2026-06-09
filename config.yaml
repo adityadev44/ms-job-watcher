@@ -59,6 +59,9 @@ matching:
     - "SQL"
     - "Azure"
     - "Angular"
+    - "TypeScript"
+    - "JavaScript"
+    - "React"
     - "Entity Framework"
 
   # Reject a job immediately if its title contains any of these terms.

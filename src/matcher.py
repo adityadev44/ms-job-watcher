@@ -275,16 +275,18 @@ def find_matching_jobs(
             matched.append({**job, "description": ""})
             continue
 
-        if matches_skills(description, skills):
+        normed_desc = _normalize_text(description)
+        found = [s for s in skills if _normalize_text(s) in normed_desc]
+        non_react = [s for s in found if _normalize_text(s) != "react"]
+        if non_react:
             matched.append({**job, "description": description})
+        elif found:  # React is the only match
+            filtered_out.append(f"[react-only]    {job['title']}")
         else:
-            # Detailed breakdown so near-misses are easy to diagnose.
-            normed = _normalize_text(description)
-            found = [s for s in skills if _normalize_text(s) in normed]
             filtered_out.append(
                 f"[skill]         {job['title']} "
                 f"(desc={len(description)} chars, "
-                f"skills_found={found if found else 'none'})"
+                f"skills_found=none)"
             )
 
     if filtered_out:
