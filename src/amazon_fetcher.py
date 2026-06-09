@@ -5,7 +5,7 @@ from __future__ import annotations
 import html as html_mod
 import re
 import time
-from typing import Any
+from datetime import datetime
 
 import requests
 
@@ -38,6 +38,24 @@ def _strip_html(raw: str) -> str:
     return " ".join(text.split())
 
 
+def _parse_posted_date(raw: str) -> str:
+    """Normalise Amazon date strings to ISO YYYY-MM-DD.
+
+    Amazon returns dates like 'June  9, 2026' (with occasional double-space
+    before single-digit days). strptime accepts single or double-digit %d so
+    normalising whitespace first is enough.
+    """
+    if not raw:
+        return ""
+    normalised = " ".join(raw.split())
+    for fmt in ("%B %d, %Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(normalised, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            pass
+    return ""
+
+
 def fetch_jobs(
     keyword: str,
     location: str,
@@ -49,12 +67,14 @@ def fetch_jobs(
 ) -> list[dict[str, str]]:
     """Return one page of Amazon India job listings matching keyword.
 
-    location is ignored — country is hardcoded to IN (India) in the request,
+    location is ignored — country is hardcoded to IND in the request,
     consistent with how optum_fetcher handles location filtering.
+    Note: Amazon's API uses the 3-letter ISO code 'IND' and a plain
+    'country' parameter (no brackets) for reliable country filtering.
     """
-    params: dict[str, Any] = {
+    params = {
         "query": keyword,
-        "country[]": "IN",
+        "country": "IND",
         "offset": start,
         "result_limit": num,
         "sort": "recent",
@@ -84,6 +104,10 @@ def fetch_jobs(
 
         results = []
         for job in jobs_raw:
+            # Safety guard: skip any non-India result in case the filter slips.
+            if job.get("country_code", "").upper() != "IND":
+                continue
+
             job_path = job.get("job_path", "")
             app_url = f"{_BASE_URL}{job_path}"
 
@@ -94,11 +118,17 @@ def fetch_jobs(
             ).strip()
             _desc_cache[app_url] = combined
 
+            loc = job.get("normalized_location") or job.get("location", "")
+            # Amazon location strings use codes like "IN, KA, Bengaluru"; append
+            # ", India" so matcher's is_india_job() check ("india" in location) works.
+            if "india" not in loc.lower():
+                loc = f"{loc}, India".strip(", ")
+
             results.append({
                 "id": str(job.get("id", "")),
                 "title": job.get("title", ""),
-                "location": job.get("normalized_location") or job.get("location", ""),
-                "posting_date": job.get("posted_date", ""),
+                "location": loc,
+                "posting_date": _parse_posted_date(job.get("posted_date", "")),
                 "application_url": app_url,
             })
         return results
