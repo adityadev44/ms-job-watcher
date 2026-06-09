@@ -173,24 +173,26 @@ def find_matching_jobs(
     # --- Step 1: Fetch & deduplicate across all keyword × location combinations ---
     # Empty locations list means fetch without a location filter (date sort works).
     # A non-empty list drives one search pass per location value.
-    _PAGE_SIZE = 20          # results requested per page
-    _MAX_PAGES = 5           # at most 5 pages per keyword/location pair
-    _INTER_PAGE_DELAY = 1.5  # seconds between consecutive search API calls
+    _PAGE_SIZE = 20                # results requested per page
+    _MAX_LISTINGS_PER_COMBO = 500  # stop fetching once this many results retrieved
+    _INTER_PAGE_DELAY = 1.5        # seconds between consecutive search API calls
 
     seen_ids: set[str] = set()
     all_jobs: list[dict] = []
     for keyword in keywords:
         for location in (locations or [""]):
             start = 0
-            for page_num in range(_MAX_PAGES):
-                if page_num > 0:
+            first_page = True
+            while start < _MAX_LISTINGS_PER_COMBO:
+                if not first_page:
                     time.sleep(_INTER_PAGE_DELAY)
+                first_page = False
                 try:
                     page = _fetch_jobs(keyword, location, num=_PAGE_SIZE, start=start)
                 except _RateLimitError as exc:
                     print(
                         f"  [warn] rate-limited for '{keyword}' / '{location}' "
-                        f"after {page_num} page(s) — {exc}; skipping remaining pages"
+                        f"after {start} results — {exc}; skipping remaining pages"
                     )
                     break
                 if not page:
