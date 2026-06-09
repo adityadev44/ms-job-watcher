@@ -29,6 +29,21 @@ optum_search:
     - "Chennai"
     - "Tamil Nadu"
 
+amazon_search:
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - "software development engineer"
+    - "SDE"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations: []
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+
 matching:
   # Include a job if its title belongs to the software-engineer family.
   # Matching is normalised: case, hyphens, C#/CSharp/.NET/dotnet, and

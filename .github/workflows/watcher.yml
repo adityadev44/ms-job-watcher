@@ -1,4 +1,4 @@
-name: MS and Optum Job Watcher
+name: MS, Optum, and Amazon Job Watcher
 
 on:
   schedule:
@@ -42,12 +42,22 @@ jobs:
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
         run: python src/run_optum.py
 
+      - name: Run Amazon watcher
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
+        run: python src/run_amazon.py
+
       - name: Save updated seen_jobs files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add seen_jobs.json
           test -f seen_jobs_optum.json && git add seen_jobs_optum.json || true
+          test -f seen_jobs_amazon.json && git add seen_jobs_amazon.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else
