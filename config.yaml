@@ -190,6 +190,15 @@ wellsfargo_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+  # Wells Fargo-specific: job title must contain at least one of these
+  # to pass. Filters out generic "Senior Software Engineer" titles that
+  # are Java/Python roles. Other pipelines do not use this field.
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
 
 notifications:
   email:

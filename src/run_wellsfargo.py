@@ -40,6 +40,27 @@ def run_wellsfargo_pipeline(
     }
 
     total_fetched, matched = find_matching_jobs(wf_cfg, _wf_mod)
+
+    # Wells Fargo-only: require the tech stack to appear in the job title.
+    # Generic titles like "Senior Software Engineer" are usually Java/Python
+    # roles that happen to mention a .NET skill in passing. Other pipelines
+    # do NOT use this filter.
+    tech_terms = whole_cfg["wellsfargo_search"].get("require_tech_in_title", [])
+    if tech_terms:
+        title_passed = []
+        title_dropped = []
+        for j in matched:
+            t = j["title"].lower()
+            if any(term.lower() in t for term in tech_terms):
+                title_passed.append(j)
+            else:
+                title_dropped.append(f"[title-tech]    {j['title']}")
+        if title_dropped:
+            print("Wells Fargo title-tech filtered out (near-misses):")
+            for line in title_dropped:
+                print(f"  {line}")
+        matched = title_passed
+
     new_matches = [j for j in matched if j["id"] not in seen_ids]
 
     alert_sent = False
