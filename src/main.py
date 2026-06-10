@@ -64,4 +64,8 @@ def run_pipeline(
 
 
 if __name__ == "__main__":
-    run_pipeline()
+    try:
+        run_pipeline()
+    except Exception as exc:
+        print(f"[MS] PIPELINE ERROR: {exc}")
+        print("[MS] Exiting cleanly to avoid blocking other pipelines.")
