@@ -97,11 +97,13 @@ def notify(jobs: list[dict], source: str = "Microsoft") -> None:
     gmail_password = os.getenv("GMAIL_APP_PASSWORD", "")
     recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
 
-    if token and chat_id:
+    chat_ids = [cid.strip() for cid in chat_id.split(",") if cid.strip()]
+    if token and chat_ids:
         try:
             chunks = _build_telegram_chunks(jobs, source=source)
-            for chunk in chunks:
-                send_telegram(chunk, token, chat_id)
+            for cid in chat_ids:
+                for chunk in chunks:
+                    send_telegram(chunk, token, cid)
             print(f"Telegram alert sent ({len(chunks)} message(s)).")
         except Exception as exc:
             print(f"[warn] Telegram alert failed: {exc}")
