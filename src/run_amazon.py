@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import amazon_fetcher as _amazon_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify
+from notifier import notify, notify_pipeline_error
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -60,4 +60,9 @@ def run_amazon_pipeline(
 
 
 if __name__ == "__main__":
-    run_amazon_pipeline()
+    try:
+        run_amazon_pipeline()
+    except Exception as exc:
+        print(f"[Amazon] PIPELINE ERROR: {exc}")
+        print("[Amazon] Exiting cleanly to avoid blocking other pipelines.")
+        notify_pipeline_error("Amazon", exc)

@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import honeywell_fetcher as _honeywell_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify
+from notifier import notify, notify_pipeline_error
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -70,3 +70,4 @@ if __name__ == "__main__":
     except Exception as exc:
         print(f"[Honeywell] PIPELINE ERROR: {exc}")
         print("[Honeywell] Exiting cleanly to avoid blocking other pipelines.")
+        notify_pipeline_error("Honeywell", exc)

@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import optum_fetcher as _optum_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify
+from notifier import notify, notify_pipeline_error
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -60,4 +60,9 @@ def run_optum_pipeline(
 
 
 if __name__ == "__main__":
-    run_optum_pipeline()
+    try:
+        run_optum_pipeline()
+    except Exception as exc:
+        print(f"[Optum] PIPELINE ERROR: {exc}")
+        print("[Optum] Exiting cleanly to avoid blocking other pipelines.")
+        notify_pipeline_error("Optum", exc)

@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import siemens_fetcher as _siemens_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify
+from notifier import notify, notify_pipeline_error
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,4 +65,9 @@ def run_siemens_pipeline(
 
 
 if __name__ == "__main__":
-    run_siemens_pipeline()
+    try:
+        run_siemens_pipeline()
+    except Exception as exc:
+        print(f"[Siemens] PIPELINE ERROR: {exc}")
+        print("[Siemens] Exiting cleanly to avoid blocking other pipelines.")
+        notify_pipeline_error("Siemens", exc)

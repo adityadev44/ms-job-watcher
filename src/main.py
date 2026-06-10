@@ -9,14 +9,13 @@ Run:  py src/main.py
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from matcher import find_matching_jobs
-from notifier import notify, send_email
+from notifier import notify, notify_pipeline_error
 
 _ROOT = Path(__file__).parent.parent
 _DEFAULT_CONFIG = _ROOT / "config.yaml"
@@ -70,18 +69,4 @@ if __name__ == "__main__":
     except Exception as exc:
         print(f"[MS] PIPELINE ERROR: {exc}")
         print("[MS] Exiting cleanly to avoid blocking other pipelines.")
-        try:
-            gmail_user = os.getenv("GMAIL_USER", "")
-            gmail_password = os.getenv("GMAIL_APP_PASSWORD", "")
-            recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
-            if gmail_user and gmail_password and recipients:
-                send_email(
-                    f"Microsoft job-watcher pipeline failed and did not run.\n\nError: {exc}",
-                    gmail_user,
-                    gmail_password,
-                    recipients,
-                    source="Microsoft (pipeline error)",
-                )
-                print("[MS] Error notification email sent.")
-        except Exception:
-            pass
+        notify_pipeline_error("Microsoft", exc)

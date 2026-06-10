@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import metlife_fetcher as _metlife_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify
+from notifier import notify, notify_pipeline_error
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -64,3 +64,4 @@ if __name__ == "__main__":
     except Exception as exc:
         print(f"[MetLife] PIPELINE ERROR: {exc}")
         print("[MetLife] Exiting cleanly to avoid blocking other pipelines.")
+        notify_pipeline_error("MetLife", exc)

@@ -120,6 +120,25 @@ def notify(jobs: list[dict], source: str = "Microsoft") -> None:
         print("Email skipped (GMAIL_USER, GMAIL_APP_PASSWORD, or ALERT_RECIPIENT not set).")
 
 
+def notify_pipeline_error(source: str, exc: Exception) -> None:
+    """Send an error email when a pipeline crashes. No-ops silently if credentials are missing."""
+    try:
+        gmail_user = os.getenv("GMAIL_USER", "")
+        gmail_password = os.getenv("GMAIL_APP_PASSWORD", "")
+        recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
+        if gmail_user and gmail_password and recipients:
+            send_email(
+                f"{source} job-watcher pipeline failed and did not run.\n\nError: {exc}",
+                gmail_user,
+                gmail_password,
+                recipients,
+                source=f"{source} (pipeline error)",
+            )
+            print(f"[{source}] Error notification email sent.")
+    except Exception:
+        pass
+
+
 def _test_message() -> list[dict]:
     return [
         {
