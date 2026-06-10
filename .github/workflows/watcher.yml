@@ -5,6 +5,10 @@ on:
     - cron: '*/3000000000000 * * * *'   # every 30 minutes
   workflow_dispatch:           # also runnable manually from the GitHub UI
 
+concurrency:
+  group: job-watcher
+  cancel-in-progress: false    # queue runs; never allow two to write seen_jobs files simultaneously
+
 permissions:
   contents: write              # needed so the job can commit seen_jobs.json back
 
