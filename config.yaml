@@ -404,6 +404,26 @@ icertis_search:
     - "Pune"
     - "Chandigarh"
 
+maersk_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Maersk uses Workday with India location WIDs embedded in the fetcher.
+  # Keyword filtering is not server-side — all India jobs are cached once per run.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

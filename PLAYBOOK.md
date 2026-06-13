@@ -101,6 +101,7 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | S&P Global Careers | iCIMS | REST API (JSON) | `run_spglobal_careers.py` | Separate portal from Workday pipeline (`careers.spglobal.com/api/jobs`); full description included in search response — no detail fetch needed |
 | Gallagher (AJG) | iCIMS | REST API (JSON) | `run_gallagher.py` | `jobs.ajg.com/api/jobs`; identical iCIMS pattern to S&P Global Careers; India jobs in Kochi |
 | Icertis | Oracle HCM CE | REST API (JSON) | `run_icertis.py` | Tenant: iaaviz.fa.ocs.oraclecloud.com, site Jobs-at-Icertis; no India facet — fetches globally, filters client-side; all current India jobs are in Pune (excluded) so 0 matches expected until Icertis opens non-Pune roles |
+| Maersk | Workday | REST API (JSON) | `run_maersk.py` | `maersk.wd3.myworkdayjobs.com`; India location WIDs embedded as constant; all 122 India jobs fetched and cached once; `careers.maersk.com` API skipped (requires Consumer-Key and only returns 150 non-tech India jobs) |
 
 ---
 
@@ -265,6 +266,8 @@ Verify:
 | 92 matched Wells Fargo jobs (too many) | Description fetch was broken → matcher kept all as fallback | Fixed description → re-ran → 26; added title-tech filter → 2 |
 | WTW India location facet (`300000000346515`) not filtering | Oracle HCM CE at `eedu.fa.em3.oraclecloud.com` ignores `selectedLocationsFacet` — returns Philippines job with India facet applied | Fetch globally (no facet); `is_india_job()` filters client-side — WTW's total job count is small enough (~70 per keyword) that this is fine |
 | Morningstar Phenom `/widgets` API always returns `{"status":"failure"}` | Phenom People at `careers.morningstar.com` requires browser-side JS session state (PLAY_SESSION JWT + CSRF token) that plain HTTP cannot replicate | Use sitemap.xml (208 URLs) + JSON-LD on each page; filter India via `addressCountry`; cache all India jobs + descriptions in-module so subsequent keyword calls are free |
+| Maersk `locationsText = "2 Locations"` bypasses India check | Workday shows "2 Locations" when a job is available in multiple sites; `is_india_job()` in matcher.py checks for "india" in location text, so these jobs were silently skipped | In `_fill_cache`, set `loc_text = "India"` when "india" is not in the location text — safe because we already pre-filtered with India WIDs |
+| Maersk `careers.maersk.com` API not usable | Requires `Consumer-Key` header (extracted from frontend JS `api-keys.DfSBqKQY.js`) and only returns 150 India jobs — all non-technical (CSM, Finance, Operations) — none are software engineering roles | Use Workday directly: `maersk.wd3.myworkdayjobs.com/wday/cxs/maersk/Maersk_Careers/jobs` with India location WIDs in `appliedFacets.locations` |
 
 ---
 
@@ -294,7 +297,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 17 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 18 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
