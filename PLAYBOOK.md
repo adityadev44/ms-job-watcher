@@ -97,6 +97,7 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Chubb | Oracle HCM CE | REST API (JSON) | `run_chubb.py` | Tenant: fa-ewgu-saasfaprod1.fa.ocs.oraclecloud.com, site CX_2001 |
 | S&P Global | Workday | REST API (JSON) | `run_spglobal.py` | No India facet; fetches globally, filters client-side; state-name normalisation for India detection |
 | WTW | Oracle HCM CE | REST API (JSON) | `run_wtw.py` | Tenant: eedu.fa.em3.oraclecloud.com, site CX_1003; India facet unreliable — fetches globally, filters client-side |
+| Morningstar | Phenom People | Sitemap + HTML scraping | `run_morningstar.py` | `/widgets` API not accessible without browser JS; sitemap has 208 jobs; each page's JSON-LD has full description — all fetched once and cached in-module |
 
 ---
 
@@ -124,6 +125,7 @@ Common ATS vendors and what to expect:
 | **Lever** | URL contains `lever.co` | Public REST API |
 | **SAP SuccessFactors** | URL contains `successfactors.com` | REST API, may need session |
 | **Taleo** | URL contains `taleo.net` | HTML scraping usually required |
+| **Phenom People** | URL contains `phenompeople.com` CDN assets or `refNum` in page JS | `/widgets` API requires browser session — use sitemap.xml + JSON-LD scraping |
 
 ### Step 2 — Map the response structure
 
@@ -258,6 +260,7 @@ Verify:
 | `postedOn: "Posted Yesterday"` not parsed | `_parse_posted_on` only handled "X Days Ago" | Added explicit `"yesterday"` case |
 | 92 matched Wells Fargo jobs (too many) | Description fetch was broken → matcher kept all as fallback | Fixed description → re-ran → 26; added title-tech filter → 2 |
 | WTW India location facet (`300000000346515`) not filtering | Oracle HCM CE at `eedu.fa.em3.oraclecloud.com` ignores `selectedLocationsFacet` — returns Philippines job with India facet applied | Fetch globally (no facet); `is_india_job()` filters client-side — WTW's total job count is small enough (~70 per keyword) that this is fine |
+| Morningstar Phenom `/widgets` API always returns `{"status":"failure"}` | Phenom People at `careers.morningstar.com` requires browser-side JS session state (PLAY_SESSION JWT + CSRF token) that plain HTTP cannot replicate | Use sitemap.xml (208 URLs) + JSON-LD on each page; filter India via `addressCountry`; cache all India jobs + descriptions in-module so subsequent keyword calls are free |
 
 ---
 
@@ -286,7 +289,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 13 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 14 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder

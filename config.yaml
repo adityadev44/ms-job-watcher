@@ -300,6 +300,25 @@ metlife_search:
     - "Tamil Nadu"
     - "Pune"
 
+morningstar_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Morningstar's Phenom People site has no server-side keyword filtering.
+  # One keyword suffices — all India jobs are fetched and cached in one scan.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+
 wtw_search:
   max_listings: 200
   inter_page_delay: 0.3
