@@ -1,4 +1,4 @@
-name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, Oracle, MetLife, FIS, Chubb, S&P Global, WTW, and Morningstar Job Watcher
+name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, Oracle, MetLife, FIS, Chubb, S&P Global (Workday+Careers), WTW, Morningstar, Gallagher, and Icertis Job Watcher
 
 on:
   schedule:
@@ -65,6 +65,9 @@ jobs:
           python -u src/run_spglobal.py & pid12=$!
           python -u src/run_wtw.py & pid13=$!
           python -u src/run_morningstar.py & pid14=$!
+          python -u src/run_spglobal_careers.py & pid15=$!
+          python -u src/run_gallagher.py & pid16=$!
+          python -u src/run_icertis.py & pid17=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -80,6 +83,9 @@ jobs:
           wait $pid12 || fail=1
           wait $pid13 || fail=1
           wait $pid14 || fail=1
+          wait $pid15 || fail=1
+          wait $pid16 || fail=1
+          wait $pid17 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -100,6 +106,9 @@ jobs:
           test -f seen_jobs_spglobal.json && git add seen_jobs_spglobal.json || true
           test -f seen_jobs_wtw.json && git add seen_jobs_wtw.json || true
           test -f seen_jobs_morningstar.json && git add seen_jobs_morningstar.json || true
+          test -f seen_jobs_spglobal_careers.json && git add seen_jobs_spglobal_careers.json || true
+          test -f seen_jobs_gallagher.json && git add seen_jobs_gallagher.json || true
+          test -f seen_jobs_icertis.json && git add seen_jobs_icertis.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else

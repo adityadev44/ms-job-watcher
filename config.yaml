@@ -18,6 +18,7 @@ search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 optum_search:
   max_listings: 200
@@ -37,6 +38,7 @@ optum_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 amazon_search:
   max_listings: 200
@@ -55,6 +57,7 @@ amazon_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 matching:
   # Include a job if its title belongs to the software-engineer family.
@@ -157,6 +160,7 @@ siemens_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 honeywell_search:
   max_listings: 200
@@ -174,6 +178,7 @@ honeywell_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 wellsfargo_search:
   max_listings: 200
@@ -191,6 +196,7 @@ wellsfargo_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
   # Wells Fargo-specific: job title must contain at least one of these
   # to pass. Filters out generic "Senior Software Engineer" titles that
   # are Java/Python roles. Other pipelines do not use this field.
@@ -217,6 +223,7 @@ dell_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 oracle_search:
   max_listings: 200
@@ -234,6 +241,7 @@ oracle_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 spglobal_search:
   max_listings: 300
@@ -251,6 +259,7 @@ spglobal_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 chubb_search:
   max_listings: 200
@@ -268,6 +277,7 @@ chubb_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 fis_search:
   max_listings: 500
@@ -285,6 +295,7 @@ fis_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 metlife_search:
   max_listings: 200
@@ -299,6 +310,43 @@ metlife_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
+
+gallagher_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+
+spglobal_careers_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
 
 morningstar_search:
   max_listings: 300
@@ -318,6 +366,7 @@ morningstar_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
 
 wtw_search:
   max_listings: 200
@@ -335,6 +384,25 @@ wtw_search:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
+
+icertis_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
 
 notifications:
   email:

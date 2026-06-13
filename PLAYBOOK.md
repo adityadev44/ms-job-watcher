@@ -16,7 +16,7 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 **Layer 1 — Location**
 - Job location must contain "India"
-- Must not be Chennai, Tamil Nadu, or Pune (configured per company via `exclude_locations`)
+- Must not be Chennai, Tamil Nadu, Pune, or Chandigarh (configured per company via `exclude_locations`)
 
 **Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
@@ -98,6 +98,9 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | S&P Global | Workday | REST API (JSON) | `run_spglobal.py` | No India facet; fetches globally, filters client-side; state-name normalisation for India detection |
 | WTW | Oracle HCM CE | REST API (JSON) | `run_wtw.py` | Tenant: eedu.fa.em3.oraclecloud.com, site CX_1003; India facet unreliable — fetches globally, filters client-side |
 | Morningstar | Phenom People | Sitemap + HTML scraping | `run_morningstar.py` | `/widgets` API not accessible without browser JS; sitemap has 208 jobs; each page's JSON-LD has full description — all fetched once and cached in-module |
+| S&P Global Careers | iCIMS | REST API (JSON) | `run_spglobal_careers.py` | Separate portal from Workday pipeline (`careers.spglobal.com/api/jobs`); full description included in search response — no detail fetch needed |
+| Gallagher (AJG) | iCIMS | REST API (JSON) | `run_gallagher.py` | `jobs.ajg.com/api/jobs`; identical iCIMS pattern to S&P Global Careers; India jobs in Kochi |
+| Icertis | Oracle HCM CE | REST API (JSON) | `run_icertis.py` | Tenant: iaaviz.fa.ocs.oraclecloud.com, site Jobs-at-Icertis; no India facet — fetches globally, filters client-side; all current India jobs are in Pune (excluded) so 0 matches expected until Icertis opens non-Pune roles |
 
 ---
 
@@ -197,6 +200,7 @@ Add a new section before `notifications:`:
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
   # DO NOT add require_tech_in_title unless explicitly asked
 ```
 
@@ -278,10 +282,11 @@ matching:                         # shared across ALL companies
   inter_page_delay: 0.2
   keywords: [...]
   locations: [...]
-  exclude_locations:              # ALWAYS include Chennai, Tamil Nadu, Pune
+  exclude_locations:              # ALWAYS include Chennai, Tamil Nadu, Pune, Chandigarh
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
+    - "Chandigarh"
   require_tech_in_title: [...]    # OPTIONAL — Wells Fargo only, do not add by default
 ```
 
@@ -289,7 +294,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 14 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 17 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
