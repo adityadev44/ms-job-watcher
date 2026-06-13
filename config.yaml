@@ -300,6 +300,23 @@ metlife_search:
     - "Tamil Nadu"
     - "Pune"
 
+wtw_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

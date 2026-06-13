@@ -90,6 +90,13 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Siemens | Custom | HTML scraping | `run_siemens.py` | Keywords ignored server-side; fetches all, dedupes |
 | Honeywell | Oracle HCM CE | **Playwright/Firefox** | `run_honeywell.py` | Chromium blocked by Akamai; titles use "Engr" not "Engineer" |
 | Wells Fargo | Workday | REST API (JSON) | `run_wellsfargo.py` | India WID hardcoded; title-tech 4th filter active |
+| Dell | Custom | REST API (JSON) | `run_dell.py` | |
+| Oracle | Oracle HCM CE | REST API (JSON) | `run_oracle.py` | |
+| MetLife | Custom | REST API (JSON) | `run_metlife.py` | Empty keyword fetches all India jobs; title/skills filter handles rest |
+| FIS | Custom | REST API (JSON) | `run_fis.py` | |
+| Chubb | Oracle HCM CE | REST API (JSON) | `run_chubb.py` | Tenant: fa-ewgu-saasfaprod1.fa.ocs.oraclecloud.com, site CX_2001 |
+| S&P Global | Workday | REST API (JSON) | `run_spglobal.py` | No India facet; fetches globally, filters client-side; state-name normalisation for India detection |
+| WTW | Oracle HCM CE | REST API (JSON) | `run_wtw.py` | Tenant: eedu.fa.em3.oraclecloud.com, site CX_1003; India facet unreliable — fetches globally, filters client-side |
 
 ---
 
@@ -250,6 +257,7 @@ Verify:
 | Wells Fargo `limit=0` returns HTTP 400 | Workday rejects zero-result requests | Hardcode India WID discovered from a real search with `limit=1+` |
 | `postedOn: "Posted Yesterday"` not parsed | `_parse_posted_on` only handled "X Days Ago" | Added explicit `"yesterday"` case |
 | 92 matched Wells Fargo jobs (too many) | Description fetch was broken → matcher kept all as fallback | Fixed description → re-ran → 26; added title-tech filter → 2 |
+| WTW India location facet (`300000000346515`) not filtering | Oracle HCM CE at `eedu.fa.em3.oraclecloud.com` ignores `selectedLocationsFacet` — returns Philippines job with India facet applied | Fetch globally (no facet); `is_india_job()` filters client-side — WTW's total job count is small enough (~70 per keyword) that this is fine |
 
 ---
 
@@ -278,7 +286,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 6 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 13 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
