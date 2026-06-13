@@ -424,6 +424,26 @@ maersk_search:
     - "Pune"
     - "Chandigarh"
 
+nomura_search:
+  max_listings: 400
+  inter_page_delay: 0.3
+  # Nomura India portal fetches all India jobs at once — keywords are not sent server-side.
+  # All 337+ India jobs are cached in-module; title/skills filters handle relevance.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

@@ -1,4 +1,4 @@
-name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, Oracle, MetLife, FIS, Chubb, S&P Global (Workday+Careers), WTW, Morningstar, Gallagher, Icertis, and Maersk Job Watcher
+name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, Oracle, MetLife, FIS, Chubb, S&P Global (Workday+Careers), WTW, Morningstar, Gallagher, Icertis, Maersk, and Nomura Job Watcher
 
 on:
   schedule:
@@ -69,6 +69,7 @@ jobs:
           python -u src/run_gallagher.py & pid16=$!
           python -u src/run_icertis.py & pid17=$!
           python -u src/run_maersk.py & pid18=$!
+          python -u src/run_nomura.py & pid19=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -88,6 +89,7 @@ jobs:
           wait $pid16 || fail=1
           wait $pid17 || fail=1
           wait $pid18 || fail=1
+          wait $pid19 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -112,6 +114,7 @@ jobs:
           test -f seen_jobs_gallagher.json && git add seen_jobs_gallagher.json || true
           test -f seen_jobs_icertis.json && git add seen_jobs_icertis.json || true
           test -f seen_jobs_maersk.json && git add seen_jobs_maersk.json || true
+          test -f seen_jobs_nomura.json && git add seen_jobs_nomura.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else
