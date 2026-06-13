@@ -19,6 +19,7 @@ search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 optum_search:
   max_listings: 200
@@ -39,6 +40,7 @@ optum_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 amazon_search:
   max_listings: 200
@@ -58,6 +60,7 @@ amazon_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 matching:
   # Include a job if its title belongs to the software-engineer family.
@@ -161,6 +164,7 @@ siemens_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 honeywell_search:
   max_listings: 200
@@ -179,6 +183,7 @@ honeywell_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 wellsfargo_search:
   max_listings: 200
@@ -197,6 +202,7 @@ wellsfargo_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
   # Wells Fargo-specific: job title must contain at least one of these
   # to pass. Filters out generic "Senior Software Engineer" titles that
   # are Java/Python roles. Other pipelines do not use this field.
@@ -224,6 +230,7 @@ dell_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 oracle_search:
   max_listings: 200
@@ -242,6 +249,7 @@ oracle_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 spglobal_search:
   max_listings: 300
@@ -260,6 +268,7 @@ spglobal_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 chubb_search:
   max_listings: 200
@@ -278,6 +287,7 @@ chubb_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 fis_search:
   max_listings: 500
@@ -296,6 +306,7 @@ fis_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 metlife_search:
   max_listings: 200
@@ -311,6 +322,7 @@ metlife_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 gallagher_search:
   max_listings: 200
@@ -329,6 +341,7 @@ gallagher_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 spglobal_careers_search:
   max_listings: 300
@@ -347,6 +360,7 @@ spglobal_careers_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 morningstar_search:
   max_listings: 300
@@ -367,6 +381,7 @@ morningstar_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 wtw_search:
   max_listings: 200
@@ -385,6 +400,7 @@ wtw_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 icertis_search:
   max_listings: 200
@@ -403,6 +419,7 @@ icertis_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 maersk_search:
   max_listings: 200
@@ -423,6 +440,7 @@ maersk_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 nomura_search:
   max_listings: 400
@@ -443,6 +461,7 @@ nomura_search:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
 
 notifications:
   email:

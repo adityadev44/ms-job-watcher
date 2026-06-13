@@ -16,7 +16,7 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 **Layer 1 — Location**
 - Job location must contain "India"
-- Must not be Chennai, Tamil Nadu, Pune, or Chandigarh (configured per company via `exclude_locations`)
+- Must not be Chennai, Tamil Nadu, Pune, Chandigarh, or Kochi (configured per company via `exclude_locations`)
 
 **Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
@@ -244,7 +244,7 @@ Verify:
 - Non-zero jobs fetched with India locations
 - Near-miss log shows `[title family]`, `[skill]`, `[broad-only]` tags firing correctly — no obvious false positives
 - No Java/Python/cloud-native jobs slipping through as matches
-- Pune/Chennai/Tamil Nadu not in any matched result's location
+- Pune/Kochi/Chandigarh/Chennai/Tamil Nadu not in any matched result's location
 - Alert fires (or "not sent (no new matches)" if all already seen)
 
 ---
@@ -287,11 +287,12 @@ matching:                         # shared across ALL companies
   inter_page_delay: 0.2
   keywords: [...]
   locations: [...]
-  exclude_locations:              # ALWAYS include Chennai, Tamil Nadu, Pune, Chandigarh
+  exclude_locations:              # ALWAYS include Chennai, Tamil Nadu, Pune, Chandigarh, Kochi
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
   require_tech_in_title: [...]    # OPTIONAL — Wells Fargo only, do not add by default
 ```
 
