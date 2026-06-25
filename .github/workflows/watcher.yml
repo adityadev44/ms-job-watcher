@@ -1,4 +1,4 @@
-name: MS, Optum, Amazon, Siemens, Honeywell, Wells Fargo, Dell, Oracle, MetLife, FIS, Chubb, S&P Global (Workday+Careers), WTW, Morningstar, Gallagher, Icertis, Maersk, and Nomura Job Watcher
+name: Job Watcher (29 companies)
 
 on:
   schedule:

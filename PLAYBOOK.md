@@ -103,6 +103,16 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Icertis | Oracle HCM CE | REST API (JSON) | `run_icertis.py` | Tenant: iaaviz.fa.ocs.oraclecloud.com, site Jobs-at-Icertis; no India facet — fetches globally, filters client-side; all current India jobs are in Pune (excluded) so 0 matches expected until Icertis opens non-Pune roles |
 | Maersk | Workday | REST API (JSON) | `run_maersk.py` | `maersk.wd3.myworkdayjobs.com`; India location WIDs embedded as constant; all 122 India jobs fetched and cached once; `careers.maersk.com` API skipped (requires Consumer-Key and only returns 150 non-tech India jobs) |
 | Nomura | SAP SuccessFactors J2W | HTML scraping | `run_nomura.py` | `careers.nomura.com/Nomura/go/Career-Opportunities-India/9050900/`; 337 India jobs; pagination via path segments (`/9050900/100/`, `/9050900/200/`), NOT `?startRow=N`; location format "Mumbai, IN" normalised to "Mumbai, India"; mostly Java/Python roles — .NET matches rare |
+| American Express | Oracle HCM CE | REST API (JSON) | `run_amex.py` | Tenant: egug.fa.us2.oraclecloud.com, site CX_1; India location facet applied server-side |
+| Fidelity | Workday | REST API (JSON) | `run_fidelity.py` | `fmr.wd1.myworkdayjobs.com`; India `locationCountry` facet; appends ", India" when missing from locationsText (city-only strings like "Bangalore, Karnataka") |
+| Fiserv | Workday | REST API (JSON) | `run_fiserv.py` | `fiserv.wd5.myworkdayjobs.com`; no country facet — fetches globally, filters client-side |
+| Goldman Sachs | Oracle HCM CE | REST API (JSON) | `run_goldmansachs.py` | Tenant: hdpc.fa.us2.oraclecloud.com, site LateralHiring; application_url points to public higher.gs.com (GraphQL BFF requires Okta auth; raw Oracle tenant is open) |
+| JPMorgan Chase | Oracle HCM CE | REST API (JSON) | `run_jpmorgan.py` | Tenant: jpmc.fa.oraclecloud.com, site CX_1001; India location facet ID 300000000289360 |
+| Marsh McLennan | Workday | REST API (JSON) | `run_marshmclennan.py` | `mmc.wd1.myworkdayjobs.com`; `Location_Country` facet (capitalised key, unlike other Workday tenants); appends ", India" when missing from locationsText |
+| Mastercard | Workday | REST API (JSON) | `run_mastercard.py` | `mastercard.wd1.myworkdayjobs.com`; no country facet — uses "locations" facet with 8 India city WIDs; appends ", India" for "2 Locations" entries |
+| Morgan Stanley | Eightfold | REST API (JSON) | `run_morganstanley.py` | `morganstanley.eightfold.ai`; same Eightfold PCSX API shape as Microsoft pipeline |
+| Nagarro | SmartRecruiters | REST API (JSON) | `run_nagarro.py` | `careers.smartrecruiters.com/nagarro1`; `country=in` param filters server-side; keyword param is a loose pre-filter only (titles still need matcher's title-family check) |
+| Synchrony | Workday | REST API (JSON) | `run_synchrony.py` | `synchronyfinancial.wd5.myworkdayjobs.com`; no country facet — uses "locations" facet with 6 India WIDs (Hyderabad + 5 Remote IN regions) |
 
 ---
 
@@ -300,7 +310,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 19 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 29 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
