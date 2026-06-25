@@ -82,6 +82,10 @@ matching:
     - ".NET developer"
     - "application developer"
     - "application engineer"
+    - "staff engineer"
+    - "senior staff engineer"
+    - "associate staff engineer"
+    - "senior engineer"
 
   # Keep a job only if its description mentions at least one of these skills.
   skills:
@@ -447,6 +451,220 @@ nomura_search:
   inter_page_delay: 0.3
   # Nomura India portal fetches all India jobs at once — keywords are not sent server-side.
   # All 337+ India jobs are cached in-module; title/skills filters handle relevance.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+fiserv_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Fiserv's Workday tenant exposes no country-level location facet — fetched
+  # globally per keyword and filtered for India client-side (locationsText).
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+fidelity_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Fidelity's Workday tenant has a clean locationCountry facet for India.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+morganstanley_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Eightfold-hosted (morganstanley.eightfold.ai) — same API shape as Microsoft.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+amex_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Oracle HCM CE tenant egug.fa.us2.oraclecloud.com, site CX_1.
+  # India location facet ID 300000000228786 confirmed via live search.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+marshmclennan_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant "mmc", site "MMC" — covers Marsh, Mercer, Guy Carpenter, Oliver Wyman.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+jpmorgan_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Oracle HCM CE, raw tenant jpmc.fa.oraclecloud.com, site CX_1001.
+  # India location facet ID 300000000289360.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+synchrony_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant "synchronyfinancial", site "careers". No country-level
+  # facet — uses India city/region location WIDs (Hyderabad + Remote Region
+  # IN) instead. Tenant hard-caps page size at 20 (HTTP 400 above that).
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+mastercard_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant "mastercard", site "CorporateCareers". No country facet —
+  # 8 India city WIDs (Gurgaon, Hyderabad, Mumbai, Navi Mumbai, Pune, Vadodara)
+  # passed under the "locations" facet key.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+goldmansachs_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Public site (higher.gs.com) is a Next.js/Okta-gated frontend; the real
+  # backend is Oracle HCM CE at hdpc.fa.us2.oraclecloud.com, site
+  # LateralHiring, open to unauthenticated requests. Same pattern as Chubb/
+  # Amex/JPMorgan Chase.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+nagarro_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/nagarro1). The "q" keyword
+  # param is a loose server-side filter only — title/skill filters do the
+  # real work. Nagarro's titles are level-based ("Staff Engineer, .Net
+  # Fullstack") rather than role-based; "staff engineer"/"senior engineer"
+  # were added to the shared matching.title_family to surface these.
   keywords:
     - "software engineer"
     - "senior software engineer"
