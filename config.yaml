@@ -903,6 +903,35 @@ cognizant_search:
     - "dotnet"
     - "dot net"
 
+tcs_search:
+  max_listings: 500
+  inter_page_delay: 0.3
+  # TCS iBegin portal (ibegin.tcsapps.com). India-only portal — no location
+  # filter needed. Keyword search is extremely loose (# breaks search);
+  # all 4227 India jobs match "C#". require_tech_in_title is MANDATORY.
+  # 10 jobs per page (fixed); walk-in jobs (IDs ending in W) are skipped.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
 capgemini_search:
   max_listings: 500
   inter_page_delay: 0.3

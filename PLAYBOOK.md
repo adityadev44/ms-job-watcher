@@ -122,6 +122,7 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Infosys | Custom (in-house) | REST API (JSON) | `run_infosys.py` | `intapgateway.infosysapps.com/careersci/`; `searchText` is a no-op — all ~1558 India jobs returned per call; descriptions bundled in list response (no detail fetches); `require_tech_in_title` active |
 | Cognizant | Custom (Umbraco CMS) | RSS feed (XML) | `run_cognizant.py` | RSS at `careers.cognizant.com/global-en/jobs/xml/?rss=true` returns all ~2069 jobs with full descriptions — no per-job fetch needed; India filtered client-side via `<country>` field; `require_tech_in_title` active |
 | Capgemini | SAP SuccessFactors J2W | HTML scraping | `run_capgemini.py` | `careers.capgemini.com`; same J2W platform as Nomura but `?startrow=N` query-string pagination (not path-based); `locationsearch=india` server-side; location "City, IN" normalised to "City, India"; `require_tech_in_title` active |
+| TCS | iBegin (proprietary) | REST API (JSON) | `run_tcs.py` | `ibegin.tcsapps.com`; POST `/candidate/api/v1/jobs/searchJ`; India-only portal; 10 jobs/page (fixed); keyword `#` breaks search — `"C#"` matches all 4,227 India jobs; use `"csharp"` or `"dotnet"` instead; apply-by date used as posting date proxy; `require_tech_in_title` active |
 | Synchrony | Workday | REST API (JSON) | `run_synchrony.py` | `synchronyfinancial.wd5.myworkdayjobs.com`; no country facet — uses "locations" facet with 6 India WIDs (Hyderabad + 5 Remote IN regions) |
 
 ---
@@ -299,6 +300,9 @@ Verify:
 | Accenture `total` field is 0 on paginated requests | Workday `total` field returns 0 for offset > 0 even when jobs are returned | Use empty `jobPostings` array as the termination signal, not `total` |
 | Infosys `additionalResponsibility` has encoding corruption | Unicode U+2022 bullet characters inserted between every character (`•K•n•o•w•l•e•d•g•e`) | Omit `additionalResponsibility` field; use `technicalRequirement`, `rolesResponsibilities`, and `preferredSkills` instead |
 | Capgemini uses `?startrow=N` not path-based pagination | Unlike Nomura (same J2W platform), Capgemini uses query-string pagination | Use `?startrow=25` for page 2, `?startrow=50` for page 3 etc. (25 per page) |
+| TCS iBegin: `"C#"` keyword matches all 4,227 India jobs | The `#` symbol breaks the server-side search, causing it to return everything | Use `"dotnet"` and other non-symbol keywords; rely on `require_tech_in_title` for precision |
+| TCS iBegin: description endpoint requires POST not GET | `GET /candidate/api/v1/job/desc/{id}` returns 401; `POST` with `{"jobId": <int>}` body works | Strip the J/W suffix from the job ID and cast to int before POSTing |
+| TCS iBegin: old domain dead | `ibegin.tcs.com` no longer resolves | Use `ibegin.tcsapps.com` |
 
 ---
 
@@ -329,7 +333,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 39 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 40 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
