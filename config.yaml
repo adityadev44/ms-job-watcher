@@ -681,6 +681,257 @@ nagarro_search:
     - "Chandigarh"
     - "Kochi"
 
+citi_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant citi.wd5.myworkdayjobs.com, site "2". Uses
+  # Country_and_Jurisdiction facet (not locationCountry). India WID
+  # c4f78be1a8f14da0ab49ce1162348a5e. ~339 India SW engineer jobs.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+bny_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM CE (not Workday). Tenant: eofe.fa.us2.oraclecloud.com,
+  # site BNY-Careers. India location facet ID 300000000378365.
+  # Majority of India jobs are in Pune (excluded) — 0 matches expected
+  # until BNY opens non-Pune .NET roles.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+northerntrust_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant ntrs.wd1.myworkdayjobs.com, site northerntrust.
+  # locationCountry WID c4f78be1a8f14da0ab49ce1162348a5e (same cross-tenant
+  # India GUID as Fidelity/Wells Fargo). Page size capped at 20.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+deutsche_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Deutsche Bank uses Beesite (api-deutschebank.beesite.de/search/) as
+  # frontend wrapping Workday (db.wd3.myworkdayjobs.com) for descriptions.
+  # Keywords and country filter are ignored server-side — all ~1808 global
+  # jobs are fetched and India filtered client-side (CountryCode==IN).
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+barclays_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant barclays.wd3.myworkdayjobs.com. No locationCountry facet —
+  # uses 11 India city WIDs in appliedFacets.locations (same pattern as
+  # Mastercard). locationsText omits "India" — appended client-side.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+ubs_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  # IBM BrassRing (Kenexa) at jobs.ubs.com. Requires CSRF token (RFT header)
+  # extracted per session. ~15 India jobs total — mostly non-tech roles.
+  # Descriptions embedded in search results; no separate detail fetch needed.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+accenture_search:
+  max_listings: 500
+  inter_page_delay: 0.3
+  # Workday wd103 tenant (accenture.wd103.myworkdayjobs.com/AccentureCareers).
+  # India WID c4f78be1a8f14da0ab49ce1162348a5e (locationCountry facet).
+  # ~24,731 India jobs; API caps at 2000 results per query.
+  # require_tech_in_title is MANDATORY — without it thousands of generic
+  # "Custom Software Engineer" titles flood through.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
+infosys_search:
+  max_listings: 500
+  inter_page_delay: 0.3
+  # Custom in-house ATS at intapgateway.infosysapps.com/careersci/.
+  # searchText param is a no-op — all ~1558 India jobs returned per call.
+  # Descriptions bundled in list response (no separate detail fetches).
+  # require_tech_in_title is MANDATORY — generic titles dominate.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
+cognizant_search:
+  max_listings: 500
+  inter_page_delay: 0.3
+  # Custom Umbraco CMS site (careers.cognizant.com). RSS feed at
+  # /global-en/jobs/xml/?rss=true returns all ~2069 jobs with full
+  # descriptions — no per-job fetch needed. India filtered client-side
+  # via <country> field. require_tech_in_title is MANDATORY.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
+capgemini_search:
+  max_listings: 500
+  inter_page_delay: 0.3
+  # SAP SuccessFactors J2W at careers.capgemini.com. HTML scraping (same
+  # platform as Nomura but with query-string pagination: startrow=N, 25/page).
+  # locationsearch=india applied server-side. Thousands of India jobs —
+  # mostly SAP/Java. require_tech_in_title is MANDATORY.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

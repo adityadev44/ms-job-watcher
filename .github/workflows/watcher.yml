@@ -1,4 +1,4 @@
-name: Job Watcher (29 companies)
+name: Job Watcher (39 companies)
 
 on:
   schedule:
@@ -80,6 +80,16 @@ jobs:
           python -u src/run_mastercard.py & pid27=$!
           python -u src/run_goldmansachs.py & pid28=$!
           python -u src/run_nagarro.py & pid29=$!
+          python -u src/run_citi.py & pid30=$!
+          python -u src/run_bny.py & pid31=$!
+          python -u src/run_northerntrust.py & pid32=$!
+          python -u src/run_deutsche.py & pid33=$!
+          python -u src/run_barclays.py & pid34=$!
+          python -u src/run_ubs.py & pid35=$!
+          python -u src/run_accenture.py & pid36=$!
+          python -u src/run_infosys.py & pid37=$!
+          python -u src/run_cognizant.py & pid38=$!
+          python -u src/run_capgemini.py & pid39=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -110,6 +120,16 @@ jobs:
           wait $pid27 || fail=1
           wait $pid28 || fail=1
           wait $pid29 || fail=1
+          wait $pid30 || fail=1
+          wait $pid31 || fail=1
+          wait $pid32 || fail=1
+          wait $pid33 || fail=1
+          wait $pid34 || fail=1
+          wait $pid35 || fail=1
+          wait $pid36 || fail=1
+          wait $pid37 || fail=1
+          wait $pid38 || fail=1
+          wait $pid39 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -145,6 +165,16 @@ jobs:
           test -f seen_jobs_mastercard.json && git add seen_jobs_mastercard.json || true
           test -f seen_jobs_goldmansachs.json && git add seen_jobs_goldmansachs.json || true
           test -f seen_jobs_nagarro.json && git add seen_jobs_nagarro.json || true
+          test -f seen_jobs_citi.json && git add seen_jobs_citi.json || true
+          test -f seen_jobs_bny.json && git add seen_jobs_bny.json || true
+          test -f seen_jobs_northerntrust.json && git add seen_jobs_northerntrust.json || true
+          test -f seen_jobs_deutsche.json && git add seen_jobs_deutsche.json || true
+          test -f seen_jobs_barclays.json && git add seen_jobs_barclays.json || true
+          test -f seen_jobs_ubs.json && git add seen_jobs_ubs.json || true
+          test -f seen_jobs_accenture.json && git add seen_jobs_accenture.json || true
+          test -f seen_jobs_infosys.json && git add seen_jobs_infosys.json || true
+          test -f seen_jobs_cognizant.json && git add seen_jobs_cognizant.json || true
+          test -f seen_jobs_capgemini.json && git add seen_jobs_capgemini.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
           else

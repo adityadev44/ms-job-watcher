@@ -112,6 +112,16 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Mastercard | Workday | REST API (JSON) | `run_mastercard.py` | `mastercard.wd1.myworkdayjobs.com`; no country facet — uses "locations" facet with 8 India city WIDs; appends ", India" for "2 Locations" entries |
 | Morgan Stanley | Eightfold | REST API (JSON) | `run_morganstanley.py` | `morganstanley.eightfold.ai`; same Eightfold PCSX API shape as Microsoft pipeline |
 | Nagarro | SmartRecruiters | REST API (JSON) | `run_nagarro.py` | `careers.smartrecruiters.com/nagarro1`; `country=in` param filters server-side; keyword param is a loose pre-filter only (titles still need matcher's title-family check) |
+| Citi | Workday | REST API (JSON) | `run_citi.py` | Tenant: `citi.wd5.myworkdayjobs.com`, site `2`; `Country_and_Jurisdiction` facet (not `locationCountry`); India WID `c4f78be1a8f14da0ab49ce1162348a5e`; ~339 India SW engineer jobs; "2 Locations" entries appended ", India" client-side |
+| BNY Mellon | Oracle HCM CE | REST API (JSON) | `run_bny.py` | Tenant: `eofe.fa.us2.oraclecloud.com`, site `BNY-Careers`; India location facet ID `300000000378365`; majority of India jobs are Pune (excluded) — 0 matches expected until non-Pune .NET roles open |
+| Northern Trust | Workday | REST API (JSON) | `run_northerntrust.py` | Tenant: `ntrs.wd1.myworkdayjobs.com`, site `northerntrust`; `locationCountry` WID `c4f78be1a8f14da0ab49ce1162348a5e` (same cross-tenant India GUID as Fidelity/Wells Fargo); page size capped at 20 |
+| Deutsche Bank | Beesite + Workday | Beesite REST API (JSON) + Workday CXS descriptions | `run_deutsche.py` | Keywords and country filter ignored server-side; fetches all ~1808 global jobs, filters India (`CountryCode==IN`) client-side; descriptions via Workday CXS at `db.wd3.myworkdayjobs.com` |
+| Barclays | Workday | REST API (JSON) | `run_barclays.py` | Tenant: `barclays.wd3.myworkdayjobs.com`; no `locationCountry` facet — uses 11 India city WIDs in `appliedFacets.locations`; `locationsText` omits "India" — appended client-side |
+| UBS | IBM BrassRing | REST API (JSON) | `run_ubs.py` | `jobs.ubs.com`; CSRF token (`RFT` header) required per session — GET page first; descriptions inline in search results; ~15 India jobs; pagination wraps around — stop when no new IDs |
+| Accenture | Workday (wd103) | REST API (JSON) | `run_accenture.py` | Tenant: `accenture.wd103.myworkdayjobs.com/AccentureCareers`; India WID `c4f78be1a8f14da0ab49ce1162348a5e`; ~24,731 India jobs; API caps at 2000 per query; `require_tech_in_title` active — essential |
+| Infosys | Custom (in-house) | REST API (JSON) | `run_infosys.py` | `intapgateway.infosysapps.com/careersci/`; `searchText` is a no-op — all ~1558 India jobs returned per call; descriptions bundled in list response (no detail fetches); `require_tech_in_title` active |
+| Cognizant | Custom (Umbraco CMS) | RSS feed (XML) | `run_cognizant.py` | RSS at `careers.cognizant.com/global-en/jobs/xml/?rss=true` returns all ~2069 jobs with full descriptions — no per-job fetch needed; India filtered client-side via `<country>` field; `require_tech_in_title` active |
+| Capgemini | SAP SuccessFactors J2W | HTML scraping | `run_capgemini.py` | `careers.capgemini.com`; same J2W platform as Nomura but `?startrow=N` query-string pagination (not path-based); `locationsearch=india` server-side; location "City, IN" normalised to "City, India"; `require_tech_in_title` active |
 | Synchrony | Workday | REST API (JSON) | `run_synchrony.py` | `synchronyfinancial.wd5.myworkdayjobs.com`; no country facet — uses "locations" facet with 6 India WIDs (Hyderabad + 5 Remote IN regions) |
 
 ---
@@ -280,6 +290,15 @@ Verify:
 | Maersk `locationsText = "2 Locations"` bypasses India check | Workday shows "2 Locations" when a job is available in multiple sites; `is_india_job()` in matcher.py checks for "india" in location text, so these jobs were silently skipped | In `_fill_cache`, set `loc_text = "India"` when "india" is not in the location text — safe because we already pre-filtered with India WIDs |
 | Maersk `careers.maersk.com` API not usable | Requires `Consumer-Key` header (extracted from frontend JS `api-keys.DfSBqKQY.js`) and only returns 150 India jobs — all non-technical (CSM, Finance, Operations) — none are software engineering roles | Use Workday directly: `maersk.wd3.myworkdayjobs.com/wday/cxs/maersk/Maersk_Careers/jobs` with India location WIDs in `appliedFacets.locations` |
 | Nomura `?startRow=N` doesn't paginate | SuccessFactors J2W India portal uses path-based pagination, not query-string. `?startRow=100` returns the same 100 jobs as `?startRow=0` | Use path segments: `/9050900/100/` for page 2, `/9050900/200/` for page 3. Correct URLs discovered from the `<a class="paginationItemFirst">` links in the HTML |
+| Citi facet key is `Country_and_Jurisdiction` not `locationCountry` | Citi's Workday tenant uses a non-standard facet key — sending `locationCountry` is silently ignored | Use `Country_and_Jurisdiction` as the facet key; India WID `c4f78be1a8f14da0ab49ce1162348a5e` |
+| BNY Mellon is Oracle HCM CE not Workday | `bnymellon.wd1.myworkdayjobs.com` returned HTTP 422 for all site/tenant combos | Use Oracle HCM CE at `eofe.fa.us2.oraclecloud.com`, site `BNY-Careers`; same REST pattern as Chubb/Amex |
+| Deutsche Bank country/keyword filter ignored server-side | Beesite API (`api-deutschebank.beesite.de/search/`) accepts but silently ignores `PositionCountry` and keyword criteria — always returns the full global pool | Cache all ~1808 jobs on first call, filter India by `CountryCode==IN` client-side; descriptions fetched from Workday CXS at `db.wd3.myworkdayjobs.com` |
+| Barclays appears to use TalentBrew but is actually Workday | `search.jobs.barclays` loads TalentBrew JS as a frontend skin; apply links go to `barclays.wd3.myworkdayjobs.com` | Probe the underlying XHR requests; use Workday CXS directly with 11 India city WIDs |
+| UBS is IBM BrassRing not Workday | All Workday probes (`ubs.wd1/wd3/wd5.myworkdayjobs.com`) returned 422 | Use IBM BrassRing at `jobs.ubs.com/TgNewUI/Search/Ajax/PowerSearchJobs`; extract CSRF token (`__RequestVerificationToken`) from page HTML and pass as `RFT` header |
+| UBS pagination wraps around | `TotalJobsCount` is always 0; incrementing `PageNumber` eventually cycles back to the first page | Stop pagination when a page yields zero new job IDs |
+| Accenture `total` field is 0 on paginated requests | Workday `total` field returns 0 for offset > 0 even when jobs are returned | Use empty `jobPostings` array as the termination signal, not `total` |
+| Infosys `additionalResponsibility` has encoding corruption | Unicode U+2022 bullet characters inserted between every character (`•K•n•o•w•l•e•d•g•e`) | Omit `additionalResponsibility` field; use `technicalRequirement`, `rolesResponsibilities`, and `preferredSkills` instead |
+| Capgemini uses `?startrow=N` not path-based pagination | Unlike Nomura (same J2W platform), Capgemini uses query-string pagination | Use `?startrow=25` for page 2, `?startrow=50` for page 3 etc. (25 per page) |
 
 ---
 
@@ -310,7 +329,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 29 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 39 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
