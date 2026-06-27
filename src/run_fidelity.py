@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fidelity Investments (FMR India) job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import fidelity_fetcher as _fidelity_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_fidelity_pipeline(
 if __name__ == "__main__":
     try:
         run_fidelity_pipeline()
+        reset_failure_count("Fidelity")
     except Exception as exc:
         print(f"[Fidelity] PIPELINE ERROR: {exc}")
         print("[Fidelity] Exiting cleanly to avoid blocking other pipelines.")

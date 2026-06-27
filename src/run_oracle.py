@@ -1,10 +1,10 @@
-"""
+﻿"""
 Oracle / Oracle Health job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
   - Uses oracle_fetcher (Oracle HCM Cloud REST API, plain requests)
   - Writes to seen_jobs_oracle.json
-  - Oracle Health jobs are on the same platform — no separate pipeline needed
+  - Oracle Health jobs are on the same platform â€” no separate pipeline needed
 
 Run:  py src/run_oracle.py
 """
@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import oracle_fetcher as _oracle_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -66,6 +66,7 @@ def run_oracle_pipeline(
 if __name__ == "__main__":
     try:
         run_oracle_pipeline()
+        reset_failure_count("Oracle")
     except Exception as exc:
         print(f"[Oracle] PIPELINE ERROR: {exc}")
         print("[Oracle] Exiting cleanly to avoid blocking other pipelines.")

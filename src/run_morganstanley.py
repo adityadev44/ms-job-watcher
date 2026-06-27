@@ -1,4 +1,4 @@
-"""
+﻿"""
 Morgan Stanley job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import morganstanley_fetcher as _ms_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_morganstanley_pipeline(
 if __name__ == "__main__":
     try:
         run_morganstanley_pipeline()
+        reset_failure_count("Morgan Stanley")
     except Exception as exc:
         print(f"[Morgan Stanley] PIPELINE ERROR: {exc}")
         print("[Morgan Stanley] Exiting cleanly to avoid blocking other pipelines.")

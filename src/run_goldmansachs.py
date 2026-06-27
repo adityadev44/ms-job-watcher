@@ -1,4 +1,4 @@
-"""
+﻿"""
 Goldman Sachs job-watcher pipeline entry point.
 
 Runs independently of the other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import goldmansachs_fetcher as _goldmansachs_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_goldmansachs_pipeline(
 if __name__ == "__main__":
     try:
         run_goldmansachs_pipeline()
+        reset_failure_count("Goldman Sachs")
     except Exception as exc:
         print(f"[Goldman Sachs] PIPELINE ERROR: {exc}")
         print("[Goldman Sachs] Exiting cleanly to avoid blocking other pipelines.")

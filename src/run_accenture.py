@@ -1,4 +1,4 @@
-"""
+﻿"""
 Accenture job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import accenture_fetcher as _accenture_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -85,6 +85,7 @@ def run_accenture_pipeline(
 if __name__ == "__main__":
     try:
         run_accenture_pipeline()
+        reset_failure_count("Accenture")
     except Exception as exc:
         print(f"[Accenture] PIPELINE ERROR: {exc}")
         print("[Accenture] Exiting cleanly to avoid blocking other pipelines.")

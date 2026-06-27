@@ -7,9 +7,12 @@ Run `py src/notifier.py --test` to fire a test message through both channels.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import smtplib
+import tempfile
 from email.message import EmailMessage
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
@@ -20,6 +23,23 @@ _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 _TELEGRAM_LIMIT = 4096   # Telegram's hard cap on message length in characters
 _SMTP_HOST = "smtp.gmail.com"
 _SMTP_PORT = 587
+_FAILURES_PATH = Path(__file__).parent.parent / "pipeline_failures.json"
+_FAILURE_THRESHOLD = 3
+
+
+def _read_failures() -> dict:
+    try:
+        return json.loads(_FAILURES_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _write_failures(data: dict) -> None:
+    dir_ = _FAILURES_PATH.parent
+    with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        tmp = f.name
+    os.replace(tmp, _FAILURES_PATH)
 
 
 def format_message(jobs: list[dict], source: str = "Microsoft") -> str:
@@ -121,20 +141,41 @@ def notify(jobs: list[dict], source: str = "Microsoft") -> None:
 
 
 def notify_pipeline_error(source: str, exc: Exception) -> None:
-    """Send an error email when a pipeline crashes. No-ops silently if credentials are missing."""
+    """Email when a pipeline crashes 3 consecutive times. Silent on 1st/2nd failure."""
     try:
+        data = _read_failures()
+        data[source] = data.get(source, 0) + 1
+        count = data[source]
+        _write_failures(data)
+        print(f"[{source}] Consecutive failure count: {count}/{_FAILURE_THRESHOLD}")
+        if count < _FAILURE_THRESHOLD:
+            return
+        # Reached threshold — alert, then reset so the next streak also triggers
+        data[source] = 0
+        _write_failures(data)
         gmail_user = os.getenv("GMAIL_USER", "")
         gmail_password = os.getenv("GMAIL_APP_PASSWORD", "")
         recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
         if gmail_user and gmail_password and recipients:
             send_email(
-                f"{source} job-watcher pipeline failed and did not run.\n\nError: {exc}",
+                f"{source} job-watcher pipeline has failed {_FAILURE_THRESHOLD} consecutive times and did not run.\n\nMost recent error: {exc}",
                 gmail_user,
                 gmail_password,
                 recipients,
                 source=f"{source} (pipeline error)",
             )
-            print(f"[{source}] Error notification email sent.")
+            print(f"[{source}] Error notification email sent (after {_FAILURE_THRESHOLD} consecutive failures).")
+    except Exception:
+        pass
+
+
+def reset_failure_count(source: str) -> None:
+    """Reset consecutive failure counter after a successful run. No-ops silently on any error."""
+    try:
+        data = _read_failures()
+        if data.get(source, 0) != 0:
+            data[source] = 0
+            _write_failures(data)
     except Exception:
         pass
 

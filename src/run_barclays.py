@@ -1,4 +1,4 @@
-"""
+﻿"""
 Barclays job-watcher pipeline entry point.
 
 Runs independently of all other company pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import barclays_fetcher as _barclays_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_barclays_pipeline(
 if __name__ == "__main__":
     try:
         run_barclays_pipeline()
+        reset_failure_count("Barclays")
     except Exception as exc:
         print(f"[Barclays] PIPELINE ERROR: {exc}")
         print("[Barclays] Exiting cleanly to avoid blocking other pipelines.")

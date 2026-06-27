@@ -1,4 +1,4 @@
-"""
+﻿"""
 TCS job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import tcs_fetcher as _tcs_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -44,7 +44,7 @@ def run_tcs_pipeline(
     # TCS-specific: require the tech stack to appear in the job title.
     # TCS posts thousands of India jobs; generic titles like "Senior Software
     # Engineer" are almost never .NET/C# roles. This 4th filter keeps alerts
-    # precise — the same pattern used for Wells Fargo.
+    # precise â€” the same pattern used for Wells Fargo.
     tech_terms = whole_cfg["tcs_search"].get("require_tech_in_title", [])
     if tech_terms:
         title_passed = []
@@ -86,6 +86,7 @@ def run_tcs_pipeline(
 if __name__ == "__main__":
     try:
         run_tcs_pipeline()
+        reset_failure_count("TCS")
     except Exception as exc:
         print(f"[TCS] PIPELINE ERROR: {exc}")
         print("[TCS] Exiting cleanly to avoid blocking other pipelines.")

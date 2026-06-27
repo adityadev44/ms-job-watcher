@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mastercard job-watcher pipeline entry point.
 
 Runs independently of the Microsoft, Optum, and Amazon pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import mastercard_fetcher as _mastercard_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_mastercard_pipeline(
 if __name__ == "__main__":
     try:
         run_mastercard_pipeline()
+        reset_failure_count("Mastercard")
     except Exception as exc:
         print(f"[Mastercard] PIPELINE ERROR: {exc}")
         print("[Mastercard] Exiting cleanly to avoid blocking other pipelines.")

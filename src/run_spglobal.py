@@ -1,4 +1,4 @@
-"""
+﻿"""
 S&P Global job-watcher pipeline entry point.
 
 Run:  py src/run_spglobal.py
@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import spglobal_fetcher as _spg_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -61,6 +61,7 @@ def run_spglobal_pipeline(
 if __name__ == "__main__":
     try:
         run_spglobal_pipeline()
+        reset_failure_count("S&P Global")
     except Exception as exc:
         print(f"[S&P Global] PIPELINE ERROR: {exc}")
         print("[S&P Global] Exiting cleanly to avoid blocking other pipelines.")

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Infosys job-watcher pipeline entry point.
 
 Runs independently of all other pipelines:
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import infosys_fetcher as _infosys_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -42,7 +42,7 @@ def run_infosys_pipeline(
     total_fetched, matched = find_matching_jobs(infosys_cfg, _infosys_mod)
 
     # Infosys-only: require the tech stack to appear in the job title.
-    # Infosys posts thousands of India jobs — generic titles like
+    # Infosys posts thousands of India jobs â€” generic titles like
     # "Technology Analyst" are mostly Java/Python/infrastructure roles that
     # may mention .NET skills in passing. Restricting to titles with explicit
     # .NET/C# terms maximises precision at the cost of some recall.
@@ -87,6 +87,7 @@ def run_infosys_pipeline(
 if __name__ == "__main__":
     try:
         run_infosys_pipeline()
+        reset_failure_count("Infosys")
     except Exception as exc:
         print(f"[Infosys] PIPELINE ERROR: {exc}")
         print("[Infosys] Exiting cleanly to avoid blocking other pipelines.")

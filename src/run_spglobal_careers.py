@@ -1,4 +1,4 @@
-"""
+﻿"""
 S&P Global Careers (careers.spglobal.com) job-watcher pipeline entry point.
 
 This is a separate pipeline from run_spglobal.py, which monitors the
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import spglobal_careers_fetcher as _spgc_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -65,6 +65,7 @@ def run_spglobal_careers_pipeline(
 if __name__ == "__main__":
     try:
         run_spglobal_careers_pipeline()
+        reset_failure_count("S&P Global Careers")
     except Exception as exc:
         print(f"[S&P Global Careers] PIPELINE ERROR: {exc}")
         print("[S&P Global Careers] Exiting cleanly to avoid blocking other pipelines.")

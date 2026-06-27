@@ -1,4 +1,4 @@
-"""
+﻿"""
 Honeywell job-watcher pipeline entry point.
 
 Runs independently of the Microsoft, Optum, Amazon, and Siemens pipelines:
@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import honeywell_fetcher as _honeywell_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -67,6 +67,7 @@ def run_honeywell_pipeline(
 if __name__ == "__main__":
     try:
         run_honeywell_pipeline()
+        reset_failure_count("Honeywell")
     except Exception as exc:
         print(f"[Honeywell] PIPELINE ERROR: {exc}")
         print("[Honeywell] Exiting cleanly to avoid blocking other pipelines.")

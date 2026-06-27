@@ -1,4 +1,4 @@
-"""
+﻿"""
 Nomura job-watcher pipeline entry point.
 
 Run:  py src/run_nomura.py
@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import nomura_fetcher as _nomura_mod
 from matcher import find_matching_jobs, load_config
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
 _ROOT = Path(__file__).parent.parent
@@ -61,6 +61,7 @@ def run_nomura_pipeline(
 if __name__ == "__main__":
     try:
         run_nomura_pipeline()
+        reset_failure_count("Nomura")
     except Exception as exc:
         print(f"[Nomura] PIPELINE ERROR: {exc}")
         print("[Nomura] Exiting cleanly to avoid blocking other pipelines.")

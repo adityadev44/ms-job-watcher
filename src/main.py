@@ -18,7 +18,7 @@ if hasattr(sys.stdout, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent))
 
 from matcher import find_matching_jobs
-from notifier import notify, notify_pipeline_error
+from notifier import notify, notify_pipeline_error, reset_failure_count
 
 _ROOT = Path(__file__).parent.parent
 _DEFAULT_CONFIG = _ROOT / "config.yaml"
@@ -69,6 +69,7 @@ def run_pipeline(
 if __name__ == "__main__":
     try:
         run_pipeline()
+        reset_failure_count("Microsoft")
     except Exception as exc:
         print(f"[MS] PIPELINE ERROR: {exc}")
         print("[MS] Exiting cleanly to avoid blocking other pipelines.")
