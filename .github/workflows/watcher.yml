@@ -2,7 +2,7 @@ name: Job Watcher (64 companies)
 
 on:
   schedule:
-    - cron: '*/3000000000000 * * * *'   # every 30 minutes
+    - cron: '*/30 * * * *'   # every 30 minutes
   workflow_dispatch:           # also runnable manually from the GitHub UI
 
 concurrency:
@@ -187,6 +187,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config merge.jsonunion.driver "python3 scripts/merge_seen_jobs_union.py %O %A %B"
           git add seen_jobs.json
           test -f seen_jobs_optum.json && git add seen_jobs_optum.json || true
           test -f seen_jobs_amazon.json && git add seen_jobs_amazon.json || true
