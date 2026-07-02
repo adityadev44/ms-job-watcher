@@ -1316,6 +1316,213 @@ msci_search:
     - "Chandigarh"
     - "Kochi"
 
+target_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant target.wd5.myworkdayjobs.com, site "targetcareers".
+  # Target's India GCC is in Bangalore. Capitalised "Location_Country" facet
+  # key. ~58 India software-engineer jobs.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+adobe_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant adobe.wd5.myworkdayjobs.com, site "external_experienced".
+  # India centres in Bangalore + Noida. locationCountry facet works even
+  # though not listed in the tenant's advertised facets response.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+micron_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  # Workday tenant micron.wd1.myworkdayjobs.com, site "External". Hyderabad
+  # "Phoenix Aquila" campus. Semiconductor/hardware company -- most roles
+  # are firmware/data, not .NET, so low match volume expected.
+  # WARNING: locationCountry facet is unreliable on this tenant (~85% of
+  # "India"-faceted results are actually Singapore/Taiwan/Boise) -- the
+  # fetcher does NOT append ", India" and relies on matcher.py's
+  # is_india_job() to filter genuinely.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+sabre_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant sabre.wd1.myworkdayjobs.com, site "SabreJobs". Travel-
+  # technology (GDS) company with a Bengaluru engineering centre.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+autodesk_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant autodesk.wd1.myworkdayjobs.com, site "Ext". India centres
+  # in Bengaluru + Pune. locationsText uses abbreviated "IND" country code.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+verizon_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant verizon.wd12.myworkdayjobs.com, site "verizon-careers".
+  # India engineering presence in Hyderabad (network/telecom software).
+  # WARNING: locationCountry facet is unreliable on this tenant (genuine
+  # US locations like Arlington TX/Ashburn VA leak through) -- the fetcher
+  # does NOT append ", India" and relies on matcher.py's is_india_job()
+  # to filter genuinely.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+lowes_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant lowes.wd5.myworkdayjobs.com, site "LWS_External_CS".
+  # Lowe's India engineering centre is in Bengaluru.
+  # WARNING: locationCountry facet is unreliable on this tenant (genuine US
+  # locations like Perris CA/Richmond VA/Charlotte NC HQ leak through) --
+  # the fetcher appends ", India" only for recognised India city names
+  # (Bengaluru etc), not blindly.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+ebay_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant ebay.wd5.myworkdayjobs.com, site "apply". eBay's India
+  # engineering centre is in Bengaluru. Capitalised "Location_Country" facet.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+generalmotors_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant generalmotors.wd5.myworkdayjobs.com, site "Careers_GM".
+  # GM India Technical Centre in Bengaluru -- small footprint (~5 total
+  # "software engineer" postings currently); included for completeness,
+  # same precedent as BNY Mellon/Icertis. Capitalised "Location_Country"
+  # facet key.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

@@ -139,6 +139,15 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | HCLTech | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_hcltech.py` | `careers.hcltech.com`, India-only categoryId `9553955`; same Unify pattern, different field names (`custprimecity`/`custCountryRegion` instead of `jobLocationShort`/`jobLocationCountry`); ~8000 India jobs; `require_tech_in_title` mandatory |
 | HSBC | Eightfold | REST API (JSON) | `run_hsbc.py` | `portal.careers.hsbc.com` (migrated off the old Avature `mycareer.hsbc.com` portal); public `pcsx/search` API disabled tenant-wide — uses the "related jobs" widget endpoint anchored to a hardcoded real job ID; hard-capped at 10 results, no pagination |
 | MSCI | Algolia (direct) | REST API (JSON) | `run_msci.py` | `careers.msci.com` frontend queries Algolia directly (app `RVMOB42DFH`) with a public search-only API key; ~90 jobs total, ~18 India, single unfiltered query covers everything; full description embedded in each hit — no detail fetch needed |
+| Target | Workday | REST API (JSON) | `run_target.py` | `target.wd5.myworkdayjobs.com`, site `targetcareers`; India GCC in Bangalore; capitalised `Location_Country` facet; ~58 India software-engineer jobs |
+| Adobe | Workday | REST API (JSON) | `run_adobe.py` | `adobe.wd5.myworkdayjobs.com`, site `external_experienced`; India centres in Bangalore + Noida; `locationCountry` facet works despite not being listed in the tenant's advertised facets |
+| Micron | Workday | REST API (JSON) | `run_micron.py` | `micron.wd1.myworkdayjobs.com`, site `External`; Hyderabad "Phoenix Aquila" campus; semiconductor/hardware — low .NET match volume expected; **`locationCountry` facet unreliable (~85% non-India leakage)** — fetcher does not append ", India", relies on `is_india_job()` to filter genuinely |
+| Sabre | Workday | REST API (JSON) | `run_sabre.py` | `sabre.wd1.myworkdayjobs.com`, site `SabreJobs`; travel-technology (GDS) company, Bengaluru engineering centre |
+| Autodesk | Workday | REST API (JSON) | `run_autodesk.py` | `autodesk.wd1.myworkdayjobs.com`, site `Ext`; India centres in Bengaluru + Pune; locationsText uses abbreviated "IND" country code |
+| Verizon | Workday | REST API (JSON) | `run_verizon.py` | `verizon.wd12.myworkdayjobs.com`, site `verizon-careers`; Hyderabad network/telecom engineering; **`locationCountry` facet unreliable** (genuine US locations leak through) — fetcher does not append ", India" |
+| Lowe's | Workday | REST API (JSON) | `run_lowes.py` | `lowes.wd5.myworkdayjobs.com`, site `LWS_External_CS`; Bengaluru engineering centre; **`locationCountry` facet unreliable** (US locations leak through) — fetcher appends ", India" only for recognised India city names, not blindly |
+| eBay | Workday | REST API (JSON) | `run_ebay.py` | `ebay.wd5.myworkdayjobs.com`, site `apply`; Bengaluru engineering centre; capitalised `Location_Country` facet |
+| General Motors | Workday | REST API (JSON) | `run_generalmotors.py` | `generalmotors.wd5.myworkdayjobs.com`, site `Careers_GM`; GM India Technical Centre in Bengaluru — small footprint (~5 total postings), 0 matches often expected; capitalised `Location_Country` facet |
 
 ---
 
@@ -330,6 +339,7 @@ Verify:
 | Standard Chartered/Wipro pagination silently capped at 10 results | `/services/recruiting/v1/jobs` ignores `start`/`offset`; the only way to page is incrementing `pageNumber` in the POST body itself | Loop `pageNumber` 0,1,2… until a page returns an empty `jobSearchResult`, caching everything in-module |
 | HSBC search API returns 403 "PCSX is not enabled for this user" | HSBC's Eightfold tenant (`portal.careers.hsbc.com`, migrated off the old Avature `mycareer.hsbc.com`) disabled the public `pcsx/search` endpoint that Microsoft/Morgan Stanley use | Use the "related jobs" widget endpoint (`/api/apply/v2/jobs/{anchor_id}/jobs`) instead — requires a real, currently-open job ID as a similarity anchor (hardcoded, same pattern as Wells Fargo's India WID); hard-capped at 10 results, `start`/`num` ignored |
 | MSCI's own site API returned 404 | `careers.msci.com/api/jobs` doesn't exist — the site is an Algolia InstantSearch frontend calling Algolia directly, not a first-party API, despite `globalcareers-msci.icims.com` also existing (iCIMS handles applications, not search) | Call the Algolia REST endpoint directly with the public search-only API key captured from the page's network requests |
+| Micron/Verizon/Lowe's "India"-faceted results were mostly non-India (Singapore, Taiwan, Boise ID, Arlington TX, Richmond VA, Charlotte NC HQ) | Assumed every Workday tenant's `locationCountry`/`Location_Country` facet is authoritative like Fidelity/Citi/Northern Trust — some tenants' facets are simply broken and return jobs from other countries anyway (Micron: ~85% leakage) | Audited all newly-added companies by fetching with the India facet applied and manually checking `locationsText` for genuine non-India place names before trusting the facet; for broken tenants, stopped blindly appending ", India" (which would mislabel a Singapore job as India) and let `matcher.py`'s `is_india_job()` reject anything that doesn't genuinely say "India" — Lowe's needed a middle ground (city-name whitelist) since it has real Bengaluru postings that never say "India" either |
 
 ---
 
@@ -360,7 +370,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 55 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 64 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
