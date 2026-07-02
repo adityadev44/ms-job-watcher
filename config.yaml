@@ -20,6 +20,11 @@ search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 optum_search:
   max_listings: 200
@@ -41,6 +46,11 @@ optum_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 amazon_search:
   max_listings: 200
@@ -61,6 +71,11 @@ amazon_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 matching:
   # Include a job if its title belongs to the software-engineer family.
@@ -169,6 +184,11 @@ siemens_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 honeywell_search:
   max_listings: 200
@@ -188,6 +208,11 @@ honeywell_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 wellsfargo_search:
   max_listings: 200
@@ -207,6 +232,11 @@ wellsfargo_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   # Wells Fargo-specific: description must explicitly name one of these
   # core terms. Filters out generic "Senior Software Engineer" titles that
   # are Java/Python roles even when a shared primary_skill (SQL Server/EF)
@@ -234,6 +264,11 @@ dell_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 oracle_search:
   max_listings: 200
@@ -253,6 +288,11 @@ oracle_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 spglobal_search:
   max_listings: 300
@@ -272,6 +312,11 @@ spglobal_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 chubb_search:
   max_listings: 200
@@ -291,6 +336,11 @@ chubb_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 fis_search:
   max_listings: 500
@@ -310,6 +360,11 @@ fis_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 metlife_search:
   max_listings: 200
@@ -326,6 +381,11 @@ metlife_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 gallagher_search:
   max_listings: 200
@@ -345,6 +405,11 @@ gallagher_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 spglobal_careers_search:
   max_listings: 300
@@ -364,6 +429,11 @@ spglobal_careers_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 morningstar_search:
   max_listings: 300
@@ -385,6 +455,11 @@ morningstar_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 wtw_search:
   max_listings: 200
@@ -404,6 +479,11 @@ wtw_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 icertis_search:
   max_listings: 200
@@ -423,6 +503,11 @@ icertis_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 maersk_search:
   max_listings: 200
@@ -444,6 +529,11 @@ maersk_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 nomura_search:
   max_listings: 400
@@ -465,6 +555,11 @@ nomura_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 fiserv_search:
   max_listings: 300
@@ -486,6 +581,11 @@ fiserv_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 fidelity_search:
   max_listings: 300
@@ -506,6 +606,11 @@ fidelity_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 morganstanley_search:
   max_listings: 300
@@ -526,6 +631,11 @@ morganstanley_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 amex_search:
   max_listings: 300
@@ -547,6 +657,11 @@ amex_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 marshmclennan_search:
   max_listings: 300
@@ -567,6 +682,11 @@ marshmclennan_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 jpmorgan_search:
   max_listings: 300
@@ -588,6 +708,11 @@ jpmorgan_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 synchrony_search:
   max_listings: 300
@@ -610,6 +735,11 @@ synchrony_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 mastercard_search:
   max_listings: 300
@@ -632,6 +762,11 @@ mastercard_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 goldmansachs_search:
   max_listings: 300
@@ -655,6 +790,11 @@ goldmansachs_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 nagarro_search:
   max_listings: 500
@@ -679,6 +819,11 @@ nagarro_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 citi_search:
   max_listings: 200
@@ -701,6 +846,11 @@ citi_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 bny_search:
   max_listings: 200
@@ -724,6 +874,11 @@ bny_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 northerntrust_search:
   max_listings: 200
@@ -746,6 +901,11 @@ northerntrust_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 deutsche_search:
   max_listings: 200
@@ -769,6 +929,11 @@ deutsche_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 barclays_search:
   max_listings: 200
@@ -791,6 +956,11 @@ barclays_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 ubs_search:
   max_listings: 200
@@ -813,6 +983,11 @@ ubs_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 accenture_search:
   max_listings: 500
@@ -837,6 +1012,11 @@ accenture_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -864,6 +1044,11 @@ infosys_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -891,6 +1076,11 @@ cognizant_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -918,6 +1108,11 @@ tcs_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -945,6 +1140,11 @@ capgemini_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -972,6 +1172,11 @@ lseg_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 statestreet_search:
   max_listings: 300
@@ -996,6 +1201,11 @@ statestreet_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 broadridge_search:
   max_listings: 200
@@ -1018,6 +1228,11 @@ broadridge_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 kyndryl_search:
   max_listings: 300
@@ -1040,6 +1255,11 @@ kyndryl_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 dxc_search:
   max_listings: 300
@@ -1067,6 +1287,11 @@ dxc_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1092,6 +1317,11 @@ ameriprise_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 factset_search:
   max_listings: 200
@@ -1114,6 +1344,11 @@ factset_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 paypal_search:
   max_listings: 300
@@ -1137,6 +1372,11 @@ paypal_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 invesco_search:
   max_listings: 200
@@ -1160,6 +1400,11 @@ invesco_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 firstamerican_search:
   max_listings: 200
@@ -1184,6 +1429,11 @@ firstamerican_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 standardchartered_search:
   max_listings: 400
@@ -1207,6 +1457,11 @@ standardchartered_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 wipro_search:
   max_listings: 4000
@@ -1232,6 +1487,11 @@ wipro_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1263,6 +1523,11 @@ hcltech_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1291,6 +1556,11 @@ hsbc_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 msci_search:
   max_listings: 50
@@ -1313,6 +1583,11 @@ msci_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 target_search:
   max_listings: 200
@@ -1335,6 +1610,11 @@ target_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 adobe_search:
   max_listings: 200
@@ -1357,6 +1637,11 @@ adobe_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 micron_search:
   max_listings: 500
@@ -1383,6 +1668,11 @@ micron_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 sabre_search:
   max_listings: 200
@@ -1404,6 +1694,11 @@ sabre_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 autodesk_search:
   max_listings: 200
@@ -1425,6 +1720,11 @@ autodesk_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 verizon_search:
   max_listings: 200
@@ -1450,6 +1750,11 @@ verizon_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 lowes_search:
   max_listings: 200
@@ -1475,6 +1780,11 @@ lowes_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 ebay_search:
   max_listings: 200
@@ -1496,6 +1806,11 @@ ebay_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 generalmotors_search:
   max_listings: 200
@@ -1520,6 +1835,11 @@ generalmotors_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 notifications:
   email:

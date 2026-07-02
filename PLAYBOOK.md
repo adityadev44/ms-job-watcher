@@ -16,7 +16,7 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 **Layer 1 — Location**
 - Job location must contain "India"
-- Must not be Chennai, Tamil Nadu, Pune, Chandigarh, or Kochi (configured per company via `exclude_locations`)
+- Must not be Chennai, Tamil Nadu, Pune, Chandigarh, Kochi, Kerala, Trivandrum, Lucknow, Nagpur, or Madurai (configured per company via `exclude_locations`)
 
 **Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
@@ -251,6 +251,12 @@ Add a new section before `notifications:`:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   # DO NOT add require_tech_in_description unless explicitly asked
 ```
 
@@ -360,12 +366,17 @@ matching:                         # shared across ALL companies
   inter_page_delay: 0.2
   keywords: [...]
   locations: [...]
-  exclude_locations:              # ALWAYS include Chennai, Tamil Nadu, Pune, Chandigarh, Kochi
+  exclude_locations:              # ALWAYS include this full default set
     - "Chennai"
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
   require_tech_in_description: [...]  # OPTIONAL Layer 4 — do not add by default
 ```
 
