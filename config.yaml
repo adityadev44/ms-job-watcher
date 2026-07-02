@@ -961,6 +961,210 @@ capgemini_search:
     - "dotnet"
     - "dot net"
 
+lseg_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant lseg.wd3.myworkdayjobs.com, site "careers". locationCountry
+  # facet with the standard India WID. Large Bengaluru engineering centre with
+  # frequent .NET/C#/Azure roles. locationsText uses office codes
+  # ("IND-BLR-...") — ", India" appended in the fetcher.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+statestreet_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant statestreet.wd1.myworkdayjobs.com, site "Global". Uses the
+  # capitalised Location_Country facet key (like Marsh McLennan). ~200 India
+  # jobs across Bangalore, Hyderabad, Mumbai, Coimbatore. Coimbatore is in
+  # Tamil Nadu but the location text doesn't say so — excluded by name.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Coimbatore"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+broadridge_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant broadridge.wd5.myworkdayjobs.com, site "Careers".
+  # Location_Country facet (capitalised key). Broadridge is heavily .NET —
+  # small India job count (~30) but high relevance when roles open.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+kyndryl_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant kyndryl.wd5.myworkdayjobs.com, site
+  # "KyndrylProfessionalCareers". locationCountry facet. ~290 India software
+  # jobs; multi-site rollups show "2 Locations" — ", India" appended.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+dxc_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant dxctechnology.wd1.myworkdayjobs.com, site "DXCJobs".
+  # locationCountry facet. locationsText format is "IND - TN - CHENNAI"
+  # (state codes, no "India") — the fetcher appends ", India"; "- TN -"
+  # below excludes ALL Tamil Nadu cities, which "Tamil Nadu" alone can't.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "- TN -"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+ameriprise_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant ameriprise.wd5.myworkdayjobs.com, site "ameriprise".
+  # locationCountry facet. India centres: Hyderabad, Noida, Gurugram.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+factset_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant factset.wd108.myworkdayjobs.com, site "FactSetCareers".
+  # No country facet — fetches globally (~60 jobs total) and filters India
+  # client-side. FactSet's Hyderabad centre is .NET-heavy.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+paypal_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant paypal.wd1.myworkdayjobs.com, site "jobs". No country
+  # facet — fetches globally, filters India client-side with a word-boundary
+  # match (so "Indianapolis"/"Indiana" never pass). India presence is
+  # currently small (Bangalore + Chennai) — 0 matches often expected.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+invesco_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant invesco.wd1.myworkdayjobs.com, site "IVZ". No country
+  # facet and locationsText omits "India" entirely ("Hyderabad, Telangana") —
+  # the fetcher detects India via city/state tokens and appends ", India".
+  # Invesco's Hyderabad centre is .NET-heavy.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

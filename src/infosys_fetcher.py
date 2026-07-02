@@ -195,8 +195,9 @@ def fetch_jobs(
         loc = _normalize_location(job.get("location") or "")
         posting_date = _parse_date(job.get("createdOn") or "")
         source_id = job.get("sourceId", 1)
+        # /jobdesc is the SPA's job-description route; /jobdetails is a 404
         app_url = (
-            f"{_CAREER_BASE}/jobdetails"
+            f"{_CAREER_BASE}/jobdesc"
             f"?jobReferenceCode={ref}&sourceId={source_id}"
         )
         jobs.append({
@@ -221,7 +222,7 @@ def fetch_job_description(
     (e.g. if the cache fill failed silently).
     """
     # Extract referenceCode from URL
-    # e.g. https://career.infosys.com/jobdetails?jobReferenceCode=INFSYS-EXTERNAL-247575&sourceId=1
+    # e.g. https://career.infosys.com/jobdesc?jobReferenceCode=INFSYS-EXTERNAL-247575&sourceId=1
     m = re.search(r"jobReferenceCode=([^&]+)", application_url)
     ref_code = m.group(1) if m else ""
 

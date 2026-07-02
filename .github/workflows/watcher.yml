@@ -1,4 +1,4 @@
-name: Job Watcher (40 companies)
+name: Job Watcher (49 companies)
 
 on:
   schedule:
@@ -91,6 +91,15 @@ jobs:
           python -u src/run_cognizant.py & pid38=$!
           python -u src/run_capgemini.py & pid39=$!
           python -u src/run_tcs.py & pid40=$!
+          python -u src/run_lseg.py & pid41=$!
+          python -u src/run_statestreet.py & pid42=$!
+          python -u src/run_broadridge.py & pid43=$!
+          python -u src/run_kyndryl.py & pid44=$!
+          python -u src/run_dxc.py & pid45=$!
+          python -u src/run_ameriprise.py & pid46=$!
+          python -u src/run_factset.py & pid47=$!
+          python -u src/run_paypal.py & pid48=$!
+          python -u src/run_invesco.py & pid49=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -132,6 +141,15 @@ jobs:
           wait $pid38 || fail=1
           wait $pid39 || fail=1
           wait $pid40 || fail=1
+          wait $pid41 || fail=1
+          wait $pid42 || fail=1
+          wait $pid43 || fail=1
+          wait $pid44 || fail=1
+          wait $pid45 || fail=1
+          wait $pid46 || fail=1
+          wait $pid47 || fail=1
+          wait $pid48 || fail=1
+          wait $pid49 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -179,6 +197,15 @@ jobs:
           test -f seen_jobs_cognizant.json && git add seen_jobs_cognizant.json || true
           test -f seen_jobs_capgemini.json && git add seen_jobs_capgemini.json || true
           test -f seen_jobs_tcs.json && git add seen_jobs_tcs.json || true
+          test -f seen_jobs_lseg.json && git add seen_jobs_lseg.json || true
+          test -f seen_jobs_statestreet.json && git add seen_jobs_statestreet.json || true
+          test -f seen_jobs_broadridge.json && git add seen_jobs_broadridge.json || true
+          test -f seen_jobs_kyndryl.json && git add seen_jobs_kyndryl.json || true
+          test -f seen_jobs_dxc.json && git add seen_jobs_dxc.json || true
+          test -f seen_jobs_ameriprise.json && git add seen_jobs_ameriprise.json || true
+          test -f seen_jobs_factset.json && git add seen_jobs_factset.json || true
+          test -f seen_jobs_paypal.json && git add seen_jobs_paypal.json || true
+          test -f seen_jobs_invesco.json && git add seen_jobs_invesco.json || true
           test -f pipeline_failures.json && git add pipeline_failures.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"

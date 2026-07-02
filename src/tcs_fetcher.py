@@ -22,8 +22,10 @@ Description endpoint: POST /candidate/api/v1/job/desc
   - Walk-in jobs (ID ends "W"): use /candidate/api/v1/job/desc/walkin
   - Returns HTML description + skilldetail + qualifications
 
-Application URL: https://ibegin.tcsapps.com/candidate/#!/jobs/{id}
-  where {id} includes the J/W suffix.
+Application URL: https://ibegin.tcsapps.com/candidate/jobs/{id}
+  where {id} includes the J/W suffix. The SPA uses html5Mode routing —
+  path-based URLs, NOT the #!/ hashbang (hashbang links land on the
+  home page and never open the job).
 
 Posting date: iBegin does not expose a posting date. The description
 returns applyby ("YYYY-MM-DD HH:MM:SS"); we use its date portion as
@@ -43,7 +45,7 @@ _BASE = "https://ibegin.tcsapps.com/candidate"
 _SEARCH_URL = f"{_BASE}/api/v1/jobs/searchJ"
 _DESC_URL = f"{_BASE}/api/v1/job/desc"
 _DESC_WALKIN_URL = f"{_BASE}/api/v1/job/desc/walkin"
-_APP_BASE = f"{_BASE}/#!/jobs"
+_APP_BASE = f"{_BASE}/jobs"
 
 # Fixed page size returned by TCS iBegin API
 _TCS_PAGE_SIZE = 10
@@ -57,7 +59,7 @@ _HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "Content-Type": "application/json;charset=UTF-8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://ibegin.tcsapps.com/candidate/#!/jobs/search",
+    "Referer": "https://ibegin.tcsapps.com/candidate/jobs/search",
     "Origin": "https://ibegin.tcsapps.com",
 }
 

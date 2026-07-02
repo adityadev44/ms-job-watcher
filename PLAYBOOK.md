@@ -124,6 +124,15 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | Capgemini | SAP SuccessFactors J2W | HTML scraping | `run_capgemini.py` | `careers.capgemini.com`; same J2W platform as Nomura but `?startrow=N` query-string pagination (not path-based); `locationsearch=india` server-side; location "City, IN" normalised to "City, India"; `require_tech_in_title` active |
 | TCS | iBegin (proprietary) | REST API (JSON) | `run_tcs.py` | `ibegin.tcsapps.com`; POST `/candidate/api/v1/jobs/searchJ`; India-only portal; 10 jobs/page (fixed); keyword `#` breaks search — `"C#"` matches all 4,227 India jobs; use `"csharp"` or `"dotnet"` instead; apply-by date used as posting date proxy; `require_tech_in_title` active |
 | Synchrony | Workday | REST API (JSON) | `run_synchrony.py` | `synchronyfinancial.wd5.myworkdayjobs.com`; no country facet — uses "locations" facet with 6 India WIDs (Hyderabad + 5 Remote IN regions) |
+| LSEG | Workday | REST API (JSON) | `run_lseg.py` | `lseg.wd3.myworkdayjobs.com`, site `careers`; `locationCountry` facet; large Bengaluru centre, frequent .NET roles; office-code locations ("IND-BLR-…") get ", India" appended |
+| State Street | Workday | REST API (JSON) | `run_statestreet.py` | `statestreet.wd1.myworkdayjobs.com`, site `Global`; `Location_Country` facet (capitalised, like MMC); ~200 India jobs; Coimbatore excluded by name (location text omits "Tamil Nadu") |
+| Broadridge | Workday | REST API (JSON) | `run_broadridge.py` | `broadridge.wd5.myworkdayjobs.com`, site `Careers`; `Location_Country` facet; .NET-heavy shop, ~30 India jobs (Bengaluru/Hyderabad) |
+| Kyndryl | Workday | REST API (JSON) | `run_kyndryl.py` | `kyndryl.wd5.myworkdayjobs.com`, site `KyndrylProfessionalCareers`; `locationCountry` facet; ~290 India software jobs |
+| DXC Technology | Workday | REST API (JSON) | `run_dxc.py` | `dxctechnology.wd1.myworkdayjobs.com`, site `DXCJobs`; `locationCountry` facet; locations use state codes ("IND - TN - CHENNAI") — "- TN -" added to exclude_locations to cover all Tamil Nadu cities |
+| Ameriprise | Workday | REST API (JSON) | `run_ameriprise.py` | `ameriprise.wd5.myworkdayjobs.com`, site `ameriprise`; `locationCountry` facet; Hyderabad/Noida/Gurugram |
+| FactSet | Workday | REST API (JSON) | `run_factset.py` | `factset.wd108.myworkdayjobs.com`, site `FactSetCareers`; no country facet — global fetch (~60 jobs) + client-side India filter; .NET-heavy Hyderabad centre |
+| PayPal | Workday | REST API (JSON) | `run_paypal.py` | `paypal.wd1.myworkdayjobs.com`, site `jobs`; no country facet — global fetch + word-boundary India filter (`\bindia\b`, so "Indianapolis" never passes); small India presence, 0 matches often expected |
+| Invesco | Workday | REST API (JSON) | `run_invesco.py` | `invesco.wd1.myworkdayjobs.com`, site `IVZ`; no country facet AND locationsText omits "India" ("Hyderabad, Telangana") — India detected via city/state tokens; .NET-heavy Hyderabad centre |
 
 ---
 
@@ -303,6 +312,10 @@ Verify:
 | TCS iBegin: `"C#"` keyword matches all 4,227 India jobs | The `#` symbol breaks the server-side search, causing it to return everything | Use `"dotnet"` and other non-symbol keywords; rely on `require_tech_in_title` for precision |
 | TCS iBegin: description endpoint requires POST not GET | `GET /candidate/api/v1/job/desc/{id}` returns 401; `POST` with `{"jobId": <int>}` body works | Strip the J/W suffix from the job ID and cast to int before POSTing |
 | TCS iBegin: old domain dead | `ibegin.tcs.com` no longer resolves | Use `ibegin.tcsapps.com` |
+| TCS alert links landed on the home page, not the job | Application URL used AngularJS hashbang routing (`/candidate/#!/jobs/{id}`), but the iBegin app has `html5Mode(true)` — path-based routing; hashbang URLs are silently ignored | Use path URLs: `https://ibegin.tcsapps.com/candidate/jobs/{id}` (verified rendering the job + Apply button in Playwright) |
+| Infosys alert links showed a 404 page | Application URL used `/jobdetails?...` but the Angular app has no such route — its job-description route is `/jobdesc` | Use `https://career.infosys.com/jobdesc?jobReferenceCode={ref}&sourceId={id}` (verified rendering the job + Apply button in Playwright) |
+| Invesco India jobs invisible to `is_india_job()` | Workday tenant IVZ has no country facet and locationsText is "Hyderabad, Telangana" — no "India" substring | Fetcher detects India via city/state token list, appends ", India"; word-boundary guard rejects "Indianapolis"/"Indiana" |
+| PayPal/FactSet client-side India check risks "Indianapolis" | Plain `"india" in loc` substring matches "Indianapolis" and "Indiana" | Use regex `\bindia\b` word-boundary match in the fetcher |
 
 ---
 
@@ -333,7 +346,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 40 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 49 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder
