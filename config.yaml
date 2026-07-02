@@ -1189,6 +1189,133 @@ firstamerican_search:
     - "Chandigarh"
     - "Kochi"
 
+standardchartered_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # SAP SuccessFactors "Job2Web Unify" tenant (jobs.standardchartered.com).
+  # keywords are ignored server-side -- facetFilters restricts to India
+  # (~280 jobs) and all are cached in-module; title/skill filters do the
+  # real narrowing.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+wipro_search:
+  max_listings: 4000
+  inter_page_delay: 0.2
+  # Same SuccessFactors Unify platform as Standard Chartered, different
+  # tenant (careers.wipro.com). ~3700 India jobs cached in-module; almost
+  # entirely generic IT-services titles ("SOFTWARE ENGINEER L3" etc with no
+  # tech named) -- require_tech_in_title is MANDATORY.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
+hcltech_search:
+  max_listings: 8500
+  inter_page_delay: 0.2
+  # Same SuccessFactors Unify platform, tenant careers.hcltech.com, India-only
+  # category page (categoryId 9553955). ~8000 India jobs cached in-module;
+  # overwhelmingly generic IT-services titles -- require_tech_in_title is
+  # MANDATORY.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+  require_tech_in_title:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "dotnet"
+    - "dot net"
+
+hsbc_search:
+  max_listings: 10
+  inter_page_delay: 0.3
+  # Eightfold (portal.careers.hsbc.com); HSBC's tenant has the normal public
+  # search API (pcsx/search) disabled -- only the "related jobs" widget
+  # endpoint works, and it hard-caps at 10 results with no pagination. Set
+  # max_listings to 10 (not the usual 200+) so find_matching_jobs stops
+  # after one page instead of retrying for pages that will never come.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
+msci_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Algolia-powered (careers.msci.com) -- small total job count (~90
+  # globally, ~18 India) so a single unfiltered query covers everything;
+  # cached in-module.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

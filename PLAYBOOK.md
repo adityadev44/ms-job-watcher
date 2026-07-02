@@ -134,6 +134,11 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | PayPal | Workday | REST API (JSON) | `run_paypal.py` | `paypal.wd1.myworkdayjobs.com`, site `jobs`; no country facet — global fetch + word-boundary India filter (`\bindia\b`, so "Indianapolis" never passes); small India presence, 0 matches often expected |
 | Invesco | Workday | REST API (JSON) | `run_invesco.py` | `invesco.wd1.myworkdayjobs.com`, site `IVZ`; no country facet AND locationsText omits "India" ("Hyderabad, Telangana") — India detected via city/state tokens; .NET-heavy Hyderabad centre |
 | First American | Workday | REST API (JSON) | `run_firstamerican.py` | `firstam.wd1.myworkdayjobs.com`, site `faicareers` — First American India's dedicated portal, every posting is India (all Bangalore); heavily .NET shop; ", India" appended to "IND, Karnataka, Bangalore" locations |
+| Standard Chartered | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_standardchartered.py` | `jobs.standardchartered.com`, categoryId `9783657`; CSRF-token + session-cookie handshake; `facetFilters.jobLocationCountry` restricts to India (~280 jobs); keywords/location ignored server-side |
+| Wipro | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_wipro.py` | `careers.wipro.com`, categoryId `0`; same Unify pattern as Standard Chartered; ~3700 India jobs; `require_tech_in_title` mandatory — generic "SOFTWARE ENGINEER L3/L4" titles dominate |
+| HCLTech | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_hcltech.py` | `careers.hcltech.com`, India-only categoryId `9553955`; same Unify pattern, different field names (`custprimecity`/`custCountryRegion` instead of `jobLocationShort`/`jobLocationCountry`); ~8000 India jobs; `require_tech_in_title` mandatory |
+| HSBC | Eightfold | REST API (JSON) | `run_hsbc.py` | `portal.careers.hsbc.com` (migrated off the old Avature `mycareer.hsbc.com` portal); public `pcsx/search` API disabled tenant-wide — uses the "related jobs" widget endpoint anchored to a hardcoded real job ID; hard-capped at 10 results, no pagination |
+| MSCI | Algolia (direct) | REST API (JSON) | `run_msci.py` | `careers.msci.com` frontend queries Algolia directly (app `RVMOB42DFH`) with a public search-only API key; ~90 jobs total, ~18 India, single unfiltered query covers everything; full description embedded in each hit — no detail fetch needed |
 
 ---
 
@@ -159,7 +164,10 @@ Common ATS vendors and what to expect:
 | **iCIMS** | URL contains `icims.com` | REST API or HTML scraping |
 | **Greenhouse** | URL contains `greenhouse.io` | Public REST API, well-documented |
 | **Lever** | URL contains `lever.co` | Public REST API |
-| **SAP SuccessFactors J2W** | URL contains `careers.<company>.com` with job list at `/go/...` and detail at `/job/.../{id}/`; "J2W" (Job-to-Work) branding | HTML scraping — `<tr class="data-row">` table rows; pagination via path `/go/.../{offset}/`; description in `<span class="jobdescription">`; date in `<meta itemprop="datePosted">` |
+| **SAP SuccessFactors J2W (classic)** | URL contains `careers.<company>.com` with job list at `/go/...` and detail at `/job/.../{id}/`; "J2W" (Job-to-Work) branding; view source shows `<tr class="data-row">` rows | HTML scraping — pagination via path `/go/.../{offset}/`; description in `<span class="jobdescription">`; date in `<meta itemprop="datePosted">` |
+| **SAP SuccessFactors J2W (Unify theme)** | Same `/go/` or `/search/` URLs as classic J2W, but view source shows NO `data-row` rows — results are empty until JS runs. Scripts include `j2w.searchResultsUnify.min.js` | REST API — POST JSON to `/services/recruiting/v1/jobs` with `facetFilters`; needs a `x-csrf-token` header (scraped from a `var CSRFToken = "..."` in the page) + session cookie from a prior GET; `pageNumber` must be walked manually (ignores `start`/`offset`). Detail pages ARE server-rendered HTML — extract by anchoring on the "Job Description:" label, not `itemprop="description"` (that attribute can double up on an unrelated company blurb) |
+| **Algolia (direct)** | Page's JS calls `{app_id}-dsn.algolia.net` with `X-Algolia-Application-Id`/`X-Algolia-API-Key` headers (key visible in Network tab — Algolia "search-only" keys are meant to be public) | POST to `https://{app_id}-dsn.algolia.net/1/indexes/*/queries`; full description is usually embedded in each search hit already |
+| **Eightfold with PCSX disabled** | Tenant otherwise matches Microsoft/Morgan Stanley's Eightfold shape, but `GET /api/pcsx/search` returns 403 `"PCSX is not enabled for this user"` | Use the "related jobs" widget instead: `GET /api/apply/v2/jobs/{anchor_id}/jobs` where `{anchor_id}` is any real, currently-open job ID (hardcode one, refresh if it closes) — hard-capped at 10 results, no working pagination |
 | **Taleo** | URL contains `taleo.net` | HTML scraping usually required |
 | **Phenom People** | URL contains `phenompeople.com` CDN assets or `refNum` in page JS | `/widgets` API requires browser session — use sitemap.xml + JSON-LD scraping |
 
@@ -317,6 +325,11 @@ Verify:
 | Infosys alert links showed a 404 page | Application URL used `/jobdetails?...` but the Angular app has no such route — its job-description route is `/jobdesc` | Use `https://career.infosys.com/jobdesc?jobReferenceCode={ref}&sourceId={id}` (verified rendering the job + Apply button in Playwright) |
 | Invesco India jobs invisible to `is_india_job()` | Workday tenant IVZ has no country facet and locationsText is "Hyderabad, Telangana" — no "India" substring | Fetcher detects India via city/state token list, appends ", India"; word-boundary guard rejects "Indianapolis"/"Indiana" |
 | PayPal/FactSet client-side India check risks "Indianapolis" | Plain `"india" in loc` substring matches "Indianapolis" and "Indiana" | Use regex `\bindia\b` word-boundary match in the fetcher |
+| Standard Chartered/Wipro/HCLTech search results appeared empty | These SuccessFactors tenants run the newer "Job2Web Unify" theme, which loads results via a client-side JS call to `/services/recruiting/v1/jobs` — the classic J2W data-row HTML (Nomura/Capgemini) is never server-rendered | Captured the real POST via Playwright network capture: JSON body with `facetFilters`, CSRF token from a `var CSRFToken = "...";` assignment on the category/search page, session cookie from the same GET |
+| Wipro/HCLTech job descriptions came back as unrelated boilerplate ("About Wipro is a leading...") | `itemprop="description"` appears twice per page on this ATS — once on a generic company blurb, once on the real job content; grabbing the first match silently returns the wrong text | Anchor extraction on the "Job Description:" joblayouttoken label instead of the itemprop attribute |
+| Standard Chartered/Wipro pagination silently capped at 10 results | `/services/recruiting/v1/jobs` ignores `start`/`offset`; the only way to page is incrementing `pageNumber` in the POST body itself | Loop `pageNumber` 0,1,2… until a page returns an empty `jobSearchResult`, caching everything in-module |
+| HSBC search API returns 403 "PCSX is not enabled for this user" | HSBC's Eightfold tenant (`portal.careers.hsbc.com`, migrated off the old Avature `mycareer.hsbc.com`) disabled the public `pcsx/search` endpoint that Microsoft/Morgan Stanley use | Use the "related jobs" widget endpoint (`/api/apply/v2/jobs/{anchor_id}/jobs`) instead — requires a real, currently-open job ID as a similarity anchor (hardcoded, same pattern as Wells Fargo's India WID); hard-capped at 10 results, `start`/`num` ignored |
+| MSCI's own site API returned 404 | `careers.msci.com/api/jobs` doesn't exist — the site is an Algolia InstantSearch frontend calling Algolia directly, not a first-party API, despite `globalcareers-msci.icims.com` also existing (iCIMS handles applications, not search) | Call the Algolia REST endpoint directly with the public search-only API key captured from the page's network requests |
 
 ---
 
@@ -347,7 +360,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 50 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 55 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder

@@ -1,4 +1,4 @@
-name: Job Watcher (50 companies)
+name: Job Watcher (55 companies)
 
 on:
   schedule:
@@ -101,6 +101,11 @@ jobs:
           python -u src/run_paypal.py & pid48=$!
           python -u src/run_invesco.py & pid49=$!
           python -u src/run_firstamerican.py & pid50=$!
+          python -u src/run_standardchartered.py & pid51=$!
+          python -u src/run_wipro.py & pid52=$!
+          python -u src/run_hcltech.py & pid53=$!
+          python -u src/run_hsbc.py & pid54=$!
+          python -u src/run_msci.py & pid55=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -152,6 +157,11 @@ jobs:
           wait $pid48 || fail=1
           wait $pid49 || fail=1
           wait $pid50 || fail=1
+          wait $pid51 || fail=1
+          wait $pid52 || fail=1
+          wait $pid53 || fail=1
+          wait $pid54 || fail=1
+          wait $pid55 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -209,6 +219,11 @@ jobs:
           test -f seen_jobs_paypal.json && git add seen_jobs_paypal.json || true
           test -f seen_jobs_invesco.json && git add seen_jobs_invesco.json || true
           test -f seen_jobs_firstamerican.json && git add seen_jobs_firstamerican.json || true
+          test -f seen_jobs_standardchartered.json && git add seen_jobs_standardchartered.json || true
+          test -f seen_jobs_wipro.json && git add seen_jobs_wipro.json || true
+          test -f seen_jobs_hcltech.json && git add seen_jobs_hcltech.json || true
+          test -f seen_jobs_hsbc.json && git add seen_jobs_hsbc.json || true
+          test -f seen_jobs_msci.json && git add seen_jobs_msci.json || true
           test -f pipeline_failures.json && git add pipeline_failures.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"
