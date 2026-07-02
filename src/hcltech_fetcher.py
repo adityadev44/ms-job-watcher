@@ -15,8 +15,8 @@ jobLocationShort / jobLocationCountry), this tenant's search response uses
 custprimecity (city string) and custCountryRegion (list, e.g. ["India"]).
 
 HCLTech has ~8000 India postings under this category, overwhelmingly generic
-IT-services titles. require_tech_in_title is MANDATORY, same as
-TCS/Infosys/Cognizant/Capgemini/Wipro. Job detail pages are server-rendered
+IT-services titles. require_tech_in_description is MANDATORY, same as
+TCS/Infosys/Cognizant/Capgemini/Wipro/Accenture/Wells Fargo. Job detail pages are server-rendered
 HTML, same structure as Standard Chartered's (itemprop="description" span;
 "Posting Start Date" joblayouttoken row).
 """

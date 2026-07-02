@@ -18,7 +18,7 @@ if hasattr(sys.stdout, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent))
 
 import wipro_fetcher as _wipro_mod
-from matcher import find_matching_jobs, load_config
+from matcher import find_matching_jobs, load_config, _normalize_text
 from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
@@ -40,6 +40,29 @@ def run_wipro_pipeline(
     }
 
     total_fetched, matched = find_matching_jobs(wipro_cfg, _wipro_mod)
+
+    # Wipro-only: require a core .NET/C#/ASP.NET term in the description,
+    # not just any shared primary_skill. Wipro posts thousands of India
+    # jobs with generic "SOFTWARE ENGINEER L3/L4" titles that give no
+    # signal at all. (This config existed before but was never actually
+    # applied here — the filter was silently dead until this change.)
+    tech_terms = whole_cfg["wipro_search"].get("require_tech_in_description", [])
+    if tech_terms:
+        normed_terms = [_normalize_text(t) for t in tech_terms]
+        desc_passed = []
+        desc_dropped = []
+        for j in matched:
+            normed_desc = _normalize_text(j.get("description", ""))
+            if any(t in normed_desc for t in normed_terms):
+                desc_passed.append(j)
+            else:
+                desc_dropped.append(f"[desc-tech]     {j['title']}")
+        if desc_dropped:
+            print("Wipro description-tech filtered out (near-misses):")
+            for line in desc_dropped:
+                print(f"  {line}")
+        matched = desc_passed
+
     new_matches = [j for j in matched if j["id"] not in seen_ids]
 
     alert_sent = False

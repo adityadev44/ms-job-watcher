@@ -18,7 +18,7 @@ if hasattr(sys.stdout, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent))
 
 import tcs_fetcher as _tcs_mod
-from matcher import find_matching_jobs, load_config
+from matcher import find_matching_jobs, load_config, _normalize_text
 from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
@@ -41,25 +41,26 @@ def run_tcs_pipeline(
 
     total_fetched, matched = find_matching_jobs(tcs_cfg, _tcs_mod)
 
-    # TCS-specific: require the tech stack to appear in the job title.
-    # TCS posts thousands of India jobs; generic titles like "Senior Software
-    # Engineer" are almost never .NET/C# roles. This 4th filter keeps alerts
-    # precise â€” the same pattern used for Wells Fargo.
-    tech_terms = whole_cfg["tcs_search"].get("require_tech_in_title", [])
+    # TCS-specific: require a core .NET/C#/ASP.NET term in the description,
+    # not just any shared primary_skill. TCS posts thousands of India jobs;
+    # generic titles like "Senior Software Engineer" are almost never
+    # .NET/C# roles. This 4th filter keeps alerts precise.
+    tech_terms = whole_cfg["tcs_search"].get("require_tech_in_description", [])
     if tech_terms:
-        title_passed = []
-        title_dropped = []
+        normed_terms = [_normalize_text(t) for t in tech_terms]
+        desc_passed = []
+        desc_dropped = []
         for j in matched:
-            t = j["title"].lower()
-            if any(term.lower() in t for term in tech_terms):
-                title_passed.append(j)
+            normed_desc = _normalize_text(j.get("description", ""))
+            if any(t in normed_desc for t in normed_terms):
+                desc_passed.append(j)
             else:
-                title_dropped.append(f"[title-tech]    {j['title']}")
-        if title_dropped:
-            print("TCS title-tech filtered out (near-misses):")
-            for line in title_dropped:
+                desc_dropped.append(f"[desc-tech]     {j['title']}")
+        if desc_dropped:
+            print("TCS description-tech filtered out (near-misses):")
+            for line in desc_dropped:
                 print(f"  {line}")
-        matched = title_passed
+        matched = desc_passed
 
     new_matches = [j for j in matched if j["id"] not in seen_ids]
 

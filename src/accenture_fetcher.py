@@ -5,7 +5,7 @@ The Workday CXS endpoint accepts plain POST requests — no browser needed.
 
 India is filtered server-side using the locationCountry facet WID discovered
 via probe on 2026-06-26. India total: ~24,731 jobs. The API returns at most
-2000 results per query; require_tech_in_title in the runner handles precision.
+2000 results per query; require_tech_in_description in the runner handles precision.
 
 Locations in the search response are city-only ("Bengaluru", "Hyderabad").
 This fetcher appends ", India" so the shared is_india_job() check passes.

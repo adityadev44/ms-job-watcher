@@ -4,9 +4,9 @@ Capgemini job-watcher pipeline entry point.
 Runs independently of all other pipelines:
   - Uses capgemini_fetcher (SAP SuccessFactors J2W HTML scraping)
   - Writes to seen_jobs_capgemini.json
-  - Layer 4 filter active: require_tech_in_title (.NET / C# terms must appear
-    in the job title). Capgemini posts thousands of India jobs; without this
-    filter almost none would be .NET roles.
+  - Layer 4 filter active: require_tech_in_description (.NET / C# terms
+    must appear in the job description). Capgemini posts thousands of
+    India jobs; without this filter almost none would be .NET roles.
 
 Run:  py src/run_capgemini.py
 """
@@ -21,7 +21,7 @@ if hasattr(sys.stdout, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent))
 
 import capgemini_fetcher as _cap_mod
-from matcher import find_matching_jobs, load_config
+from matcher import find_matching_jobs, load_config, _normalize_text
 from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
@@ -44,25 +44,27 @@ def run_capgemini_pipeline(
 
     total_fetched, matched = find_matching_jobs(cap_cfg, _cap_mod)
 
-    # Capgemini-specific: require the tech stack to appear in the job title.
-    # Capgemini posts thousands of India jobs; generic titles like
-    # "Lead Software Engineer" are mostly SAP/Java/Python roles that mention
-    # a .NET skill in passing. This 4th filter keeps precision high.
-    tech_terms = whole_cfg["capgemini_search"].get("require_tech_in_title", [])
+    # Capgemini-specific: require a core .NET/C#/ASP.NET term in the
+    # description, not just any shared primary_skill. Capgemini posts
+    # thousands of India jobs; generic titles like "Lead Software Engineer"
+    # are mostly SAP/Java/Python roles that mention a .NET skill in passing.
+    # This 4th filter keeps precision high.
+    tech_terms = whole_cfg["capgemini_search"].get("require_tech_in_description", [])
     if tech_terms:
-        title_passed = []
-        title_dropped = []
+        normed_terms = [_normalize_text(t) for t in tech_terms]
+        desc_passed = []
+        desc_dropped = []
         for j in matched:
-            t = j["title"].lower()
-            if any(term.lower() in t for term in tech_terms):
-                title_passed.append(j)
+            normed_desc = _normalize_text(j.get("description", ""))
+            if any(t in normed_desc for t in normed_terms):
+                desc_passed.append(j)
             else:
-                title_dropped.append(f"[title-tech]    {j['title']}")
-        if title_dropped:
-            print("Capgemini title-tech filtered out (near-misses):")
-            for line in title_dropped:
+                desc_dropped.append(f"[desc-tech]     {j['title']}")
+        if desc_dropped:
+            print("Capgemini description-tech filtered out (near-misses):")
+            for line in desc_dropped:
                 print(f"  {line}")
-        matched = title_passed
+        matched = desc_passed
 
     new_matches = [j for j in matched if j["id"] not in seen_ids]
 

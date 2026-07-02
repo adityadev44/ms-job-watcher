@@ -11,8 +11,8 @@ server-side filter that works (`keywords`/`location` are ignored).
 
 Wipro is a huge IT-services shop -- ~2600 India "software engineer"-adjacent
 postings, overwhelmingly generic ("SOFTWARE ENGINEER L3", "SOFTWARE ENGINEER
-L4" etc. with no tech named). require_tech_in_title is MANDATORY, same as
-TCS/Infosys/Cognizant/Capgemini/Accenture.
+L4" etc. with no tech named). require_tech_in_description is MANDATORY, same
+as TCS/Infosys/Cognizant/Capgemini/Accenture/HCLTech.
 
 locationsText uses office codes like "Bengaluru, IND-29, IND, 560035<br/>"
 with no literal "India" word and an embedded <br/> tag -- both handled in

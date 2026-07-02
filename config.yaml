@@ -207,15 +207,14 @@ wellsfargo_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  # Wells Fargo-specific: job title must contain at least one of these
-  # to pass. Filters out generic "Senior Software Engineer" titles that
-  # are Java/Python roles. Other pipelines do not use this field.
-  require_tech_in_title:
+  # Wells Fargo-specific: description must explicitly name one of these
+  # core terms. Filters out generic "Senior Software Engineer" titles that
+  # are Java/Python roles even when a shared primary_skill (SQL Server/EF)
+  # shows up in passing.
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 dell_search:
   max_listings: 200
@@ -821,8 +820,8 @@ accenture_search:
   # Workday wd103 tenant (accenture.wd103.myworkdayjobs.com/AccentureCareers).
   # India WID c4f78be1a8f14da0ab49ce1162348a5e (locationCountry facet).
   # ~24,731 India jobs; API caps at 2000 results per query.
-  # require_tech_in_title is MANDATORY — without it thousands of generic
-  # "Custom Software Engineer" titles flood through.
+  # require_tech_in_description is MANDATORY — without it thousands of
+  # generic "Custom Software Engineer" titles flood through.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -838,12 +837,10 @@ accenture_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 infosys_search:
   max_listings: 500
@@ -851,7 +848,7 @@ infosys_search:
   # Custom in-house ATS at intapgateway.infosysapps.com/careersci/.
   # searchText param is a no-op — all ~1558 India jobs returned per call.
   # Descriptions bundled in list response (no separate detail fetches).
-  # require_tech_in_title is MANDATORY — generic titles dominate.
+  # require_tech_in_description is MANDATORY — generic titles dominate.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -867,12 +864,10 @@ infosys_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 cognizant_search:
   max_listings: 500
@@ -880,7 +875,7 @@ cognizant_search:
   # Custom Umbraco CMS site (careers.cognizant.com). RSS feed at
   # /global-en/jobs/xml/?rss=true returns all ~2069 jobs with full
   # descriptions — no per-job fetch needed. India filtered client-side
-  # via <country> field. require_tech_in_title is MANDATORY.
+  # via <country> field. require_tech_in_description is MANDATORY.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -896,19 +891,17 @@ cognizant_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 tcs_search:
   max_listings: 500
   inter_page_delay: 0.3
   # TCS iBegin portal (ibegin.tcsapps.com). India-only portal — no location
   # filter needed. Keyword search is extremely loose (# breaks search);
-  # all 4227 India jobs match "C#". require_tech_in_title is MANDATORY.
+  # all 4227 India jobs match "C#". require_tech_in_description is MANDATORY.
   # 10 jobs per page (fixed); walk-in jobs (IDs ending in W) are skipped.
   keywords:
     - "software engineer"
@@ -925,12 +918,10 @@ tcs_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 capgemini_search:
   max_listings: 500
@@ -938,7 +929,7 @@ capgemini_search:
   # SAP SuccessFactors J2W at careers.capgemini.com. HTML scraping (same
   # platform as Nomura but with query-string pagination: startrow=N, 25/page).
   # locationsearch=india applied server-side. Thousands of India jobs —
-  # mostly SAP/Java. require_tech_in_title is MANDATORY.
+  # mostly SAP/Java. require_tech_in_description is MANDATORY.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -954,12 +945,10 @@ capgemini_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 lseg_search:
   max_listings: 300
@@ -1225,7 +1214,9 @@ wipro_search:
   # Same SuccessFactors Unify platform as Standard Chartered, different
   # tenant (careers.wipro.com). ~3700 India jobs cached in-module; almost
   # entirely generic IT-services titles ("SOFTWARE ENGINEER L3" etc with no
-  # tech named) -- require_tech_in_title is MANDATORY.
+  # tech named) -- require_tech_in_description is MANDATORY (was a dead
+  # require_tech_in_title config before this change — never actually
+  # applied by run_wipro.py, same bug HCLTech had).
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1241,12 +1232,10 @@ wipro_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 hcltech_search:
   max_listings: 8500
