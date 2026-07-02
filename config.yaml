@@ -831,6 +831,8 @@ citi_search:
   # Workday tenant citi.wd5.myworkdayjobs.com, site "2". Uses
   # Country_and_Jurisdiction facet (not locationCountry). India WID
   # c4f78be1a8f14da0ab49ce1162348a5e. ~339 India SW engineer jobs.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -851,6 +853,10 @@ citi_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 bny_search:
   max_listings: 200
@@ -1185,6 +1191,8 @@ statestreet_search:
   # capitalised Location_Country facet key (like Marsh McLennan). ~200 India
   # jobs across Bangalore, Hyderabad, Mumbai, Coimbatore. Coimbatore is in
   # Tamil Nadu but the location text doesn't say so — excluded by name.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1206,6 +1214,10 @@ statestreet_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 broadridge_search:
   max_listings: 200
@@ -1414,6 +1426,8 @@ firstamerican_search:
   # Bangalore currently), no country facet needed. First American is a
   # heavily .NET shop. locationsText ("IND, Karnataka, Bangalore") gets
   # ", India" appended in the fetcher.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1434,6 +1448,10 @@ firstamerican_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 standardchartered_search:
   max_listings: 400
@@ -1622,6 +1640,8 @@ adobe_search:
   # Workday tenant adobe.wd5.myworkdayjobs.com, site "external_experienced".
   # India centres in Bangalore + Noida. locationCountry facet works even
   # though not listed in the tenant's advertised facets response.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1642,6 +1662,10 @@ adobe_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 micron_search:
   max_listings: 500
@@ -1679,6 +1703,8 @@ sabre_search:
   inter_page_delay: 0.2
   # Workday tenant sabre.wd1.myworkdayjobs.com, site "SabreJobs". Travel-
   # technology (GDS) company with a Bengaluru engineering centre.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1699,12 +1725,18 @@ sabre_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 autodesk_search:
   max_listings: 200
   inter_page_delay: 0.2
   # Workday tenant autodesk.wd1.myworkdayjobs.com, site "Ext". India centres
   # in Bengaluru + Pune. locationsText uses abbreviated "IND" country code.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1725,6 +1757,10 @@ autodesk_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 verizon_search:
   max_listings: 200

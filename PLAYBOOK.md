@@ -12,7 +12,7 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 ## Filter Layers
 
-**3 layers apply to every company. IT-services companies with generic titles add a 4th (opt-in only).**
+**3 layers apply to every company. Companies where the shared skill check is too broad add a 4th (opt-in only).**
 
 **Layer 1 — Location**
 - Job location must contain "India"
@@ -25,9 +25,9 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 **Layer 3 — Skills**
 - Description must contain at least one **primary** .NET/C# skill (`.NET`, `C#`, `ASP.NET`, `Web API`, `SQL Server`, `T-SQL`, `Entity Framework`, `dotnet`) — Azure/Angular/TypeScript alone do not pass
 
-**Layer 4 — Tech in description (Wells Fargo, Accenture, Infosys, Cognizant, Capgemini, TCS, Wipro, HCLTech, DXC — opt-in, do not add to new companies by default)**
+**Layer 4 — Tech in description (Wells Fargo, Accenture, Infosys, Cognizant, Capgemini, TCS, Wipro, HCLTech, DXC, Citi, State Street, First American, Adobe, Sabre, Autodesk — opt-in, do not add to new companies by default)**
 - Description must explicitly contain a **narrow** .NET/C#/ASP.NET term (`require_tech_in_description` in config) — narrower than Layer 3's `primary_skills`, which also passes on SQL Server/EF/Web API alone
-- Added because these IT-services companies' generic titles ("Senior Software Engineer", "Software Engineer L3") give no reliable tech signal, and Layer 3's broader skill list was letting non-.NET roles through (e.g. HCLTech: Cisco Unified Comms, ServiceNow, GCP, Azure-monitoring roles that happened to mention SQL Server/EF)
+- Originally added for IT-services shops whose generic titles ("Senior Software Engineer", "Software Engineer L3") give no reliable tech signal, where Layer 3's broader skill list was letting non-.NET roles through (e.g. HCLTech: Cisco Unified Comms, ServiceNow, GCP, Azure-monitoring roles that happened to mention SQL Server/EF); since extended to direct employers (Citi, State Street, First American, Adobe, Sabre, Autodesk) as a general precision tightener wherever the broader skill list alone risks false positives
 - Activated as a post-filter in each company's `run_<company>.py` — not in `matcher.py`
 - **Retired: title-based matching (`require_tech_in_title`).** Every company that used it now uses description matching instead — title text turned out to be too sparse a signal at IT-services shops (many real .NET roles carry a generic level-banded title with the tech named only in the JD body)
 
@@ -76,7 +76,7 @@ fetch_jobs()
 ```
     └─ require_tech_in_description check [desc-tech] tag in near-miss log
 ```
-Implemented per-company as a post-filter after `find_matching_jobs` (`run_wellsfargo.py`, `run_accenture.py`, `run_infosys.py`, `run_cognizant.py`, `run_tcs.py`, `run_capgemini.py`, `run_wipro.py`, `run_hcltech.py`, `run_dxc.py`). Not in `matcher.py`, not shared.
+Implemented per-company as a post-filter after `find_matching_jobs` (`run_wellsfargo.py`, `run_accenture.py`, `run_infosys.py`, `run_cognizant.py`, `run_tcs.py`, `run_capgemini.py`, `run_wipro.py`, `run_hcltech.py`, `run_dxc.py`, `run_citi.py`, `run_statestreet.py`, `run_firstamerican.py`, `run_adobe.py`, `run_sabre.py`, `run_autodesk.py`). Not in `matcher.py`, not shared.
 
 ---
 
@@ -112,7 +112,7 @@ Implemented per-company as a post-filter after `find_matching_jobs` (`run_wellsf
 | Mastercard | Workday | REST API (JSON) | `run_mastercard.py` | `mastercard.wd1.myworkdayjobs.com`; no country facet — uses "locations" facet with 8 India city WIDs; appends ", India" for "2 Locations" entries |
 | Morgan Stanley | Eightfold | REST API (JSON) | `run_morganstanley.py` | `morganstanley.eightfold.ai`; same Eightfold PCSX API shape as Microsoft pipeline |
 | Nagarro | SmartRecruiters | REST API (JSON) | `run_nagarro.py` | `careers.smartrecruiters.com/nagarro1`; `country=in` param filters server-side; keyword param is a loose pre-filter only (titles still need matcher's title-family check) |
-| Citi | Workday | REST API (JSON) | `run_citi.py` | Tenant: `citi.wd5.myworkdayjobs.com`, site `2`; `Country_and_Jurisdiction` facet (not `locationCountry`); India WID `c4f78be1a8f14da0ab49ce1162348a5e`; ~339 India SW engineer jobs; "2 Locations" entries appended ", India" client-side |
+| Citi | Workday | REST API (JSON) | `run_citi.py` | Tenant: `citi.wd5.myworkdayjobs.com`, site `2`; `Country_and_Jurisdiction` facet (not `locationCountry`); India WID `c4f78be1a8f14da0ab49ce1162348a5e`; ~339 India SW engineer jobs; "2 Locations" entries appended ", India" client-side; `require_tech_in_description` active |
 | BNY Mellon | Oracle HCM CE | REST API (JSON) | `run_bny.py` | Tenant: `eofe.fa.us2.oraclecloud.com`, site `BNY-Careers`; India location facet ID `300000000378365`; majority of India jobs are Pune (excluded) — 0 matches expected until non-Pune .NET roles open |
 | Northern Trust | Workday | REST API (JSON) | `run_northerntrust.py` | Tenant: `ntrs.wd1.myworkdayjobs.com`, site `northerntrust`; `locationCountry` WID `c4f78be1a8f14da0ab49ce1162348a5e` (same cross-tenant India GUID as Fidelity/Wells Fargo); page size capped at 20 |
 | Deutsche Bank | Beesite + Workday | Beesite REST API (JSON) + Workday CXS descriptions | `run_deutsche.py` | Keywords and country filter ignored server-side; fetches all ~1808 global jobs, filters India (`CountryCode==IN`) client-side; descriptions via Workday CXS at `db.wd3.myworkdayjobs.com` |
@@ -125,7 +125,7 @@ Implemented per-company as a post-filter after `find_matching_jobs` (`run_wellsf
 | TCS | iBegin (proprietary) | REST API (JSON) | `run_tcs.py` | `ibegin.tcsapps.com`; POST `/candidate/api/v1/jobs/searchJ`; India-only portal; 10 jobs/page (fixed); keyword `#` breaks search — `"C#"` matches all 4,227 India jobs; use `"csharp"` or `"dotnet"` instead; apply-by date used as posting date proxy; `require_tech_in_description` active |
 | Synchrony | Workday | REST API (JSON) | `run_synchrony.py` | `synchronyfinancial.wd5.myworkdayjobs.com`; no country facet — uses "locations" facet with 6 India WIDs (Hyderabad + 5 Remote IN regions) |
 | LSEG | Workday | REST API (JSON) | `run_lseg.py` | `lseg.wd3.myworkdayjobs.com`, site `careers`; `locationCountry` facet; large Bengaluru centre, frequent .NET roles; office-code locations ("IND-BLR-…") get ", India" appended |
-| State Street | Workday | REST API (JSON) | `run_statestreet.py` | `statestreet.wd1.myworkdayjobs.com`, site `Global`; `Location_Country` facet (capitalised, like MMC); ~200 India jobs; Coimbatore excluded by name (location text omits "Tamil Nadu") |
+| State Street | Workday | REST API (JSON) | `run_statestreet.py` | `statestreet.wd1.myworkdayjobs.com`, site `Global`; `Location_Country` facet (capitalised, like MMC); ~200 India jobs; Coimbatore excluded by name (location text omits "Tamil Nadu"); `require_tech_in_description` active |
 | Broadridge | Workday | REST API (JSON) | `run_broadridge.py` | `broadridge.wd5.myworkdayjobs.com`, site `Careers`; `Location_Country` facet; .NET-heavy shop, ~30 India jobs (Bengaluru/Hyderabad) |
 | Kyndryl | Workday | REST API (JSON) | `run_kyndryl.py` | `kyndryl.wd5.myworkdayjobs.com`, site `KyndrylProfessionalCareers`; `locationCountry` facet; ~290 India software jobs |
 | DXC Technology | Workday | REST API (JSON) | `run_dxc.py` | `dxctechnology.wd1.myworkdayjobs.com`, site `DXCJobs`; `locationCountry` facet; locations use state codes ("IND - TN - CHENNAI") — "- TN -" added to exclude_locations to cover all Tamil Nadu cities; `require_tech_in_description` active — IT-services generic titles |
@@ -133,17 +133,17 @@ Implemented per-company as a post-filter after `find_matching_jobs` (`run_wellsf
 | FactSet | Workday | REST API (JSON) | `run_factset.py` | `factset.wd108.myworkdayjobs.com`, site `FactSetCareers`; no country facet — global fetch (~60 jobs) + client-side India filter; .NET-heavy Hyderabad centre |
 | PayPal | Workday | REST API (JSON) | `run_paypal.py` | `paypal.wd1.myworkdayjobs.com`, site `jobs`; no country facet — global fetch + word-boundary India filter (`\bindia\b`, so "Indianapolis" never passes); small India presence, 0 matches often expected |
 | Invesco | Workday | REST API (JSON) | `run_invesco.py` | `invesco.wd1.myworkdayjobs.com`, site `IVZ`; no country facet AND locationsText omits "India" ("Hyderabad, Telangana") — India detected via city/state tokens; .NET-heavy Hyderabad centre |
-| First American | Workday | REST API (JSON) | `run_firstamerican.py` | `firstam.wd1.myworkdayjobs.com`, site `faicareers` — First American India's dedicated portal, every posting is India (all Bangalore); heavily .NET shop; ", India" appended to "IND, Karnataka, Bangalore" locations |
+| First American | Workday | REST API (JSON) | `run_firstamerican.py` | `firstam.wd1.myworkdayjobs.com`, site `faicareers` — First American India's dedicated portal, every posting is India (all Bangalore); heavily .NET shop; ", India" appended to "IND, Karnataka, Bangalore" locations; `require_tech_in_description` active |
 | Standard Chartered | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_standardchartered.py` | `jobs.standardchartered.com`, categoryId `9783657`; CSRF-token + session-cookie handshake; `facetFilters.jobLocationCountry` restricts to India (~280 jobs); keywords/location ignored server-side |
 | Wipro | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_wipro.py` | `careers.wipro.com`, categoryId `0`; same Unify pattern as Standard Chartered; ~3700 India jobs; `require_tech_in_description` active — see Key Bugs, was previously a dead `require_tech_in_title` config that `run_wipro.py` never read; generic "SOFTWARE ENGINEER L3/L4" titles dominate |
 | HCLTech | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_hcltech.py` | `careers.hcltech.com`, India-only categoryId `9553955`; same Unify pattern, different field names (`custprimecity`/`custCountryRegion` instead of `jobLocationShort`/`jobLocationCountry`); ~8000 India jobs; `require_tech_in_description` active — see Key Bugs, was previously a dead `require_tech_in_title` config |
 | HSBC | Eightfold | REST API (JSON) | `run_hsbc.py` | `portal.careers.hsbc.com` (migrated off the old Avature `mycareer.hsbc.com` portal); public `pcsx/search` API disabled tenant-wide — uses the "related jobs" widget endpoint anchored to a hardcoded real job ID; hard-capped at 10 results, no pagination |
 | MSCI | Algolia (direct) | REST API (JSON) | `run_msci.py` | `careers.msci.com` frontend queries Algolia directly (app `RVMOB42DFH`) with a public search-only API key; ~90 jobs total, ~18 India, single unfiltered query covers everything; full description embedded in each hit — no detail fetch needed |
 | Target | Workday | REST API (JSON) | `run_target.py` | `target.wd5.myworkdayjobs.com`, site `targetcareers`; India GCC in Bangalore; capitalised `Location_Country` facet; ~58 India software-engineer jobs |
-| Adobe | Workday | REST API (JSON) | `run_adobe.py` | `adobe.wd5.myworkdayjobs.com`, site `external_experienced`; India centres in Bangalore + Noida; `locationCountry` facet works despite not being listed in the tenant's advertised facets |
+| Adobe | Workday | REST API (JSON) | `run_adobe.py` | `adobe.wd5.myworkdayjobs.com`, site `external_experienced`; India centres in Bangalore + Noida; `locationCountry` facet works despite not being listed in the tenant's advertised facets; `require_tech_in_description` active |
 | Micron | Workday | REST API (JSON) | `run_micron.py` | `micron.wd1.myworkdayjobs.com`, site `External`; Hyderabad "Phoenix Aquila" campus; semiconductor/hardware — low .NET match volume expected; **`locationCountry` facet unreliable (~85% non-India leakage)** — fetcher does not append ", India", relies on `is_india_job()` to filter genuinely |
-| Sabre | Workday | REST API (JSON) | `run_sabre.py` | `sabre.wd1.myworkdayjobs.com`, site `SabreJobs`; travel-technology (GDS) company, Bengaluru engineering centre |
-| Autodesk | Workday | REST API (JSON) | `run_autodesk.py` | `autodesk.wd1.myworkdayjobs.com`, site `Ext`; India centres in Bengaluru + Pune; locationsText uses abbreviated "IND" country code |
+| Sabre | Workday | REST API (JSON) | `run_sabre.py` | `sabre.wd1.myworkdayjobs.com`, site `SabreJobs`; travel-technology (GDS) company, Bengaluru engineering centre; `require_tech_in_description` active |
+| Autodesk | Workday | REST API (JSON) | `run_autodesk.py` | `autodesk.wd1.myworkdayjobs.com`, site `Ext`; India centres in Bengaluru + Pune; locationsText uses abbreviated "IND" country code; `require_tech_in_description` active |
 | Verizon | Workday | REST API (JSON) | `run_verizon.py` | `verizon.wd12.myworkdayjobs.com`, site `verizon-careers`; Hyderabad network/telecom engineering; **`locationCountry` facet unreliable** (genuine US locations leak through) — fetcher does not append ", India" |
 | Lowe's | Workday | REST API (JSON) | `run_lowes.py` | `lowes.wd5.myworkdayjobs.com`, site `LWS_External_CS`; Bengaluru engineering centre; **`locationCountry` facet unreliable** (US locations leak through) — fetcher appends ", India" only for recognised India city names, not blindly |
 | eBay | Workday | REST API (JSON) | `run_ebay.py` | `ebay.wd5.myworkdayjobs.com`, site `apply`; Bengaluru engineering centre; capitalised `Location_Country` facet |
