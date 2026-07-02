@@ -133,6 +133,7 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | FactSet | Workday | REST API (JSON) | `run_factset.py` | `factset.wd108.myworkdayjobs.com`, site `FactSetCareers`; no country facet — global fetch (~60 jobs) + client-side India filter; .NET-heavy Hyderabad centre |
 | PayPal | Workday | REST API (JSON) | `run_paypal.py` | `paypal.wd1.myworkdayjobs.com`, site `jobs`; no country facet — global fetch + word-boundary India filter (`\bindia\b`, so "Indianapolis" never passes); small India presence, 0 matches often expected |
 | Invesco | Workday | REST API (JSON) | `run_invesco.py` | `invesco.wd1.myworkdayjobs.com`, site `IVZ`; no country facet AND locationsText omits "India" ("Hyderabad, Telangana") — India detected via city/state tokens; .NET-heavy Hyderabad centre |
+| First American | Workday | REST API (JSON) | `run_firstamerican.py` | `firstam.wd1.myworkdayjobs.com`, site `faicareers` — First American India's dedicated portal, every posting is India (all Bangalore); heavily .NET shop; ", India" appended to "IND, Karnataka, Bangalore" locations |
 
 ---
 
@@ -346,7 +347,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- All 49 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
+- All 50 pipelines run in **parallel** (`& pid=$!` pattern with `wait $pid || fail=1`)
 - Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
 - `seen_jobs_*.json` files are committed back after each run with `[skip ci]` to prevent re-triggering
 - Workflow is triggered manually (`workflow_dispatch`) — the cron expression in the file is intentionally left as a placeholder

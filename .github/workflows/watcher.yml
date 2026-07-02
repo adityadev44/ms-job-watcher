@@ -1,4 +1,4 @@
-name: Job Watcher (49 companies)
+name: Job Watcher (50 companies)
 
 on:
   schedule:
@@ -100,6 +100,7 @@ jobs:
           python -u src/run_factset.py & pid47=$!
           python -u src/run_paypal.py & pid48=$!
           python -u src/run_invesco.py & pid49=$!
+          python -u src/run_firstamerican.py & pid50=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -150,6 +151,7 @@ jobs:
           wait $pid47 || fail=1
           wait $pid48 || fail=1
           wait $pid49 || fail=1
+          wait $pid50 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -206,6 +208,7 @@ jobs:
           test -f seen_jobs_factset.json && git add seen_jobs_factset.json || true
           test -f seen_jobs_paypal.json && git add seen_jobs_paypal.json || true
           test -f seen_jobs_invesco.json && git add seen_jobs_invesco.json || true
+          test -f seen_jobs_firstamerican.json && git add seen_jobs_firstamerican.json || true
           test -f pipeline_failures.json && git add pipeline_failures.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"

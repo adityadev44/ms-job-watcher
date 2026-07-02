@@ -1165,6 +1165,30 @@ invesco_search:
     - "Chandigarh"
     - "Kochi"
 
+firstamerican_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant firstam.wd1.myworkdayjobs.com, site "faicareers" — First
+  # American (India)'s dedicated portal; every posting is an India job (all
+  # Bangalore currently), no country facet needed. First American is a
+  # heavily .NET shop. locationsText ("IND, Karnataka, Bangalore") gets
+  # ", India" appended in the fetcher.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
