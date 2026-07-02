@@ -12,7 +12,7 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 
 ## Filter Layers
 
-**3 layers apply to every company. Wells Fargo has a 4th (opt-in only).**
+**3 layers apply to every company. Some IT-services companies add a 4th (opt-in only, two variants).**
 
 **Layer 1 — Location**
 - Job location must contain "India"
@@ -25,10 +25,15 @@ Monitors job postings from multiple companies every 30 minutes via GitHub Action
 **Layer 3 — Skills**
 - Description must contain at least one **primary** .NET/C# skill (`.NET`, `C#`, `ASP.NET`, `Web API`, `SQL Server`, `T-SQL`, `Entity Framework`, `dotnet`) — Azure/Angular/TypeScript alone do not pass
 
-**Layer 4 — Tech in title (Wells Fargo only — do not add to new companies by default)**
+**Layer 4a — Tech in title (Wells Fargo, Accenture, Infosys, Cognizant, Capgemini, TCS — opt-in, do not add to new companies by default)**
 - Job title must explicitly contain a .NET/C# tech term (`require_tech_in_title` in config)
-- Added because WF's generic "Senior Software Engineer" titles are mostly Java/Python roles
-- Activated only in `run_wellsfargo.py` as a post-filter — not in `matcher.py`
+- Added because these companies' generic "Senior Software Engineer" titles are mostly Java/Python roles
+- Activated as a post-filter in each company's `run_<company>.py` — not in `matcher.py`
+
+**Layer 4b — Tech in description (HCLTech, DXC — opt-in, do not add to new companies by default)**
+- Description must explicitly contain a **narrow** .NET/C#/ASP.NET term (`require_tech_in_description` in config) — narrower than Layer 3's `primary_skills`, which also passes on SQL Server/EF/Web API alone
+- Used instead of 4a when titles carry no signal at all (generic "Software Engineer L1/L2/L3" bands) but a title-based cut would be too strict for real .NET roles hidden behind those bands
+- Activated as a post-filter in `run_hcltech.py` / `run_dxc.py` — not in `matcher.py`
 
 Deduplication: jobs already in `seen_jobs_<company>.json` are never re-alerted (all companies).
 
@@ -71,12 +76,17 @@ fetch_jobs()
             └─ primary_skills check    [broad-only] / [react-only] / [skill] tags
 ```
 
-**Layer 4 (Wells Fargo only — opt-in, never added by default):**
+**Layer 4a (opt-in, never added by default):**
 ```
-    └─ require_tech_in_title check     [title-tech] tag in near-miss log
+    └─ require_tech_in_title check       [title-tech] tag in near-miss log
 ```
+Implemented per-company as a post-filter after `find_matching_jobs` (e.g. `run_wellsfargo.py`, `run_accenture.py`, `run_tcs.py`). Not in `matcher.py`, not shared.
 
-Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. Not in `matcher.py`, not shared, not active for any other company.
+**Layer 4b (opt-in, never added by default):**
+```
+    └─ require_tech_in_description check [desc-tech] tag in near-miss log
+```
+Implemented per-company as a post-filter after `find_matching_jobs` (`run_hcltech.py`, `run_dxc.py`). Not in `matcher.py`, not shared.
 
 ---
 
@@ -128,15 +138,15 @@ Implemented in `run_wellsfargo.py` as a post-filter after `find_matching_jobs`. 
 | State Street | Workday | REST API (JSON) | `run_statestreet.py` | `statestreet.wd1.myworkdayjobs.com`, site `Global`; `Location_Country` facet (capitalised, like MMC); ~200 India jobs; Coimbatore excluded by name (location text omits "Tamil Nadu") |
 | Broadridge | Workday | REST API (JSON) | `run_broadridge.py` | `broadridge.wd5.myworkdayjobs.com`, site `Careers`; `Location_Country` facet; .NET-heavy shop, ~30 India jobs (Bengaluru/Hyderabad) |
 | Kyndryl | Workday | REST API (JSON) | `run_kyndryl.py` | `kyndryl.wd5.myworkdayjobs.com`, site `KyndrylProfessionalCareers`; `locationCountry` facet; ~290 India software jobs |
-| DXC Technology | Workday | REST API (JSON) | `run_dxc.py` | `dxctechnology.wd1.myworkdayjobs.com`, site `DXCJobs`; `locationCountry` facet; locations use state codes ("IND - TN - CHENNAI") — "- TN -" added to exclude_locations to cover all Tamil Nadu cities |
+| DXC Technology | Workday | REST API (JSON) | `run_dxc.py` | `dxctechnology.wd1.myworkdayjobs.com`, site `DXCJobs`; `locationCountry` facet; locations use state codes ("IND - TN - CHENNAI") — "- TN -" added to exclude_locations to cover all Tamil Nadu cities; Layer 4b (`require_tech_in_description`) active — IT-services generic titles |
 | Ameriprise | Workday | REST API (JSON) | `run_ameriprise.py` | `ameriprise.wd5.myworkdayjobs.com`, site `ameriprise`; `locationCountry` facet; Hyderabad/Noida/Gurugram |
 | FactSet | Workday | REST API (JSON) | `run_factset.py` | `factset.wd108.myworkdayjobs.com`, site `FactSetCareers`; no country facet — global fetch (~60 jobs) + client-side India filter; .NET-heavy Hyderabad centre |
 | PayPal | Workday | REST API (JSON) | `run_paypal.py` | `paypal.wd1.myworkdayjobs.com`, site `jobs`; no country facet — global fetch + word-boundary India filter (`\bindia\b`, so "Indianapolis" never passes); small India presence, 0 matches often expected |
 | Invesco | Workday | REST API (JSON) | `run_invesco.py` | `invesco.wd1.myworkdayjobs.com`, site `IVZ`; no country facet AND locationsText omits "India" ("Hyderabad, Telangana") — India detected via city/state tokens; .NET-heavy Hyderabad centre |
 | First American | Workday | REST API (JSON) | `run_firstamerican.py` | `firstam.wd1.myworkdayjobs.com`, site `faicareers` — First American India's dedicated portal, every posting is India (all Bangalore); heavily .NET shop; ", India" appended to "IND, Karnataka, Bangalore" locations |
 | Standard Chartered | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_standardchartered.py` | `jobs.standardchartered.com`, categoryId `9783657`; CSRF-token + session-cookie handshake; `facetFilters.jobLocationCountry` restricts to India (~280 jobs); keywords/location ignored server-side |
-| Wipro | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_wipro.py` | `careers.wipro.com`, categoryId `0`; same Unify pattern as Standard Chartered; ~3700 India jobs; `require_tech_in_title` mandatory — generic "SOFTWARE ENGINEER L3/L4" titles dominate |
-| HCLTech | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_hcltech.py` | `careers.hcltech.com`, India-only categoryId `9553955`; same Unify pattern, different field names (`custprimecity`/`custCountryRegion` instead of `jobLocationShort`/`jobLocationCountry`); ~8000 India jobs; `require_tech_in_title` mandatory |
+| Wipro | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_wipro.py` | `careers.wipro.com`, categoryId `0`; same Unify pattern as Standard Chartered; ~3700 India jobs; `require_tech_in_title` is configured but **not actually applied** — `run_wipro.py` never reads it (same dead-config bug HCLTech had, see Key Bugs); generic "SOFTWARE ENGINEER L3/L4" titles dominate, so results are noisier than intended until fixed |
+| HCLTech | SAP SuccessFactors (Job2Web Unify) | REST API (JSON) | `run_hcltech.py` | `careers.hcltech.com`, India-only categoryId `9553955`; same Unify pattern, different field names (`custprimecity`/`custCountryRegion` instead of `jobLocationShort`/`jobLocationCountry`); ~8000 India jobs; Layer 4b (`require_tech_in_description`) active — see Key Bugs, was previously a dead `require_tech_in_title` config |
 | HSBC | Eightfold | REST API (JSON) | `run_hsbc.py` | `portal.careers.hsbc.com` (migrated off the old Avature `mycareer.hsbc.com` portal); public `pcsx/search` API disabled tenant-wide — uses the "related jobs" widget endpoint anchored to a hardcoded real job ID; hard-capped at 10 results, no pagination |
 | MSCI | Algolia (direct) | REST API (JSON) | `run_msci.py` | `careers.msci.com` frontend queries Algolia directly (app `RVMOB42DFH`) with a public search-only API key; ~90 jobs total, ~18 India, single unfiltered query covers everything; full description embedded in each hit — no detail fetch needed |
 | Target | Workday | REST API (JSON) | `run_target.py` | `target.wd5.myworkdayjobs.com`, site `targetcareers`; India GCC in Bangalore; capitalised `Location_Country` facet; ~58 India software-engineer jobs |
@@ -251,7 +261,7 @@ Add a new section before `notifications:`:
     - "Tamil Nadu"
     - "Pune"
     - "Chandigarh"
-  # DO NOT add require_tech_in_title unless explicitly asked
+  # DO NOT add require_tech_in_title / require_tech_in_description unless explicitly asked
 ```
 
 Check if the company's ATS uses server-side keyword filtering (Workday does) or ignores keywords (Siemens doesn't). If it ignores keywords, all keywords will return the same result set and deduplication will handle it.
@@ -340,6 +350,8 @@ Verify:
 | HSBC search API returns 403 "PCSX is not enabled for this user" | HSBC's Eightfold tenant (`portal.careers.hsbc.com`, migrated off the old Avature `mycareer.hsbc.com`) disabled the public `pcsx/search` endpoint that Microsoft/Morgan Stanley use | Use the "related jobs" widget endpoint (`/api/apply/v2/jobs/{anchor_id}/jobs`) instead — requires a real, currently-open job ID as a similarity anchor (hardcoded, same pattern as Wells Fargo's India WID); hard-capped at 10 results, `start`/`num` ignored |
 | MSCI's own site API returned 404 | `careers.msci.com/api/jobs` doesn't exist — the site is an Algolia InstantSearch frontend calling Algolia directly, not a first-party API, despite `globalcareers-msci.icims.com` also existing (iCIMS handles applications, not search) | Call the Algolia REST endpoint directly with the public search-only API key captured from the page's network requests |
 | Micron/Verizon/Lowe's "India"-faceted results were mostly non-India (Singapore, Taiwan, Boise ID, Arlington TX, Richmond VA, Charlotte NC HQ) | Assumed every Workday tenant's `locationCountry`/`Location_Country` facet is authoritative like Fidelity/Citi/Northern Trust — some tenants' facets are simply broken and return jobs from other countries anyway (Micron: ~85% leakage) | Audited all newly-added companies by fetching with the India facet applied and manually checking `locationsText` for genuine non-India place names before trusting the facet; for broken tenants, stopped blindly appending ", India" (which would mislabel a Singapore job as India) and let `matcher.py`'s `is_india_job()` reject anything that doesn't genuinely say "India" — Lowe's needed a middle ground (city-name whitelist) since it has real Bengaluru postings that never say "India" either |
+| HCLTech's `require_tech_in_title` config had zero effect | `config.yaml` had the key set, comment said "MANDATORY", but `run_hcltech.py` (unlike `run_wellsfargo.py`/`run_accenture.py`/etc.) never actually read it or applied the filter — Layer 4 was silently dead since HCLTech was added | Replaced with a working Layer 4b (`require_tech_in_description`) checked against the description instead of the title, since HCLTech's titles are pure "Software Engineer L1/L2/L3" bands with zero tech signal. **Wipro has the identical dead-config bug and has not been fixed yet** — flagged in the company table above |
+| GitHub Actions sent the same job alert twice, 15–60 min apart | `actions/checkout` pins the commit SHA at *workflow-run creation* time, not job-*start* time. `concurrency: group: job-watcher` queues runs correctly, but frequent triggers (workflow_dispatch every ~15 min stacked on the 30-min cron) plus a ~30-45 min full run meant a queued run's checkout SHA often predated the seen_jobs commit the run ahead of it in the queue was about to push — so the queued run started from stale dedup state and re-alerted jobs already sent minutes earlier | Added a `git pull --ff-only origin master` step immediately after checkout, before any pipelines run (always a clean fast-forward — nothing local has been touched yet); also hardened the final push into a 3-attempt retry loop that fails the step loudly (`::error::`) instead of silently losing the commit if it's ever still rejected |
 
 ---
 
@@ -363,7 +375,8 @@ matching:                         # shared across ALL companies
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title: [...]    # OPTIONAL — Wells Fargo only, do not add by default
+  require_tech_in_title: [...]        # OPTIONAL Layer 4a — do not add by default
+  require_tech_in_description: [...]  # OPTIONAL Layer 4b — do not add by default
 ```
 
 ---

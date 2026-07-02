@@ -1059,6 +1059,9 @@ dxc_search:
   # locationCountry facet. locationsText format is "IND - TN - CHENNAI"
   # (state codes, no "India") — the fetcher appends ", India"; "- TN -"
   # below excludes ALL Tamil Nadu cities, which "Tamil Nadu" alone can't.
+  # IT-services shop with generic titles — require_tech_in_description
+  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET, not just
+  # any shared primary_skill (SQL Server/EF alone could be a Java role).
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1075,6 +1078,10 @@ dxc_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 ameriprise_search:
   max_listings: 200
@@ -1246,8 +1253,12 @@ hcltech_search:
   inter_page_delay: 0.2
   # Same SuccessFactors Unify platform, tenant careers.hcltech.com, India-only
   # category page (categoryId 9553955). ~8000 India jobs cached in-module;
-  # overwhelmingly generic IT-services titles -- require_tech_in_title is
-  # MANDATORY.
+  # overwhelmingly generic IT-services titles -- require_tech_in_description
+  # is MANDATORY (narrower than the shared primary_skills check: only
+  # .NET/C#/ASP.NET core terms count, not SQL Server/EF/Web API alone,
+  # since boilerplate JDs namedrop many languages' skills). NOTE: this used
+  # to be require_tech_in_title, but the runner never actually applied it
+  # (dead config) -- replaced with a working description-based check.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1263,12 +1274,10 @@ hcltech_search:
     - "Pune"
     - "Chandigarh"
     - "Kochi"
-  require_tech_in_title:
+  require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
-    - "dotnet"
-    - "dot net"
 
 hsbc_search:
   max_listings: 10

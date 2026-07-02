@@ -20,6 +20,15 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v6
 
+      - name: Sync to latest master
+        # actions/checkout pins the SHA at run-creation time, not job-start time.
+        # concurrency queues runs, and a full pipeline run takes 30-45 min, so a
+        # queued run can sit behind one that finishes and pushes new seen_jobs
+        # commits mid-wait. Without this, the queued run starts from a stale
+        # checkout, misses those commits, and re-alerts jobs already sent.
+        # Safe fast-forward: nothing local has been touched yet at this point.
+        run: git pull --ff-only origin master
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -257,6 +266,17 @@ jobs:
             echo "No new jobs this run"
           else
             git commit -m "chore: update seen_jobs.json [skip ci]"
-            git pull --rebase origin master
-            git push
+            pushed=0
+            for attempt in 1 2 3; do
+              if git pull --rebase origin master && git push; then
+                pushed=1
+                break
+              fi
+              echo "push attempt $attempt failed, retrying..."
+              sleep 5
+            done
+            if [ "$pushed" -ne 1 ]; then
+              echo "::error::Failed to push seen_jobs state after 3 attempts — dedup state for this run's new matches was NOT saved; expect duplicate alerts next run."
+              exit 1
+            fi
           fi
