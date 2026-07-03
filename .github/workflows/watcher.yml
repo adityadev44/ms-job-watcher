@@ -1,4 +1,4 @@
-name: Job Watcher (64 companies)
+name: Job Watcher (69 companies)
 
 on:
   schedule:
@@ -124,6 +124,11 @@ jobs:
           python -u src/run_lowes.py & pid62=$!
           python -u src/run_ebay.py & pid63=$!
           python -u src/run_generalmotors.py & pid64=$!
+          python -u src/run_bankofamerica.py & pid65=$!
+          python -u src/run_ltimindtree.py & pid66=$!
+          python -u src/run_persistent.py & pid67=$!
+          python -u src/run_genpact.py & pid68=$!
+          python -u src/run_ibm.py & pid69=$!
           fail=0
           wait $pid1 || fail=1
           wait $pid2 || fail=1
@@ -189,6 +194,11 @@ jobs:
           wait $pid62 || fail=1
           wait $pid63 || fail=1
           wait $pid64 || fail=1
+          wait $pid65 || fail=1
+          wait $pid66 || fail=1
+          wait $pid67 || fail=1
+          wait $pid68 || fail=1
+          wait $pid69 || fail=1
           exit $fail
 
       - name: Save updated seen_jobs files
@@ -261,6 +271,11 @@ jobs:
           test -f seen_jobs_lowes.json && git add seen_jobs_lowes.json || true
           test -f seen_jobs_ebay.json && git add seen_jobs_ebay.json || true
           test -f seen_jobs_generalmotors.json && git add seen_jobs_generalmotors.json || true
+          test -f seen_jobs_bankofamerica.json && git add seen_jobs_bankofamerica.json || true
+          test -f seen_jobs_ltimindtree.json && git add seen_jobs_ltimindtree.json || true
+          test -f seen_jobs_persistent.json && git add seen_jobs_persistent.json || true
+          test -f seen_jobs_genpact.json && git add seen_jobs_genpact.json || true
+          test -f seen_jobs_ibm.json && git add seen_jobs_ibm.json || true
           test -f pipeline_failures.json && git add pipeline_failures.json || true
           if git diff --staged --quiet; then
             echo "No new jobs this run"

@@ -1901,6 +1901,178 @@ generalmotors_search:
     - "Nagpur"
     - "Madurai"
 
+bankofamerica_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Custom AEM-backed servlet at careers.bankofamerica.com/services/
+  # jobssearchservlet. Keyword/country params are ignored server-side —
+  # ~1760 global jobs fetched and cached in one pass, ~62 India (mostly
+  # Chennai/Mumbai/Hyderabad; Chennai excluded by default). require_tech_in_
+  # description narrows GBS technology postings to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+ltimindtree_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # careers.ltimindtree.com's public search has ~80 overseas-only roles with
+  # zero India results — actual India hiring runs through a separate
+  # RippleHire-hosted site (ltimindtree.ripplehire.com), linked from
+  # ltm.com/india-careers. Unlike most fetchers here, RippleHire applies the
+  # keyword server-side, so normal per-keyword pagination works.
+  # require_tech_in_description narrows generic "Specialist - Software
+  # Engineering" titles (no tech signal) to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+persistent_search:
+  max_listings: 800
+  inter_page_delay: 0.2
+  # Zwayam ATS (apipersistent.zwayam.com). Search keyword is unreliable
+  # (loose OR-match) so all ~700 global postings are cached once and
+  # filtered client-side for India (~10-15% of the pool). City is parsed
+  # from the jobUrl slug since the API's own location field is just
+  # "India" — without it Pune (Persistent's HQ, heavy postings there)
+  # wouldn't be excluded. require_tech_in_description narrows a large
+  # multi-stack IT-services shop to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+genpact_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday tenant genpact.wd108.myworkdayjobs.com, site External_Careers.
+  # No usable location facet exposed (locationMainGroup has no India
+  # sub-value) — global fetch per keyword (searchText narrows the ~2000-
+  # capped total) + client-side India filter via locationsText.
+  # require_tech_in_description narrows a large multi-stack BPO/IT-services
+  # shop to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+ibm_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Elasticsearch-backed search API at www-api.ibm.com/search/api/v2.
+  # field_keyword_05 == "India" facet filters server-side (~370 jobs for
+  # "software engineer"). Job-detail pages sit behind AWS WAF bot-challenge
+  # tokens — plain requests get a 202/empty body, so description fetch uses
+  # headless Firefox (Playwright) to solve the challenge, same pattern as
+  # Honeywell. require_tech_in_description narrows enterprise-consulting
+  # boilerplate JDs to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
