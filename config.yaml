@@ -273,6 +273,8 @@ dell_search:
 oracle_search:
   max_listings: 200
   inter_page_delay: 0.3
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -293,6 +295,10 @@ oracle_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 spglobal_search:
   max_listings: 300
@@ -1677,6 +1683,8 @@ micron_search:
   # "India"-faceted results are actually Singapore/Taiwan/Boise) -- the
   # fetcher does NOT append ", India" and relies on matcher.py's
   # is_india_job() to filter genuinely.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1697,6 +1705,10 @@ micron_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 sabre_search:
   max_listings: 200
@@ -1801,6 +1813,8 @@ lowes_search:
   # locations like Perris CA/Richmond VA/Charlotte NC HQ leak through) --
   # the fetcher appends ", India" only for recognised India city names
   # (Bengaluru etc), not blindly.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1821,12 +1835,18 @@ lowes_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 ebay_search:
   max_listings: 200
   inter_page_delay: 0.2
   # Workday tenant ebay.wd5.myworkdayjobs.com, site "apply". eBay's India
   # engineering centre is in Bengaluru. Capitalised "Location_Country" facet.
+  # require_tech_in_description narrows to jobs whose JD explicitly names
+  # .NET/C#/ASP.NET, not just any shared primary_skill.
   keywords:
     - "software engineer"
     - "senior software engineer"
@@ -1847,6 +1867,10 @@ ebay_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
 
 generalmotors_search:
   max_listings: 200

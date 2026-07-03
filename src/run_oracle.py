@@ -19,7 +19,7 @@ if hasattr(sys.stdout, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent))
 
 import oracle_fetcher as _oracle_mod
-from matcher import find_matching_jobs, load_config
+from matcher import find_matching_jobs, load_config, _normalize_text
 from notifier import notify, notify_pipeline_error, reset_failure_count
 from main import load_seen_ids, save_seen_ids
 
@@ -41,6 +41,27 @@ def run_oracle_pipeline(
     }
 
     total_fetched, matched = find_matching_jobs(oracle_cfg, _oracle_mod)
+
+    # Oracle-only: require a core .NET/C#/ASP.NET term in the description,
+    # not just any shared primary_skill (SQL Server/EF alone could easily
+    # be a Java role).
+    tech_terms = whole_cfg["oracle_search"].get("require_tech_in_description", [])
+    if tech_terms:
+        normed_terms = [_normalize_text(t) for t in tech_terms]
+        desc_passed = []
+        desc_dropped = []
+        for j in matched:
+            normed_desc = _normalize_text(j.get("description", ""))
+            if any(t in normed_desc for t in normed_terms):
+                desc_passed.append(j)
+            else:
+                desc_dropped.append(f"[desc-tech]     {j['title']}")
+        if desc_dropped:
+            print("Oracle description-tech filtered out (near-misses):")
+            for line in desc_dropped:
+                print(f"  {line}")
+        matched = desc_passed
+
     new_matches = [j for j in matched if j["id"] not in seen_ids]
 
     alert_sent = False
