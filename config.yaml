@@ -2073,6 +2073,183 @@ ibm_search:
     - "C#"
     - "ASP.NET"
 
+techmahindra_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Legacy ASP.NET WebForms site (careers.techmahindra.com) with an AJAX
+  # UpdatePanel search form — country-select fires a partial postback that
+  # needs exact ViewState/EventValidation/X-MicrosoftAjax headers to
+  # replicate; fetcher drives headless Firefox instead (same approach as
+  # Honeywell). ~81 India jobs, keyword not applied server-side — shared
+  # title/skill filters do the real narrowing. Job-detail pages ARE plain
+  # server-rendered HTML (no browser needed there).
+  # require_tech_in_description narrows a large multi-stack IT-services
+  # shop to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+virtusa_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Taleo ATS (virtusa.taleo.net). Search REST endpoint
+  # (careersection/rest/jobboard/searchjobs) needs TZ/tzname/X-Requested-With
+  # headers matching the browser or it 500s; India filtered server-side via
+  # LOCATION facet id 200100250 (~720 jobs). Job-detail description fetch
+  # uses headless Firefox (Playwright) since the real detail endpoint is a
+  # ~13KB JSF-postback form too fragile to hand-replicate.
+  # require_tech_in_description narrows a large multi-stack IT-services shop
+  # to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+hexaware_search:
+  max_listings: 300
+  inter_page_delay: 0.3
+  # Oracle HCM CE (not Workday). Tenant fa-etqo-saasfaprod1.fa.ocs.oraclecloud.com,
+  # site CX_1. Same REST pattern as Chubb/Amex/Icertis — plain requests, no
+  # Playwright. No location facet ID used — fetches globally per keyword and
+  # filters India client-side via PrimaryLocation, same conservative approach
+  # as Icertis/WTW. require_tech_in_description narrows a large multi-stack
+  # IT-services shop to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+societegenerale_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # careers.societegenerale.com's own client-side search API needs a bearer
+  # token that 403s for anything but the page's own first-load request
+  # (even replayed from within the same browser session) — not viable.
+  # The "all-job-offers" listing page is fully server-rendered instead: one
+  # plain GET returns all ~694 postings in a single page, no pagination.
+  # Job-detail pages carry a clean schema.org JobPosting JSON-LD block
+  # (plain-text description + datePosted). require_tech_in_description
+  # narrows a large multi-department bank to explicit .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
+schwab_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # www.schwabjobs.com — iCIMS-backed (career-ind-schwab.icims.com handles
+  # Apply), but search/listing pages are plain server-rendered HTML, no API
+  # needed. India filtered server-side via /search-jobs/india path (~19
+  # jobs, small Hyderabad presence). Job-detail pages carry a clean
+  # schema.org JobPosting JSON-LD block. require_tech_in_description
+  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET.
+  keywords:
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  locations:
+    - "India"
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
