@@ -12,6 +12,7 @@ import os
 import smtplib
 import tempfile
 import threading
+import time
 from dataclasses import dataclass
 from email.message import EmailMessage
 from pathlib import Path
@@ -69,7 +70,18 @@ def _write_failures(data: dict) -> None:
     with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, suffix=".tmp", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
         tmp = f.name
-    os.replace(tmp, _FAILURES_PATH)
+    # os.replace() can transiently raise PermissionError on Windows if another
+    # handle (e.g. a virus scanner) has the destination briefly open; retry
+    # instead of losing the failure-count update.
+    last_exc: OSError | None = None
+    for attempt in range(3):
+        try:
+            os.replace(tmp, _FAILURES_PATH)
+            return
+        except PermissionError as exc:
+            last_exc = exc
+            time.sleep(0.05 * (attempt + 1))
+    raise last_exc
 
 
 def format_message(jobs: list[dict], source: str = "Microsoft") -> str:
