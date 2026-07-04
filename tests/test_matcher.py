@@ -414,6 +414,23 @@ def test_known_non_candidate_does_not_change_total(monkeypatch):
     assert [job["id"] for job in matched] == [GOOD_JOB["id"]]
 
 
+def test_find_matching_jobs_survives_non_rate_limit_fetch_error(monkeypatch, capsys):
+    """A raw exception from fetch_jobs (e.g. json.JSONDecodeError on an empty-body
+    200 response) must not crash the whole pipeline -- only RateLimitError used
+    to be handled; any other exception used to propagate uncaught."""
+    def _flaky_fetch(keyword, location, *, num=20, start=0, sort_by="date", timeout=20):
+        raise ValueError("Expecting value: line 1 column 1 (char 0)")
+
+    monkeypatch.setattr("matcher.fetch_jobs", _flaky_fetch)
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: GOOD_DESCRIPTION)
+
+    total, matched = find_matching_jobs(CONFIG_PATH)
+
+    assert total == 0
+    assert matched == []
+    assert "search fetch failed" in capsys.readouterr().out
+
+
 def test_find_matching_jobs_keeps_job_when_description_fetch_fails(monkeypatch):
     """If all fetch attempts for a description fail, the job must still be in results.
 

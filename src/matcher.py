@@ -198,6 +198,19 @@ def find_matching_jobs(
                         f"after {start} results — {exc}; skipping remaining pages"
                     )
                     break
+                except Exception as exc:
+                    # Fetchers only convert *some* persistent failures into
+                    # RateLimitError (e.g. a 429). An occasional HTTP 200 with
+                    # an empty/non-JSON body -- observed intermittently under
+                    # load -- raises a raw JSONDecodeError instead, which used
+                    # to propagate uncaught and crash this company's entire
+                    # pipeline. Treat any other exception the same as a rate
+                    # limit: stop paginating this keyword/location, keep going.
+                    print(
+                        f"  [warn] search fetch failed for '{keyword}' / '{location}' "
+                        f"after {start} results — {exc}; skipping remaining pages"
+                    )
+                    break
                 if not page:
                     break
                 for job in page:
