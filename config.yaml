@@ -25,6 +25,8 @@ _defaults:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+    - "Kolkata"
+    - "Indore"
 
 search:
   max_listings: 350
@@ -573,6 +575,8 @@ statestreet_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+    - "Kolkata"
+    - "Indore"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -622,6 +626,8 @@ dxc_search:
     - "Lucknow"
     - "Nagpur"
     - "Madurai"
+    - "Kolkata"
+    - "Indore"
   require_tech_in_description:
     - ".NET"
     - "C#"

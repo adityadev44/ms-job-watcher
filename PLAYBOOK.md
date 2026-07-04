@@ -16,7 +16,7 @@ Monitors 74 company career sites every 30 minutes via GitHub Actions. Filters fo
 
 **Layer 1 — Location**
 - Job location must contain "India"
-- Must not be Chennai, Tamil Nadu, Pune, Chandigarh, Kochi, Kerala, Trivandrum, Lucknow, Nagpur, or Madurai (configured per company via `exclude_locations`)
+- Must not be Chennai, Tamil Nadu, Pune, Chandigarh, Kochi, Kerala, Trivandrum, Lucknow, Nagpur, Madurai, Kolkata, or Indore (configured per company via `exclude_locations`)
 
 **Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
