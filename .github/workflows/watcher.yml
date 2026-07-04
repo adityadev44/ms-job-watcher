@@ -1,4 +1,4 @@
-name: Job Watcher (74 companies)
+name: Job Watcher
 
 on:
   schedule:
@@ -7,10 +7,10 @@ on:
 
 concurrency:
   group: job-watcher
-  cancel-in-progress: false    # queue runs; never allow two to write seen_jobs files simultaneously
+  cancel-in-progress: false    # queue runs; never allow two to write seen state simultaneously
 
 permissions:
-  contents: write              # needed so the job can commit seen_jobs.json back
+  contents: write              # needed so the job can commit seen state back
 
 jobs:
   watch:
@@ -22,11 +22,8 @@ jobs:
 
       - name: Sync to latest master
         # actions/checkout pins the SHA at run-creation time, not job-start time.
-        # concurrency queues runs, and a full pipeline run takes 30-45 min, so a
-        # queued run can sit behind one that finishes and pushes new seen_jobs
-        # commits mid-wait. Without this, the queued run starts from a stale
-        # checkout, misses those commits, and re-alerts jobs already sent.
-        # Safe fast-forward: nothing local has been touched yet at this point.
+        # Queued runs must fast-forward past state commits made while they waited,
+        # otherwise already-alerted jobs can be sent again.
         run: git pull --ff-only origin master
 
       - name: Set up Python
@@ -52,250 +49,28 @@ jobs:
       - name: Install Playwright system deps
         run: playwright install-deps firefox
 
-      - name: Run all watchers in parallel
+      - name: Run all watchers with bounded concurrency
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
-        run: |
-          python -u src/main.py & pid1=$!
-          python -u src/run_optum.py & pid2=$!
-          python -u src/run_amazon.py & pid3=$!
-          python -u src/run_siemens.py & pid4=$!
-          python -u src/run_honeywell.py & pid5=$!
-          python -u src/run_wellsfargo.py & pid6=$!
-          python -u src/run_dell.py & pid7=$!
-          python -u src/run_oracle.py & pid8=$!
-          python -u src/run_metlife.py & pid9=$!
-          python -u src/run_fis.py & pid10=$!
-          python -u src/run_chubb.py & pid11=$!
-          python -u src/run_spglobal.py & pid12=$!
-          python -u src/run_wtw.py & pid13=$!
-          python -u src/run_morningstar.py & pid14=$!
-          python -u src/run_spglobal_careers.py & pid15=$!
-          python -u src/run_gallagher.py & pid16=$!
-          python -u src/run_icertis.py & pid17=$!
-          python -u src/run_maersk.py & pid18=$!
-          python -u src/run_nomura.py & pid19=$!
-          python -u src/run_fiserv.py & pid20=$!
-          python -u src/run_fidelity.py & pid21=$!
-          python -u src/run_morganstanley.py & pid22=$!
-          python -u src/run_amex.py & pid23=$!
-          python -u src/run_marshmclennan.py & pid24=$!
-          python -u src/run_jpmorgan.py & pid25=$!
-          python -u src/run_synchrony.py & pid26=$!
-          python -u src/run_mastercard.py & pid27=$!
-          python -u src/run_goldmansachs.py & pid28=$!
-          python -u src/run_nagarro.py & pid29=$!
-          python -u src/run_citi.py & pid30=$!
-          python -u src/run_bny.py & pid31=$!
-          python -u src/run_northerntrust.py & pid32=$!
-          python -u src/run_deutsche.py & pid33=$!
-          python -u src/run_barclays.py & pid34=$!
-          python -u src/run_ubs.py & pid35=$!
-          python -u src/run_accenture.py & pid36=$!
-          python -u src/run_infosys.py & pid37=$!
-          python -u src/run_cognizant.py & pid38=$!
-          python -u src/run_capgemini.py & pid39=$!
-          python -u src/run_tcs.py & pid40=$!
-          python -u src/run_lseg.py & pid41=$!
-          python -u src/run_statestreet.py & pid42=$!
-          python -u src/run_broadridge.py & pid43=$!
-          python -u src/run_kyndryl.py & pid44=$!
-          python -u src/run_dxc.py & pid45=$!
-          python -u src/run_ameriprise.py & pid46=$!
-          python -u src/run_factset.py & pid47=$!
-          python -u src/run_paypal.py & pid48=$!
-          python -u src/run_invesco.py & pid49=$!
-          python -u src/run_firstamerican.py & pid50=$!
-          python -u src/run_standardchartered.py & pid51=$!
-          python -u src/run_wipro.py & pid52=$!
-          python -u src/run_hcltech.py & pid53=$!
-          python -u src/run_hsbc.py & pid54=$!
-          python -u src/run_msci.py & pid55=$!
-          python -u src/run_target.py & pid56=$!
-          python -u src/run_adobe.py & pid57=$!
-          python -u src/run_micron.py & pid58=$!
-          python -u src/run_sabre.py & pid59=$!
-          python -u src/run_autodesk.py & pid60=$!
-          python -u src/run_verizon.py & pid61=$!
-          python -u src/run_lowes.py & pid62=$!
-          python -u src/run_ebay.py & pid63=$!
-          python -u src/run_generalmotors.py & pid64=$!
-          python -u src/run_bankofamerica.py & pid65=$!
-          python -u src/run_ltimindtree.py & pid66=$!
-          python -u src/run_persistent.py & pid67=$!
-          python -u src/run_genpact.py & pid68=$!
-          python -u src/run_ibm.py & pid69=$!
-          python -u src/run_techmahindra.py & pid70=$!
-          python -u src/run_virtusa.py & pid71=$!
-          python -u src/run_hexaware.py & pid72=$!
-          python -u src/run_societegenerale.py & pid73=$!
-          python -u src/run_schwab.py & pid74=$!
-          fail=0
-          wait $pid1 || fail=1
-          wait $pid2 || fail=1
-          wait $pid3 || fail=1
-          wait $pid4 || fail=1
-          wait $pid5 || fail=1
-          wait $pid6 || fail=1
-          wait $pid7 || fail=1
-          wait $pid8 || fail=1
-          wait $pid9 || fail=1
-          wait $pid10 || fail=1
-          wait $pid11 || fail=1
-          wait $pid12 || fail=1
-          wait $pid13 || fail=1
-          wait $pid14 || fail=1
-          wait $pid15 || fail=1
-          wait $pid16 || fail=1
-          wait $pid17 || fail=1
-          wait $pid18 || fail=1
-          wait $pid19 || fail=1
-          wait $pid20 || fail=1
-          wait $pid21 || fail=1
-          wait $pid22 || fail=1
-          wait $pid23 || fail=1
-          wait $pid24 || fail=1
-          wait $pid25 || fail=1
-          wait $pid26 || fail=1
-          wait $pid27 || fail=1
-          wait $pid28 || fail=1
-          wait $pid29 || fail=1
-          wait $pid30 || fail=1
-          wait $pid31 || fail=1
-          wait $pid32 || fail=1
-          wait $pid33 || fail=1
-          wait $pid34 || fail=1
-          wait $pid35 || fail=1
-          wait $pid36 || fail=1
-          wait $pid37 || fail=1
-          wait $pid38 || fail=1
-          wait $pid39 || fail=1
-          wait $pid40 || fail=1
-          wait $pid41 || fail=1
-          wait $pid42 || fail=1
-          wait $pid43 || fail=1
-          wait $pid44 || fail=1
-          wait $pid45 || fail=1
-          wait $pid46 || fail=1
-          wait $pid47 || fail=1
-          wait $pid48 || fail=1
-          wait $pid49 || fail=1
-          wait $pid50 || fail=1
-          wait $pid51 || fail=1
-          wait $pid52 || fail=1
-          wait $pid53 || fail=1
-          wait $pid54 || fail=1
-          wait $pid55 || fail=1
-          wait $pid56 || fail=1
-          wait $pid57 || fail=1
-          wait $pid58 || fail=1
-          wait $pid59 || fail=1
-          wait $pid60 || fail=1
-          wait $pid61 || fail=1
-          wait $pid62 || fail=1
-          wait $pid63 || fail=1
-          wait $pid64 || fail=1
-          wait $pid65 || fail=1
-          wait $pid66 || fail=1
-          wait $pid67 || fail=1
-          wait $pid68 || fail=1
-          wait $pid69 || fail=1
-          wait $pid70 || fail=1
-          wait $pid71 || fail=1
-          wait $pid72 || fail=1
-          wait $pid73 || fail=1
-          wait $pid74 || fail=1
-          exit $fail
+        run: python -u src/run_all.py --workers 10
 
-      - name: Save updated seen_jobs files
+      - name: Save updated watcher state
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config merge.jsonunion.driver "python3 scripts/merge_seen_jobs_union.py %O %A %B"
-          git add seen_jobs.json
-          test -f seen_jobs_optum.json && git add seen_jobs_optum.json || true
-          test -f seen_jobs_amazon.json && git add seen_jobs_amazon.json || true
-          test -f seen_jobs_siemens.json && git add seen_jobs_siemens.json || true
-          test -f seen_jobs_honeywell.json && git add seen_jobs_honeywell.json || true
-          test -f seen_jobs_wellsfargo.json && git add seen_jobs_wellsfargo.json || true
-          test -f seen_jobs_dell.json && git add seen_jobs_dell.json || true
-          test -f seen_jobs_oracle.json && git add seen_jobs_oracle.json || true
-          test -f seen_jobs_metlife.json && git add seen_jobs_metlife.json || true
-          test -f seen_jobs_fis.json && git add seen_jobs_fis.json || true
-          test -f seen_jobs_chubb.json && git add seen_jobs_chubb.json || true
-          test -f seen_jobs_spglobal.json && git add seen_jobs_spglobal.json || true
-          test -f seen_jobs_wtw.json && git add seen_jobs_wtw.json || true
-          test -f seen_jobs_morningstar.json && git add seen_jobs_morningstar.json || true
-          test -f seen_jobs_spglobal_careers.json && git add seen_jobs_spglobal_careers.json || true
-          test -f seen_jobs_gallagher.json && git add seen_jobs_gallagher.json || true
-          test -f seen_jobs_icertis.json && git add seen_jobs_icertis.json || true
-          test -f seen_jobs_maersk.json && git add seen_jobs_maersk.json || true
-          test -f seen_jobs_nomura.json && git add seen_jobs_nomura.json || true
-          test -f seen_jobs_fiserv.json && git add seen_jobs_fiserv.json || true
-          test -f seen_jobs_fidelity.json && git add seen_jobs_fidelity.json || true
-          test -f seen_jobs_morganstanley.json && git add seen_jobs_morganstanley.json || true
-          test -f seen_jobs_amex.json && git add seen_jobs_amex.json || true
-          test -f seen_jobs_marshmclennan.json && git add seen_jobs_marshmclennan.json || true
-          test -f seen_jobs_jpmorgan.json && git add seen_jobs_jpmorgan.json || true
-          test -f seen_jobs_synchrony.json && git add seen_jobs_synchrony.json || true
-          test -f seen_jobs_mastercard.json && git add seen_jobs_mastercard.json || true
-          test -f seen_jobs_goldmansachs.json && git add seen_jobs_goldmansachs.json || true
-          test -f seen_jobs_nagarro.json && git add seen_jobs_nagarro.json || true
-          test -f seen_jobs_citi.json && git add seen_jobs_citi.json || true
-          test -f seen_jobs_bny.json && git add seen_jobs_bny.json || true
-          test -f seen_jobs_northerntrust.json && git add seen_jobs_northerntrust.json || true
-          test -f seen_jobs_deutsche.json && git add seen_jobs_deutsche.json || true
-          test -f seen_jobs_barclays.json && git add seen_jobs_barclays.json || true
-          test -f seen_jobs_ubs.json && git add seen_jobs_ubs.json || true
-          test -f seen_jobs_accenture.json && git add seen_jobs_accenture.json || true
-          test -f seen_jobs_infosys.json && git add seen_jobs_infosys.json || true
-          test -f seen_jobs_cognizant.json && git add seen_jobs_cognizant.json || true
-          test -f seen_jobs_capgemini.json && git add seen_jobs_capgemini.json || true
-          test -f seen_jobs_tcs.json && git add seen_jobs_tcs.json || true
-          test -f seen_jobs_lseg.json && git add seen_jobs_lseg.json || true
-          test -f seen_jobs_statestreet.json && git add seen_jobs_statestreet.json || true
-          test -f seen_jobs_broadridge.json && git add seen_jobs_broadridge.json || true
-          test -f seen_jobs_kyndryl.json && git add seen_jobs_kyndryl.json || true
-          test -f seen_jobs_dxc.json && git add seen_jobs_dxc.json || true
-          test -f seen_jobs_ameriprise.json && git add seen_jobs_ameriprise.json || true
-          test -f seen_jobs_factset.json && git add seen_jobs_factset.json || true
-          test -f seen_jobs_paypal.json && git add seen_jobs_paypal.json || true
-          test -f seen_jobs_invesco.json && git add seen_jobs_invesco.json || true
-          test -f seen_jobs_firstamerican.json && git add seen_jobs_firstamerican.json || true
-          test -f seen_jobs_standardchartered.json && git add seen_jobs_standardchartered.json || true
-          test -f seen_jobs_wipro.json && git add seen_jobs_wipro.json || true
-          test -f seen_jobs_hcltech.json && git add seen_jobs_hcltech.json || true
-          test -f seen_jobs_hsbc.json && git add seen_jobs_hsbc.json || true
-          test -f seen_jobs_msci.json && git add seen_jobs_msci.json || true
-          test -f seen_jobs_target.json && git add seen_jobs_target.json || true
-          test -f seen_jobs_adobe.json && git add seen_jobs_adobe.json || true
-          test -f seen_jobs_micron.json && git add seen_jobs_micron.json || true
-          test -f seen_jobs_sabre.json && git add seen_jobs_sabre.json || true
-          test -f seen_jobs_autodesk.json && git add seen_jobs_autodesk.json || true
-          test -f seen_jobs_verizon.json && git add seen_jobs_verizon.json || true
-          test -f seen_jobs_lowes.json && git add seen_jobs_lowes.json || true
-          test -f seen_jobs_ebay.json && git add seen_jobs_ebay.json || true
-          test -f seen_jobs_generalmotors.json && git add seen_jobs_generalmotors.json || true
-          test -f seen_jobs_bankofamerica.json && git add seen_jobs_bankofamerica.json || true
-          test -f seen_jobs_ltimindtree.json && git add seen_jobs_ltimindtree.json || true
-          test -f seen_jobs_persistent.json && git add seen_jobs_persistent.json || true
-          test -f seen_jobs_genpact.json && git add seen_jobs_genpact.json || true
-          test -f seen_jobs_ibm.json && git add seen_jobs_ibm.json || true
-          test -f seen_jobs_techmahindra.json && git add seen_jobs_techmahindra.json || true
-          test -f seen_jobs_virtusa.json && git add seen_jobs_virtusa.json || true
-          test -f seen_jobs_hexaware.json && git add seen_jobs_hexaware.json || true
-          test -f seen_jobs_societegenerale.json && git add seen_jobs_societegenerale.json || true
-          test -f seen_jobs_schwab.json && git add seen_jobs_schwab.json || true
-          test -f pipeline_failures.json && git add pipeline_failures.json || true
+          # -u deliberately stages only already-tracked state files. The quoted
+          # pathspec covers Microsoft's seen_jobs.json and every company suffix.
+          git add -u -- 'seen_jobs*.json' pipeline_failures.json
           if git diff --staged --quiet; then
-            echo "No new jobs this run"
+            echo "No watcher state changes this run"
           else
-            git commit -m "chore: update seen_jobs.json [skip ci]"
+            git commit -m "chore: update watcher state [skip ci]"
             pushed=0
             for attempt in 1 2 3; do
               if git pull --rebase origin master && git push; then
@@ -306,7 +81,7 @@ jobs:
               sleep 5
             done
             if [ "$pushed" -ne 1 ]; then
-              echo "::error::Failed to push seen_jobs state after 3 attempts — dedup state for this run's new matches was NOT saved; expect duplicate alerts next run."
+              echo "::error::Failed to push watcher state after 3 attempts -- dedup state was NOT saved; expect duplicate alerts next run."
               exit 1
             fi
           fi

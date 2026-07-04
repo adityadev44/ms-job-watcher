@@ -3,7 +3,10 @@ Tests for src/notifier.py.
 
 All network calls are mocked — nothing is actually sent.
 """
+import json
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -12,9 +15,11 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from notifier import (
+    DeliveryResult,
     _build_telegram_chunks,
     format_message,
     notify,
+    notify_pipeline_error,
     send_email,
     send_telegram,
 )
@@ -207,9 +212,10 @@ def test_send_email_multiple_recipients():
 
 def test_notify_does_nothing_for_empty_list():
     with patch("notifier.send_telegram") as mock_tg, patch("notifier.send_email") as mock_em:
-        notify([])
+        result = notify([])
     mock_tg.assert_not_called()
     mock_em.assert_not_called()
+    assert result == DeliveryResult()
 
 
 def test_notify_calls_both_channels(monkeypatch):
@@ -220,10 +226,56 @@ def test_notify_calls_both_channels(monkeypatch):
     monkeypatch.setenv("ALERT_RECIPIENT", "r@example.com")
 
     with patch("notifier.send_telegram") as mock_tg, patch("notifier.send_email") as mock_em:
-        notify(ONE_JOB)
+        result = notify(ONE_JOB)
 
     mock_tg.assert_called_once()
     mock_em.assert_called_once()
+    assert result.telegram_attempted and result.telegram_succeeded
+    assert result.email_attempted and result.email_succeeded
+    assert result.should_mark_seen
+
+
+def test_notify_all_configured_channels_failed(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "cid")
+    monkeypatch.setenv("GMAIL_USER", "u@gmail.com")
+    monkeypatch.setenv("GMAIL_APP_PASSWORD", "pw")
+    monkeypatch.setenv("ALERT_RECIPIENT", "r@example.com")
+
+    with patch("notifier.send_telegram", side_effect=Exception("telegram down")), \
+         patch("notifier.send_email", side_effect=Exception("email down")):
+        result = notify(ONE_JOB)
+
+    assert result.any_attempted
+    assert not result.any_succeeded
+    assert not result.should_mark_seen
+
+
+def test_notify_no_config_preserves_local_seen_semantics(monkeypatch):
+    for name in (
+        "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "GMAIL_USER",
+        "GMAIL_APP_PASSWORD", "ALERT_RECIPIENT",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    result = notify(ONE_JOB)
+
+    assert not result.any_attempted
+    assert result.should_mark_seen
+
+
+def test_notify_partial_config_does_not_advance_seen_state(monkeypatch):
+    for name in (
+        "TELEGRAM_CHAT_ID", "GMAIL_USER", "GMAIL_APP_PASSWORD", "ALERT_RECIPIENT",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-without-chat")
+
+    result = notify(ONE_JOB)
+
+    assert result.telegram_attempted
+    assert not result.any_succeeded
+    assert not result.should_mark_seen
 
 
 def test_notify_skips_telegram_when_token_missing(monkeypatch):
@@ -331,3 +383,29 @@ def test_notify_email_failure_does_not_block_telegram(monkeypatch):
         notify(ONE_JOB)   # must not raise
 
     mock_tg.assert_called_once()
+
+
+def test_pipeline_failure_updates_are_thread_safe(monkeypatch, tmp_path):
+    """Concurrent companies must not erase each other's failure counters."""
+    failures_path = tmp_path / "pipeline_failures.json"
+    monkeypatch.setattr("notifier._FAILURES_PATH", failures_path)
+    monkeypatch.setattr("notifier._FAILURE_THRESHOLD", 100)
+
+    # Widen the historical read/write race window. The notifier lock should
+    # still serialize each complete transaction.
+    import notifier
+    original_read = notifier._read_failures
+
+    def slow_read():
+        data = original_read()
+        time.sleep(0.002)
+        return data
+
+    monkeypatch.setattr("notifier._read_failures", slow_read)
+    sources = [f"Company {index}" for index in range(20)]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lambda source: notify_pipeline_error(source, RuntimeError("x")), sources))
+
+    assert json.loads(failures_path.read_text(encoding="utf-8")) == {
+        source: 1 for source in sources
+    }

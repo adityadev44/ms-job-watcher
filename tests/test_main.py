@@ -13,7 +13,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from main import load_seen_ids, run_pipeline, save_seen_ids
+from main import cli_main, load_seen_ids, run_pipeline, save_seen_ids
+from notifier import DeliveryResult
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -84,6 +85,16 @@ def test_known_job_is_skipped(tmp_path):
     assert result["alert_sent"] is False
 
 
+def test_seen_ids_are_passed_to_matcher_for_early_pruning(tmp_path):
+    seen_path = tmp_path / "seen_jobs.json"
+    seen_path.write_text(json.dumps([GOOD_JOB["id"]]))
+
+    with patch("main.find_matching_jobs", return_value=(10, [])) as mock_find:
+        run_pipeline(config_path=CONFIG_PATH, seen_path=seen_path)
+
+    assert mock_find.call_args.kwargs["known_ids"] == {GOOD_JOB["id"]}
+
+
 # ---------------------------------------------------------------------------
 # run_pipeline — new job triggers alert and gets recorded
 # ---------------------------------------------------------------------------
@@ -109,6 +120,35 @@ def test_new_job_is_recorded_in_seen_file(tmp_path):
 
     saved = json.loads(seen_path.read_text())
     assert GOOD_JOB["id"] in saved
+
+
+def test_all_delivery_attempts_failed_does_not_record_job(tmp_path):
+    seen_path = tmp_path / "seen_jobs.json"
+    failed = DeliveryResult(telegram_attempted=True)
+
+    with patch("main.find_matching_jobs", return_value=(10, [GOOD_JOB])), \
+         patch("main.notify", return_value=failed):
+        result = run_pipeline(config_path=CONFIG_PATH, seen_path=seen_path)
+
+    assert not seen_path.exists()
+    assert result["new"] == 1
+    assert result["alert_sent"] is False
+
+
+def test_one_successful_channel_records_job(tmp_path):
+    seen_path = tmp_path / "seen_jobs.json"
+    partial = DeliveryResult(
+        telegram_attempted=True,
+        email_attempted=True,
+        email_succeeded=True,
+    )
+
+    with patch("main.find_matching_jobs", return_value=(10, [GOOD_JOB])), \
+         patch("main.notify", return_value=partial):
+        result = run_pipeline(config_path=CONFIG_PATH, seen_path=seen_path)
+
+    assert load_seen_ids(seen_path) == {GOOD_JOB["id"]}
+    assert result["alert_sent"] is True
 
 
 def test_notify_receives_only_new_jobs(tmp_path):
@@ -169,3 +209,21 @@ def test_no_matches_does_not_write_seen_file(tmp_path):
         run_pipeline(config_path=CONFIG_PATH, seen_path=seen_path)
 
     assert not seen_path.exists()
+
+
+def test_cli_main_returns_nonzero_and_reports_pipeline_error():
+    exc = RuntimeError("boom")
+    with patch("main.run_pipeline", side_effect=exc), \
+         patch("main.notify_pipeline_error") as report:
+        status = cli_main()
+
+    assert status == 1
+    report.assert_called_once_with("Microsoft", exc)
+
+
+def test_cli_main_returns_zero_and_resets_failure_count():
+    with patch("main.run_pipeline"), patch("main.reset_failure_count") as reset:
+        status = cli_main()
+
+    assert status == 0
+    reset.assert_called_once_with("Microsoft")

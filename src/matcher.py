@@ -7,7 +7,7 @@ import re
 import time
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, Collection
 
 import requests
 import yaml
@@ -144,6 +144,7 @@ def fetch_job_description(application_url: str, timeout: int = 20) -> str:
 def find_matching_jobs(
     config_path_or_cfg,   # str | Path for existing callers; dict for new multi-board callers
     fetcher=None,         # None → use module-level MS functions; pass optum_fetcher for Optum
+    known_ids: Collection[str] | None = None,
 ) -> tuple[int, list[dict]]:
     """Fetch all jobs from the API, apply every filter, and return results.
 
@@ -179,7 +180,7 @@ def find_matching_jobs(
     _MAX_LISTINGS_PER_COMBO: int = cfg["search"].get("max_listings", 500)
     _INTER_PAGE_DELAY: float = cfg["search"].get("inter_page_delay", 1.5)
 
-    seen_ids: set[str] = set()
+    fetched_ids: set[str] = set()
     all_jobs: list[dict] = []
     for keyword in keywords:
         for location in (locations or [""]):
@@ -200,8 +201,8 @@ def find_matching_jobs(
                 if not page:
                     break
                 for job in page:
-                    if job["id"] not in seen_ids:
-                        seen_ids.add(job["id"])
+                    if job["id"] not in fetched_ids:
+                        fetched_ids.add(job["id"])
                         all_jobs.append(job)
                 start += len(page)
 
@@ -220,6 +221,8 @@ def find_matching_jobs(
     # --- Step 2: Quick title/location filters (no extra HTTP calls) ---
     candidates: list[dict] = []
     filtered_out: list[str] = []
+    known_ids = set(known_ids or ())
+    known_candidates = 0
     for job in all_jobs:
         if not is_india_job(job):
             continue
@@ -231,7 +234,19 @@ def find_matching_jobs(
         if not passes_title_family_check(job, title_family):
             filtered_out.append(f"[title family]  {job['title']}")
             continue
+        # Known jobs cannot generate another alert.  Prune them only after the
+        # cheap filters so fetched/matching diagnostics remain useful, but
+        # before the comparatively expensive description request.
+        if job["id"] in known_ids:
+            known_candidates += 1
+            continue
         candidates.append(job)
+
+    if known_candidates:
+        print(
+            f"Skipped {known_candidates} already-seen candidate(s) before "
+            "description fetch"
+        )
 
     # --- Step 3: Skill filter — fetch description only for remaining candidates ---
     # Each fetch gets one retry and a short inter-request delay to stay friendly

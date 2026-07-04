@@ -1,5 +1,30 @@
 # Job Watcher Configuration
-# Do NOT commit this file to git — it may contain notification secrets.
+# Safe operational settings live here; notification credentials are read only
+# from environment variables / GitHub Secrets by src/notifier.py.
+
+# YAML anchors keep the intentionally shared search policy in one place while
+# allowing individual companies to override ATS-specific limits and exceptions.
+_defaults:
+  keywords: &default_keywords
+    - "software engineer"
+    - "senior software engineer"
+    - ".NET developer"
+    - "C# developer"
+    - "dot net"
+    - "angular"
+  india_locations: &india_locations
+    - "India"
+  exclude_locations: &default_exclude_locations
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
 
 search:
   max_listings: 350
@@ -14,17 +39,7 @@ search:
     - ".NET developer"
     - "C# developer"
   locations: []
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  exclude_locations: *default_exclude_locations
 
 optum_search:
   max_listings: 200
@@ -38,19 +53,8 @@ optum_search:
     - "C# developer"
     - "dot net"
     - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 amazon_search:
   max_listings: 200
@@ -65,17 +69,7 @@ amazon_search:
     - "dot net"
     - "angular"
   locations: []
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  exclude_locations: *default_exclude_locations
 
 matching:
   # Include a job if its title belongs to the software-engineer family.
@@ -176,67 +170,22 @@ siemens_search:
     - "C# developer"
     - "dot net"
     - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 honeywell_search:
   max_listings: 200
   inter_page_delay: 0.1
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 wellsfargo_search:
   max_listings: 200
   inter_page_delay: 0.2
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   # Wells Fargo-specific: description must explicitly name one of these
   # core terms. Filters out generic "Senior Software Engineer" titles that
   # are Java/Python roles even when a shared primary_skill (SQL Server/EF)
@@ -249,52 +198,18 @@ wellsfargo_search:
 dell_search:
   max_listings: 200
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 oracle_search:
   max_listings: 200
   inter_page_delay: 0.3
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -303,74 +218,23 @@ oracle_search:
 spglobal_search:
   max_listings: 300
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 chubb_search:
   max_listings: 200
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 fis_search:
   max_listings: 500
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 metlife_search:
   max_listings: 200
@@ -379,346 +243,114 @@ metlife_search:
   # A single empty keyword fetches all ~95 India jobs; title/skills filters handle the rest.
   keywords:
     - ""
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 gallagher_search:
   max_listings: 200
   inter_page_delay: 0.2
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 spglobal_careers_search:
   max_listings: 300
   inter_page_delay: 0.2
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 morningstar_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Morningstar's Phenom People site has no server-side keyword filtering.
   # One keyword suffices — all India jobs are fetched and cached in one scan.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 wtw_search:
   max_listings: 200
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 icertis_search:
   max_listings: 200
   inter_page_delay: 0.3
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 maersk_search:
   max_listings: 200
   inter_page_delay: 0.2
   # Maersk uses Workday with India location WIDs embedded in the fetcher.
   # Keyword filtering is not server-side — all India jobs are cached once per run.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 nomura_search:
   max_listings: 400
   inter_page_delay: 0.3
   # Nomura India portal fetches all India jobs at once — keywords are not sent server-side.
   # All 337+ India jobs are cached in-module; title/skills filters handle relevance.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 fiserv_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Fiserv's Workday tenant exposes no country-level location facet — fetched
   # globally per keyword and filtered for India client-side (locationsText).
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 fidelity_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Fidelity's Workday tenant has a clean locationCountry facet for India.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 morganstanley_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Eightfold-hosted (morganstanley.eightfold.ai) — same API shape as Microsoft.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 amex_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Oracle HCM CE tenant egug.fa.us2.oraclecloud.com, site CX_1.
   # India location facet ID 300000000228786 confirmed via live search.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 marshmclennan_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Workday tenant "mmc", site "MMC" — covers Marsh, Mercer, Guy Carpenter, Oliver Wyman.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 jpmorgan_search:
   max_listings: 300
   inter_page_delay: 0.2
   # Oracle HCM CE, raw tenant jpmc.fa.oraclecloud.com, site CX_1001.
   # India location facet ID 300000000289360.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 synchrony_search:
   max_listings: 300
@@ -726,26 +358,9 @@ synchrony_search:
   # Workday tenant "synchronyfinancial", site "careers". No country-level
   # facet — uses India city/region location WIDs (Hyderabad + Remote Region
   # IN) instead. Tenant hard-caps page size at 20 (HTTP 400 above that).
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 mastercard_search:
   max_listings: 300
@@ -753,26 +368,9 @@ mastercard_search:
   # Workday tenant "mastercard", site "CorporateCareers". No country facet —
   # 8 India city WIDs (Gurgaon, Hyderabad, Mumbai, Navi Mumbai, Pune, Vadodara)
   # passed under the "locations" facet key.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 goldmansachs_search:
   max_listings: 300
@@ -781,26 +379,9 @@ goldmansachs_search:
   # backend is Oracle HCM CE at hdpc.fa.us2.oraclecloud.com, site
   # LateralHiring, open to unauthenticated requests. Same pattern as Chubb/
   # Amex/JPMorgan Chase.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 nagarro_search:
   max_listings: 500
@@ -810,26 +391,9 @@ nagarro_search:
   # real work. Nagarro's titles are level-based ("Staff Engineer, .Net
   # Fullstack") rather than role-based; "staff engineer"/"senior engineer"
   # were added to the shared matching.title_family to surface these.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 citi_search:
   max_listings: 200
@@ -839,26 +403,9 @@ citi_search:
   # c4f78be1a8f14da0ab49ce1162348a5e. ~339 India SW engineer jobs.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -871,26 +418,9 @@ bny_search:
   # site BNY-Careers. India location facet ID 300000000378365.
   # Majority of India jobs are in Pune (excluded) — 0 matches expected
   # until BNY opens non-Pune .NET roles.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 northerntrust_search:
   max_listings: 200
@@ -898,26 +428,9 @@ northerntrust_search:
   # Workday tenant ntrs.wd1.myworkdayjobs.com, site northerntrust.
   # locationCountry WID c4f78be1a8f14da0ab49ce1162348a5e (same cross-tenant
   # India GUID as Fidelity/Wells Fargo). Page size capped at 20.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 deutsche_search:
   max_listings: 200
@@ -926,26 +439,9 @@ deutsche_search:
   # frontend wrapping Workday (db.wd3.myworkdayjobs.com) for descriptions.
   # Keywords and country filter are ignored server-side — all ~1808 global
   # jobs are fetched and India filtered client-side (CountryCode==IN).
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 barclays_search:
   max_listings: 200
@@ -953,26 +449,9 @@ barclays_search:
   # Workday tenant barclays.wd3.myworkdayjobs.com. No locationCountry facet —
   # uses 11 India city WIDs in appliedFacets.locations (same pattern as
   # Mastercard). locationsText omits "India" — appended client-side.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 ubs_search:
   max_listings: 200
@@ -980,26 +459,9 @@ ubs_search:
   # IBM BrassRing (Kenexa) at jobs.ubs.com. Requires CSRF token (RFT header)
   # extracted per session. ~15 India jobs total — mostly non-tech roles.
   # Descriptions embedded in search results; no separate detail fetch needed.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 accenture_search:
   max_listings: 500
@@ -1009,26 +471,9 @@ accenture_search:
   # ~24,731 India jobs; API caps at 2000 results per query.
   # require_tech_in_description is MANDATORY — without it thousands of
   # generic "Custom Software Engineer" titles flood through.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1041,26 +486,9 @@ infosys_search:
   # searchText param is a no-op — all ~1558 India jobs returned per call.
   # Descriptions bundled in list response (no separate detail fetches).
   # require_tech_in_description is MANDATORY — generic titles dominate.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1073,26 +501,9 @@ cognizant_search:
   # /global-en/jobs/xml/?rss=true returns all ~2069 jobs with full
   # descriptions — no per-job fetch needed. India filtered client-side
   # via <country> field. require_tech_in_description is MANDATORY.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1105,26 +516,9 @@ tcs_search:
   # filter needed. Keyword search is extremely loose (# breaks search);
   # all 4227 India jobs match "C#". require_tech_in_description is MANDATORY.
   # 10 jobs per page (fixed); walk-in jobs (IDs ending in W) are skipped.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1137,26 +531,9 @@ capgemini_search:
   # platform as Nomura but with query-string pagination: startrow=N, 25/page).
   # locationsearch=india applied server-side. Thousands of India jobs —
   # mostly SAP/Java. require_tech_in_description is MANDATORY.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1169,26 +546,9 @@ lseg_search:
   # facet with the standard India WID. Large Bengaluru engineering centre with
   # frequent .NET/C#/Azure roles. locationsText uses office codes
   # ("IND-BLR-...") — ", India" appended in the fetcher.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 statestreet_search:
   max_listings: 300
@@ -1199,15 +559,8 @@ statestreet_search:
   # Tamil Nadu but the location text doesn't say so — excluded by name.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
+  keywords: *default_keywords
+  locations: *india_locations
   exclude_locations:
     - "Chennai"
     - "Tamil Nadu"
@@ -1231,26 +584,9 @@ broadridge_search:
   # Workday tenant broadridge.wd5.myworkdayjobs.com, site "Careers".
   # Location_Country facet (capitalised key). Broadridge is heavily .NET —
   # small India job count (~30) but high relevance when roles open.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 kyndryl_search:
   max_listings: 300
@@ -1258,26 +594,9 @@ kyndryl_search:
   # Workday tenant kyndryl.wd5.myworkdayjobs.com, site
   # "KyndrylProfessionalCareers". locationCountry facet. ~290 India software
   # jobs; multi-site rollups show "2 Locations" — ", India" appended.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 dxc_search:
   max_listings: 300
@@ -1289,15 +608,8 @@ dxc_search:
   # IT-services shop with generic titles — require_tech_in_description
   # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET, not just
   # any shared primary_skill (SQL Server/EF alone could be a Java role).
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
+  keywords: *default_keywords
+  locations: *india_locations
   exclude_locations:
     - "Chennai"
     - "Tamil Nadu"
@@ -1320,26 +632,9 @@ ameriprise_search:
   inter_page_delay: 0.2
   # Workday tenant ameriprise.wd5.myworkdayjobs.com, site "ameriprise".
   # locationCountry facet. India centres: Hyderabad, Noida, Gurugram.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 factset_search:
   max_listings: 200
@@ -1347,26 +642,9 @@ factset_search:
   # Workday tenant factset.wd108.myworkdayjobs.com, site "FactSetCareers".
   # No country facet — fetches globally (~60 jobs total) and filters India
   # client-side. FactSet's Hyderabad centre is .NET-heavy.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 paypal_search:
   max_listings: 300
@@ -1375,26 +653,9 @@ paypal_search:
   # facet — fetches globally, filters India client-side with a word-boundary
   # match (so "Indianapolis"/"Indiana" never pass). India presence is
   # currently small (Bangalore + Chennai) — 0 matches often expected.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 invesco_search:
   max_listings: 200
@@ -1403,26 +664,9 @@ invesco_search:
   # facet and locationsText omits "India" entirely ("Hyderabad, Telangana") —
   # the fetcher detects India via city/state tokens and appends ", India".
   # Invesco's Hyderabad centre is .NET-heavy.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 firstamerican_search:
   max_listings: 200
@@ -1434,26 +678,9 @@ firstamerican_search:
   # ", India" appended in the fetcher.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1466,26 +693,9 @@ standardchartered_search:
   # keywords are ignored server-side -- facetFilters restricts to India
   # (~280 jobs) and all are cached in-module; title/skill filters do the
   # real narrowing.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 wipro_search:
   max_listings: 4000
@@ -1496,26 +706,9 @@ wipro_search:
   # tech named) -- require_tech_in_description is MANDATORY (was a dead
   # require_tech_in_title config before this change — never actually
   # applied by run_wipro.py, same bug HCLTech had).
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1532,26 +725,9 @@ hcltech_search:
   # since boilerplate JDs namedrop many languages' skills). NOTE: this used
   # to be require_tech_in_title, but the runner never actually applied it
   # (dead config) -- replaced with a working description-based check.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1565,26 +741,9 @@ hsbc_search:
   # endpoint works, and it hard-caps at 10 results with no pagination. Set
   # max_listings to 10 (not the usual 200+) so find_matching_jobs stops
   # after one page instead of retrying for pages that will never come.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 msci_search:
   max_listings: 50
@@ -1592,26 +751,9 @@ msci_search:
   # Algolia-powered (careers.msci.com) -- small total job count (~90
   # globally, ~18 India) so a single unfiltered query covers everything;
   # cached in-module.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 target_search:
   max_listings: 200
@@ -1619,26 +761,9 @@ target_search:
   # Workday tenant target.wd5.myworkdayjobs.com, site "targetcareers".
   # Target's India GCC is in Bangalore. Capitalised "Location_Country" facet
   # key. ~58 India software-engineer jobs.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 adobe_search:
   max_listings: 200
@@ -1648,26 +773,9 @@ adobe_search:
   # though not listed in the tenant's advertised facets response.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1685,26 +793,9 @@ micron_search:
   # is_india_job() to filter genuinely.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1717,26 +808,9 @@ sabre_search:
   # technology (GDS) company with a Bengaluru engineering centre.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1749,26 +823,9 @@ autodesk_search:
   # in Bengaluru + Pune. locationsText uses abbreviated "IND" country code.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1783,26 +840,9 @@ verizon_search:
   # US locations like Arlington TX/Ashburn VA leak through) -- the fetcher
   # does NOT append ", India" and relies on matcher.py's is_india_job()
   # to filter genuinely.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 lowes_search:
   max_listings: 200
@@ -1815,26 +855,9 @@ lowes_search:
   # (Bengaluru etc), not blindly.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1847,26 +870,9 @@ ebay_search:
   # engineering centre is in Bengaluru. Capitalised "Location_Country" facet.
   # require_tech_in_description narrows to jobs whose JD explicitly names
   # .NET/C#/ASP.NET, not just any shared primary_skill.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1880,26 +886,9 @@ generalmotors_search:
   # "software engineer" postings currently); included for completeness,
   # same precedent as BNY Mellon/Icertis. Capitalised "Location_Country"
   # facet key.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 bankofamerica_search:
   max_listings: 200
@@ -1909,26 +898,9 @@ bankofamerica_search:
   # ~1760 global jobs fetched and cached in one pass, ~62 India (mostly
   # Chennai/Mumbai/Hyderabad; Chennai excluded by default). require_tech_in_
   # description narrows GBS technology postings to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1944,26 +916,9 @@ ltimindtree_search:
   # keyword server-side, so normal per-keyword pagination works.
   # require_tech_in_description narrows generic "Specialist - Software
   # Engineering" titles (no tech signal) to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -1979,26 +934,9 @@ persistent_search:
   # "India" — without it Pune (Persistent's HQ, heavy postings there)
   # wouldn't be excluded. require_tech_in_description narrows a large
   # multi-stack IT-services shop to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2013,26 +951,9 @@ genpact_search:
   # capped total) + client-side India filter via locationsText.
   # require_tech_in_description narrows a large multi-stack BPO/IT-services
   # shop to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2048,26 +969,9 @@ ibm_search:
   # headless Firefox (Playwright) to solve the challenge, same pattern as
   # Honeywell. require_tech_in_description narrows enterprise-consulting
   # boilerplate JDs to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2085,26 +989,9 @@ techmahindra_search:
   # server-rendered HTML (no browser needed there).
   # require_tech_in_description narrows a large multi-stack IT-services
   # shop to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2121,26 +1008,9 @@ virtusa_search:
   # ~13KB JSF-postback form too fragile to hand-replicate.
   # require_tech_in_description narrows a large multi-stack IT-services shop
   # to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2155,26 +1025,9 @@ hexaware_search:
   # filters India client-side via PrimaryLocation, same conservative approach
   # as Icertis/WTW. require_tech_in_description narrows a large multi-stack
   # IT-services shop to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2191,26 +1044,9 @@ societegenerale_search:
   # Job-detail pages carry a clean schema.org JobPosting JSON-LD block
   # (plain-text description + datePosted). require_tech_in_description
   # narrows a large multi-department bank to explicit .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -2225,26 +1061,9 @@ schwab_search:
   # jobs, small Hyderabad presence). Job-detail pages carry a clean
   # schema.org JobPosting JSON-LD block. require_tech_in_description
   # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET.
-  keywords:
-    - "software engineer"
-    - "senior software engineer"
-    - ".NET developer"
-    - "C# developer"
-    - "dot net"
-    - "angular"
-  locations:
-    - "India"
-  exclude_locations:
-    - "Chennai"
-    - "Tamil Nadu"
-    - "Pune"
-    - "Chandigarh"
-    - "Kochi"
-    - "Kerala"
-    - "Trivandrum"
-    - "Lucknow"
-    - "Nagpur"
-    - "Madurai"
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
   require_tech_in_description:
     - ".NET"
     - "C#"

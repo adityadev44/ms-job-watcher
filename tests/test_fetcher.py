@@ -13,7 +13,7 @@ import pytest
 # Make sure the src package is importable when running pytest from the project root.
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from fetcher import RateLimitError, _parse_position, fetch_jobs
+from fetcher import RateLimitError, _parse_position, fetch_job_description, fetch_jobs
 
 SAMPLE_FILE = Path(__file__).parent / "sample_response.json"
 
@@ -195,3 +195,29 @@ def test_fetch_jobs_raises_rate_limit_after_all_retries(monkeypatch):
 
     with pytest.raises(RateLimitError):
         fetch_jobs("software engineer", "India")
+
+
+def test_fetch_job_description_returns_normalized_plain_text(monkeypatch):
+    class _FakeResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"job_description": "<p>C# &amp; <strong>.NET</strong></p>"}
+
+    captured = {}
+
+    def _fake_get(url, **kwargs):
+        captured["url"] = url
+        captured["params"] = kwargs["params"]
+        return _FakeResponse()
+
+    monkeypatch.setattr("fetcher.requests.get", _fake_get)
+
+    description = fetch_job_description(
+        "https://apply.careers.microsoft.com/careers/job/12345?domain=microsoft.com"
+    )
+
+    assert description == "C# & .NET"
+    assert captured["url"].endswith("/12345")
+    assert captured["params"] == {"domain": "microsoft.com"}

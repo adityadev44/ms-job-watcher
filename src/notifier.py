@@ -11,6 +11,8 @@ import json
 import os
 import smtplib
 import tempfile
+import threading
+from dataclasses import dataclass
 from email.message import EmailMessage
 from pathlib import Path
 
@@ -25,6 +27,34 @@ _SMTP_HOST = "smtp.gmail.com"
 _SMTP_PORT = 587
 _FAILURES_PATH = Path(__file__).parent.parent / "pipeline_failures.json"
 _FAILURE_THRESHOLD = 3
+_FAILURES_LOCK = threading.RLock()
+
+
+@dataclass(frozen=True)
+class DeliveryResult:
+    """Outcome of an alert attempt, suitable for deciding deduplication state.
+
+    With no configured channels, ``should_mark_seen`` is true to preserve the
+    historical local-development behaviour.  If one or more channels are
+    configured, at least one must succeed before jobs should be marked seen.
+    """
+
+    telegram_attempted: bool = False
+    telegram_succeeded: bool = False
+    email_attempted: bool = False
+    email_succeeded: bool = False
+
+    @property
+    def any_attempted(self) -> bool:
+        return self.telegram_attempted or self.email_attempted
+
+    @property
+    def any_succeeded(self) -> bool:
+        return self.telegram_succeeded or self.email_succeeded
+
+    @property
+    def should_mark_seen(self) -> bool:
+        return not self.any_attempted or self.any_succeeded
 
 
 def _read_failures() -> dict:
@@ -105,9 +135,9 @@ def send_email(message: str, gmail_user: str, gmail_password: str, recipients: l
         smtp.send_message(msg)
 
 
-def notify(jobs: list[dict], source: str = "Microsoft") -> None:
+def notify(jobs: list[dict], source: str = "Microsoft") -> DeliveryResult:
     if not jobs:
-        return
+        return DeliveryResult()
 
     message = format_message(jobs, source)
 
@@ -118,41 +148,72 @@ def notify(jobs: list[dict], source: str = "Microsoft") -> None:
     recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
 
     chat_ids = [cid.strip() for cid in chat_id.split(",") if cid.strip()]
+    # Treat partially supplied credentials as a configured-but-failed channel.
+    # Otherwise one missing secret would silently advance deduplication state.
+    telegram_attempted = bool(token or chat_ids)
+    telegram_succeeded = False
     if token and chat_ids:
-        try:
-            chunks = _build_telegram_chunks(jobs, source=source)
-            for cid in chat_ids:
-                for chunk in chunks:
+        chunks = _build_telegram_chunks(jobs, source=source)
+        failures = 0
+        successes = 0
+        for cid in chat_ids:
+            recipient_succeeded = True
+            for chunk in chunks:
+                try:
                     send_telegram(chunk, token, cid)
-            print(f"Telegram alert sent ({len(chunks)} message(s)).")
-        except Exception as exc:
-            print(f"[warn] Telegram alert failed: {exc}")
+                    successes += 1
+                except Exception as exc:
+                    recipient_succeeded = False
+                    failures += 1
+                    print(f"[warn] Telegram alert failed for chat {cid}: {exc}")
+            # The Telegram channel counts as successful only if at least one
+            # recipient received every chunk (and therefore every job).
+            telegram_succeeded = telegram_succeeded or recipient_succeeded
+        if successes:
+            print(f"Telegram alert sent ({successes} message(s), {failures} failed).")
     else:
         print("Telegram skipped (TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set).")
 
+    email_attempted = bool(gmail_user or gmail_password or recipients)
+    email_succeeded = False
     if gmail_user and gmail_password and recipients:
         try:
             send_email(message, gmail_user, gmail_password, recipients, source=source)
+            email_succeeded = True
             print(f"Email alert sent to: {', '.join(recipients)}")
         except Exception as exc:
             print(f"[warn] Email alert failed: {exc}")
     else:
         print("Email skipped (GMAIL_USER, GMAIL_APP_PASSWORD, or ALERT_RECIPIENT not set).")
 
+    return DeliveryResult(
+        telegram_attempted=telegram_attempted,
+        telegram_succeeded=telegram_succeeded,
+        email_attempted=email_attempted,
+        email_succeeded=email_succeeded,
+    )
+
 
 def notify_pipeline_error(source: str, exc: Exception) -> None:
     """Email when a pipeline crashes 3 consecutive times. Silent on 1st/2nd failure."""
     try:
-        data = _read_failures()
-        data[source] = data.get(source, 0) + 1
-        count = data[source]
-        _write_failures(data)
+        # The launcher runs companies in threads, so protect the complete
+        # read-modify-write transaction from lost updates.
+        with _FAILURES_LOCK:
+            data = _read_failures()
+            data[source] = data.get(source, 0) + 1
+            count = data[source]
+            _write_failures(data)
+            if count >= _FAILURE_THRESHOLD:
+                # Reset in the same transaction so another thread cannot
+                # overwrite it with a stale snapshot.
+                data[source] = 0
+                _write_failures(data)
         print(f"[{source}] Consecutive failure count: {count}/{_FAILURE_THRESHOLD}")
         if count < _FAILURE_THRESHOLD:
             return
-        # Reached threshold — alert, then reset so the next streak also triggers
-        data[source] = 0
-        _write_failures(data)
+        # Reached threshold — alert after releasing the state lock so a slow
+        # SMTP connection cannot block unrelated pipeline state updates.
         gmail_user = os.getenv("GMAIL_USER", "")
         gmail_password = os.getenv("GMAIL_APP_PASSWORD", "")
         recipients = [r.strip() for r in os.getenv("ALERT_RECIPIENT", "").split(";") if r.strip()]
@@ -172,10 +233,11 @@ def notify_pipeline_error(source: str, exc: Exception) -> None:
 def reset_failure_count(source: str) -> None:
     """Reset consecutive failure counter after a successful run. No-ops silently on any error."""
     try:
-        data = _read_failures()
-        if data.get(source, 0) != 0:
-            data[source] = 0
-            _write_failures(data)
+        with _FAILURES_LOCK:
+            data = _read_failures()
+            if data.get(source, 0) != 0:
+                data[source] = 0
+                _write_failures(data)
     except Exception:
         pass
 

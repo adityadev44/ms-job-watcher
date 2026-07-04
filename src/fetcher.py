@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import html as html_mod
+import re
 import time
 import warnings
 from datetime import datetime, timezone
@@ -25,6 +27,7 @@ _HEADERS = {
 }
 
 _BASE_JOB_URL = "https://apply.careers.microsoft.com"
+_DETAIL_BASE = "https://apply.careers.microsoft.com/api/apply/v2/jobs"
 
 
 def _parse_position(raw: dict[str, Any]) -> dict[str, str]:
@@ -107,3 +110,21 @@ def fetch_jobs(
         return [_parse_position(p) for p in positions]
 
     raise RateLimitError(f"Rate-limited after {_MAX_ATTEMPTS} attempts")
+
+
+def fetch_job_description(application_url: str, timeout: int = 20) -> str:
+    """Return the Microsoft job description as normalized plain text."""
+    job_id = application_url.split("/careers/job/")[1].split("?")[0]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        response = requests.get(
+            f"{_DETAIL_BASE}/{job_id}",
+            headers=_HEADERS,
+            params={"domain": "microsoft.com"},
+            timeout=timeout,
+            verify=False,
+        )
+    response.raise_for_status()
+    raw = response.json().get("job_description", "")
+    text = re.sub(r"<[^>]+>", " ", raw)
+    return " ".join(html_mod.unescape(text).split())

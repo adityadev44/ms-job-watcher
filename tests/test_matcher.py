@@ -384,6 +384,36 @@ def test_find_matching_jobs_deduplicates(monkeypatch):
     assert len(ids) == len(set(ids)), "Duplicate job IDs found in matched results"
 
 
+def test_known_candidate_skips_description_fetch(monkeypatch, capsys):
+    """Seen IDs are pruned after cheap checks and before network-heavy details."""
+    calls = []
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr(
+        "matcher.fetch_job_description",
+        lambda *a, **kw: calls.append(a) or GOOD_DESCRIPTION,
+    )
+
+    total, matched = find_matching_jobs(CONFIG_PATH, known_ids={GOOD_JOB["id"]})
+
+    assert total == 1
+    assert matched == []
+    assert calls == []
+    assert "already-seen candidate" in capsys.readouterr().out
+
+
+def test_known_non_candidate_does_not_change_total(monkeypatch):
+    """Fetched count retains its historical meaning even with early pruning."""
+    monkeypatch.setattr(
+        "matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB, INTERN_JOB)
+    )
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: GOOD_DESCRIPTION)
+
+    total, matched = find_matching_jobs(CONFIG_PATH, known_ids={INTERN_JOB["id"]})
+
+    assert total == 2
+    assert [job["id"] for job in matched] == [GOOD_JOB["id"]]
+
+
 def test_find_matching_jobs_keeps_job_when_description_fetch_fails(monkeypatch):
     """If all fetch attempts for a description fail, the job must still be in results.
 
