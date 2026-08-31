@@ -87,7 +87,8 @@ def _write_failures(data: dict) -> None:
 def format_message(jobs: list[dict], source: str = "Microsoft") -> str:
     lines = [f"{source} job matches:\n"]
     for job in jobs:
-        lines.append(f"- {job['title']}")
+        tag = " + ".join(job.get("tags", [])) or "Unspecified"
+        lines.append(f"- [{tag}] {job['title']}")
         lines.append(f"  Location:  {job['location']}")
         lines.append(f"  Posted:    {job['posting_date']}")
         lines.append(f"  Apply:     {job['application_url']}")

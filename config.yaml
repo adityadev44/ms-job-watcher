@@ -12,6 +12,10 @@ _defaults:
     - "C# developer"
     - "dot net"
     - "angular"
+    - "AI engineer"
+    - "machine learning engineer"
+    - "python developer"
+    - "generative ai engineer"
   india_locations: &india_locations
     - "India"
   exclude_locations: &default_exclude_locations
@@ -40,6 +44,10 @@ search:
     - "backend engineer"
     - ".NET developer"
     - "C# developer"
+    - "AI engineer"
+    - "machine learning engineer"
+    - "python developer"
+    - "generative ai engineer"
   locations: []
   exclude_locations: *default_exclude_locations
 
@@ -55,6 +63,10 @@ optum_search:
     - "C# developer"
     - "dot net"
     - "angular"
+    - "AI engineer"
+    - "machine learning engineer"
+    - "python developer"
+    - "generative ai engineer"
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
@@ -70,6 +82,10 @@ amazon_search:
     - "C# developer"
     - "dot net"
     - "angular"
+    - "AI engineer"
+    - "machine learning engineer"
+    - "python developer"
+    - "generative ai engineer"
   locations: []
   exclude_locations: *default_exclude_locations
 
@@ -97,8 +113,22 @@ matching:
     - "senior staff engineer"
     - "associate staff engineer"
     - "senior engineer"
+    - "machine learning engineer"
+    - "ml engineer"
+    - "ai engineer"
+    - "artificial intelligence engineer"
+    - "generative ai engineer"
+    - "genai engineer"
+    - "llm engineer"
+    - "applied ai engineer"
+    - "ai platform engineer"
+    - "python developer"
+    - "python engineer"
 
   # Keep a job only if its description mentions at least one of these skills.
+  # A job must match BOTH this list AND primary_skills (below) — they are
+  # independent checks — so every primary_skills term (every group) MUST also
+  # be listed here, plus the soft/broad-only signals that never qualify alone.
   skills:
     - ".NET"
     - ".NET Core"
@@ -114,23 +144,76 @@ matching:
     - "TypeScript"
     - "React"
     - "Entity Framework"
+    - "Python"
+    - "machine learning"
+    - "artificial intelligence"
+    - "Golang"
+    - "multi-agent"
+    - "agentic"
+    - "prompt engineering"
+    - "OpenAI"
+    - "Anthropic"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
-  # At least one of these "hard" .NET skills must appear in the description.
-  # Azure/Angular/TypeScript/React alone are NOT sufficient — they appear in too
-  # many non-.NET job postings. Leave this list empty to disable the check.
+  # At least one "hard" skill from ONE of these named groups must appear in the
+  # description — a job qualifies via EITHER track, not both. Broad-only terms
+  # from `skills` above (Azure/Angular/TypeScript/React/Python/machine learning/
+  # etc.) are NOT sufficient alone; they appear in too many unrelated postings.
+  # Leave a group empty (or the whole mapping empty) to disable that check.
+  #
+  # This mapping is also the source of the "[tag]" prefix matcher.py attaches
+  # to each alert (see src/matcher.py find_matching_jobs) so Shivangi can tell
+  # .NET/C# hits apart from AI/ML/Python hits in one combined Telegram/Gmail
+  # feed. Group names are shown verbatim in the alert — keep them short.
+  #
+  # Deliberately excludes bare "AI", "ML", "RAG", "LLM", "GPT", "Go" everywhere
+  # in this file: matcher.py's substring check is NOT word-boundary aware, and
+  # those short tokens are substrings of extremely common words in ordinary
+  # job descriptions — "RAG" alone matches inside "storage"/"average"/"garage",
+  # "Go" matches inside "going"/"ongoing"/"algorithm", "ML" matches inside
+  # "HTML". Use full distinctive terms (LangChain, generative ai, large
+  # language model, Golang, ...) instead — same signal, no false positives.
   primary_skills:
-    - ".NET"
-    - ".NET Core"
-    - ".NET Framework"
-    - "dotnet"
-    - "C#"
-    - "ASP.NET"
-    - "Entity Framework"
-    - "Web API"
-    - "SQL Server"
-    - "T-SQL"
+    ".NET / C#":
+      - ".NET"
+      - ".NET Core"
+      - ".NET Framework"
+      - "dotnet"
+      - "C#"
+      - "ASP.NET"
+      - "Entity Framework"
+      - "Web API"
+      - "SQL Server"
+      - "T-SQL"
+    "AI / ML / Python":
+      - "LangChain"
+      - "LangGraph"
+      - "RAGAS"
+      - "Langfuse"
+      - "LangSmith"
+      - "CrewAI"
+      - "vector database"
+      - "ChromaDB"
+      - "Pinecone"
+      - "generative ai"
+      - "large language model"
+      - "retrieval augmented generation"
 
-  # Reject a job immediately if its title contains any of these terms.
+  # Reject a job immediately if its title contains any of these terms, as a
+  # whole word/phrase (matched via word boundaries, not plain substring — so
+  # "VP" rejects "VP - Engineering" but not "AVP"/"SVP", and "director"
+  # rejects "Director of Engineering" but not "Active Directory").
   exclude_terms:
     - "intern"
     - "internship"
@@ -172,6 +255,10 @@ siemens_search:
     - "C# developer"
     - "dot net"
     - "angular"
+    - "AI engineer"
+    - "machine learning engineer"
+    - "python developer"
+    - "generative ai engineer"
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
@@ -188,14 +275,27 @@ wellsfargo_search:
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
-  # Wells Fargo-specific: description must explicitly name one of these
-  # core terms. Filters out generic "Senior Software Engineer" titles that
-  # are Java/Python roles even when a shared primary_skill (SQL Server/EF)
-  # shows up in passing.
+  # Wells Fargo-specific: description must explicitly name a .NET/C# term OR
+  # an AI/LLM production term. Filters out generic "Senior Software Engineer"
+  # titles that are plain Java roles even when a shared primary_skill
+  # (SQL Server/EF) shows up in passing — a Java role mentioning LangChain in
+  # passing would still need the explicit list above to actually pass.
   require_tech_in_description:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 dell_search:
   max_listings: 200
@@ -208,7 +308,7 @@ oracle_search:
   max_listings: 200
   inter_page_delay: 0.3
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -216,6 +316,18 @@ oracle_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 spglobal_search:
   max_listings: 300
@@ -404,7 +516,7 @@ citi_search:
   # Country_and_Jurisdiction facet (not locationCountry). India WID
   # c4f78be1a8f14da0ab49ce1162348a5e. ~339 India SW engineer jobs.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -412,6 +524,18 @@ citi_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 bny_search:
   max_listings: 200
@@ -480,6 +604,18 @@ accenture_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 infosys_search:
   max_listings: 500
@@ -495,6 +631,18 @@ infosys_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 cognizant_search:
   max_listings: 500
@@ -510,6 +658,18 @@ cognizant_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 tcs_search:
   max_listings: 500
@@ -525,6 +685,18 @@ tcs_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 capgemini_search:
   max_listings: 500
@@ -540,6 +712,18 @@ capgemini_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 lseg_search:
   max_listings: 300
@@ -560,7 +744,7 @@ statestreet_search:
   # jobs across Bangalore, Hyderabad, Mumbai, Coimbatore. Coimbatore is in
   # Tamil Nadu but the location text doesn't say so — excluded by name.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations:
@@ -581,6 +765,18 @@ statestreet_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 broadridge_search:
   max_listings: 200
@@ -610,7 +806,7 @@ dxc_search:
   # (state codes, no "India") — the fetcher appends ", India"; "- TN -"
   # below excludes ALL Tamil Nadu cities, which "Tamil Nadu" alone can't.
   # IT-services shop with generic titles — require_tech_in_description
-  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET, not just
+  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET or AI/ML, not just
   # any shared primary_skill (SQL Server/EF alone could be a Java role).
   keywords: *default_keywords
   locations: *india_locations
@@ -632,6 +828,18 @@ dxc_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 ameriprise_search:
   max_listings: 200
@@ -683,7 +891,7 @@ firstamerican_search:
   # heavily .NET shop. locationsText ("IND, Karnataka, Bangalore") gets
   # ", India" appended in the fetcher.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -691,6 +899,18 @@ firstamerican_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 standardchartered_search:
   max_listings: 400
@@ -719,6 +939,18 @@ wipro_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 hcltech_search:
   max_listings: 8500
@@ -727,7 +959,7 @@ hcltech_search:
   # category page (categoryId 9553955). ~8000 India jobs cached in-module;
   # overwhelmingly generic IT-services titles -- require_tech_in_description
   # is MANDATORY (narrower than the shared primary_skills check: only
-  # .NET/C#/ASP.NET core terms count, not SQL Server/EF/Web API alone,
+  # .NET/C#/ASP.NET or AI/ML core terms count, not SQL Server/EF/Web API alone,
   # since boilerplate JDs namedrop many languages' skills). NOTE: this used
   # to be require_tech_in_title, but the runner never actually applied it
   # (dead config) -- replaced with a working description-based check.
@@ -738,6 +970,18 @@ hcltech_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 hsbc_search:
   max_listings: 10
@@ -778,7 +1022,7 @@ adobe_search:
   # India centres in Bangalore + Noida. locationCountry facet works even
   # though not listed in the tenant's advertised facets response.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -786,6 +1030,18 @@ adobe_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 micron_search:
   max_listings: 500
@@ -798,7 +1054,7 @@ micron_search:
   # fetcher does NOT append ", India" and relies on matcher.py's
   # is_india_job() to filter genuinely.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -806,6 +1062,18 @@ micron_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 sabre_search:
   max_listings: 200
@@ -813,7 +1081,7 @@ sabre_search:
   # Workday tenant sabre.wd1.myworkdayjobs.com, site "SabreJobs". Travel-
   # technology (GDS) company with a Bengaluru engineering centre.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -821,6 +1089,18 @@ sabre_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 autodesk_search:
   max_listings: 200
@@ -828,7 +1108,7 @@ autodesk_search:
   # Workday tenant autodesk.wd1.myworkdayjobs.com, site "Ext". India centres
   # in Bengaluru + Pune. locationsText uses abbreviated "IND" country code.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -836,6 +1116,18 @@ autodesk_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 verizon_search:
   max_listings: 200
@@ -860,7 +1152,7 @@ lowes_search:
   # the fetcher appends ", India" only for recognised India city names
   # (Bengaluru etc), not blindly.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -868,6 +1160,18 @@ lowes_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 ebay_search:
   max_listings: 200
@@ -875,7 +1179,7 @@ ebay_search:
   # Workday tenant ebay.wd5.myworkdayjobs.com, site "apply". eBay's India
   # engineering centre is in Bengaluru. Capitalised "Location_Country" facet.
   # require_tech_in_description narrows to jobs whose JD explicitly names
-  # .NET/C#/ASP.NET, not just any shared primary_skill.
+  # .NET/C#/ASP.NET or AI/ML, not just any shared primary_skill.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -883,6 +1187,18 @@ ebay_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 generalmotors_search:
   max_listings: 200
@@ -903,7 +1219,7 @@ bankofamerica_search:
   # jobssearchservlet. Keyword/country params are ignored server-side —
   # ~1760 global jobs fetched and cached in one pass, ~62 India (mostly
   # Chennai/Mumbai/Hyderabad; Chennai excluded by default). require_tech_in_
-  # description narrows GBS technology postings to explicit .NET/C#/ASP.NET.
+  # description narrows GBS technology postings to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -911,6 +1227,18 @@ bankofamerica_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 ltimindtree_search:
   max_listings: 200
@@ -921,7 +1249,7 @@ ltimindtree_search:
   # ltm.com/india-careers. Unlike most fetchers here, RippleHire applies the
   # keyword server-side, so normal per-keyword pagination works.
   # require_tech_in_description narrows generic "Specialist - Software
-  # Engineering" titles (no tech signal) to explicit .NET/C#/ASP.NET.
+  # Engineering" titles (no tech signal) to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -929,6 +1257,18 @@ ltimindtree_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 persistent_search:
   max_listings: 800
@@ -939,7 +1279,7 @@ persistent_search:
   # from the jobUrl slug since the API's own location field is just
   # "India" — without it Pune (Persistent's HQ, heavy postings there)
   # wouldn't be excluded. require_tech_in_description narrows a large
-  # multi-stack IT-services shop to explicit .NET/C#/ASP.NET.
+  # multi-stack IT-services shop to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -947,6 +1287,18 @@ persistent_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 genpact_search:
   max_listings: 300
@@ -956,7 +1308,7 @@ genpact_search:
   # sub-value) — global fetch per keyword (searchText narrows the ~2000-
   # capped total) + client-side India filter via locationsText.
   # require_tech_in_description narrows a large multi-stack BPO/IT-services
-  # shop to explicit .NET/C#/ASP.NET.
+  # shop to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -964,6 +1316,18 @@ genpact_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 ibm_search:
   max_listings: 400
@@ -974,7 +1338,7 @@ ibm_search:
   # tokens — plain requests get a 202/empty body, so description fetch uses
   # headless Firefox (Playwright) to solve the challenge, same pattern as
   # Honeywell. require_tech_in_description narrows enterprise-consulting
-  # boilerplate JDs to explicit .NET/C#/ASP.NET.
+  # boilerplate JDs to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -982,6 +1346,18 @@ ibm_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 techmahindra_search:
   max_listings: 200
@@ -994,7 +1370,7 @@ techmahindra_search:
   # title/skill filters do the real narrowing. Job-detail pages ARE plain
   # server-rendered HTML (no browser needed there).
   # require_tech_in_description narrows a large multi-stack IT-services
-  # shop to explicit .NET/C#/ASP.NET.
+  # shop to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -1002,6 +1378,18 @@ techmahindra_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 virtusa_search:
   max_listings: 200
@@ -1013,7 +1401,7 @@ virtusa_search:
   # uses headless Firefox (Playwright) since the real detail endpoint is a
   # ~13KB JSF-postback form too fragile to hand-replicate.
   # require_tech_in_description narrows a large multi-stack IT-services shop
-  # to explicit .NET/C#/ASP.NET.
+  # to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -1021,6 +1409,18 @@ virtusa_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 hexaware_search:
   max_listings: 300
@@ -1030,7 +1430,7 @@ hexaware_search:
   # Playwright. No location facet ID used — fetches globally per keyword and
   # filters India client-side via PrimaryLocation, same conservative approach
   # as Icertis/WTW. require_tech_in_description narrows a large multi-stack
-  # IT-services shop to explicit .NET/C#/ASP.NET.
+  # IT-services shop to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -1038,6 +1438,18 @@ hexaware_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 societegenerale_search:
   max_listings: 300
@@ -1049,7 +1461,7 @@ societegenerale_search:
   # plain GET returns all ~694 postings in a single page, no pagination.
   # Job-detail pages carry a clean schema.org JobPosting JSON-LD block
   # (plain-text description + datePosted). require_tech_in_description
-  # narrows a large multi-department bank to explicit .NET/C#/ASP.NET.
+  # narrows a large multi-department bank to explicit .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -1057,6 +1469,18 @@ societegenerale_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
 
 schwab_search:
   max_listings: 100
@@ -1066,7 +1490,7 @@ schwab_search:
   # needed. India filtered server-side via /search-jobs/india path (~19
   # jobs, small Hyderabad presence). Job-detail pages carry a clean
   # schema.org JobPosting JSON-LD block. require_tech_in_description
-  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET.
+  # narrows to jobs whose JD explicitly names .NET/C#/ASP.NET or AI/ML.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -1074,6 +1498,728 @@ schwab_search:
     - ".NET"
     - "C#"
     - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+groww_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Greenhouse board token "groww" (job-boards.eu.greenhouse.io/groww). Keyword
+  # ignored server-side, full board cached in-module. DO NOT add
+  # require_tech_in_description — not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+razorpay_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Greenhouse board token razorpaysoftwareprivatelimited; ~21 total jobs,
+  # keyword/location ignored server-side, full board cached in-module.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cred_search:
+  max_listings: 20
+  inter_page_delay: 0.1
+  # Lever board token "cred" (~14 postings). Keyword/location ignored
+  # server-side, full board cached once. DO NOT add
+  # require_tech_in_description — board is small, titles descriptive enough.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+meesho_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Lever board token "meesho" (~48 postings). Keyword/location ignored
+  # server-side, full board cached once.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+paytm_search:
+  max_listings: 250
+  inter_page_delay: 0.1
+  # Lever board token "paytm" (~228 postings, ~218 India). Keyword/location
+  # ignored server-side, full board cached once. DO NOT add
+  # require_tech_in_description — titles varied but Layer 3 should suffice.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+eclerx_search:
+  max_listings: 300
+  inter_page_delay: 0.3
+  # Oracle HCM CE (not Workday). Tenant fa-ewji-saasfaprod1.fa.ocs.oraclecloud.com,
+  # site CX_1. Same REST pattern as Chubb/Hexaware/Icertis/WTW — plain requests,
+  # no Playwright. No location facet ID used — fetches globally per keyword and
+  # filters India client-side via PrimaryLocation. require_tech_in_description
+  # active: eClerx is a KPO/BPO shop whose India postings are almost entirely
+  # generic ops titles (Senior Analyst, Process Manager) with zero "engineer"/
+  # "developer" titles seen live — narrows any future SWE-titled req to explicit
+  # .NET/C#/ASP.NET or AI/ML.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+macquarie_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Avature ATS at recruitment.macquarie.com (NOT the mq.wd3.myworkdayjobs.com
+  # Workday tenant — that's Macquarie University, a different organization
+  # that happens to share the name). Plain HTML scraping, no Playwright.
+  # Keyword search is genuinely server-side; location is not — India means
+  # exactly Gurugram/Hyderabad, filtered client-side via a city whitelist
+  # since location text never says "India".
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mufg_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant mufgub.wd3.myworkdayjobs.com, site "MUFG-Careers". Uses a
+  # plain "Country" facet (not locationCountry/Country_and_Jurisdiction).
+  # India WID c4f78be1a8f14da0ab49ce1162348a5e; ~214 India jobs. Tenant
+  # HTTP 400s above limit=20 — fetcher clamps num defensively.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ing_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant ing.wd3.myworkdayjobs.com, site ICSGBLCOR (careers.ing.com
+  # is a Radancy/TalentBrew skin over this). No location facet at all --
+  # fetches globally per keyword (searchText IS honored server-side) and
+  # filters India client-side via word-boundary regex. Confirmed live
+  # 2026-08-30: 0 of 734 global jobs are in India -- 0 matches expected
+  # until ING opens India roles; this is a genuine current fact, not a bug.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+saplabs_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (jobs.sap.com, company=SAP). Server-rendered
+  # HTML, no CSRF/session dance needed (not the Unify theme). Pagination via
+  # ?startrow=N (25/page). Keyword search full-text-matches description
+  # content so common tech words converge on nearly the whole ~50-job India
+  # pool (functionally similar to _IGNORES_KEYWORDS companies even though not
+  # classified there). require_tech_in_description active: SAP is a large
+  # multi-stack employer (Java/Go/Python/HANA-heavy), so Layer 3's broader
+  # .NET/C# group risks false positives on SQL Server/EF alone.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+lenskart_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Custom "ainterviews.com" ATS (not one of the standard vendors). Whole
+  # board (~67 postings) fetched and cached once — keyword/location ignored
+  # server-side, description already inline. Location text is bare city
+  # names ("Bangalore", "Gurugram") with no "India" word — ", India" appended
+  # only for recognized India cities (Razorpay/CRED/Invesco convention);
+  # genuine non-India offices (Spain, Singapore, UAE, Japan, Thailand, Italy)
+  # left untouched.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mphasis_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # RippleHire (mphasis.ripplehire.com, token ty4DfyWddnOrtpclQeia) — same ATS
+  # as LTIMindtree. Keyword search IS genuinely server-side (counts differ per
+  # keyword). No usable location facet — "geo"/"location" params zero out
+  # totalJobCount even though India jobs exist; fetches globally per keyword
+  # and recognizes India via a city whitelist (bare city names, no country
+  # field). require_tech_in_description active: titles are heavily generic/
+  # level-banded ("Senior Software Engineer") hiding wildly different stacks
+  # (Salesforce LWC, Selenium/UFT, Java/AWS all seen under that exact title) —
+  # narrows to explicit .NET/C#/ASP.NET or AI/ML signal in the description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+necsws_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/NECSWS) — same ATS as Nagarro
+  # and PhonePe. "country=in" is a reliable server-side filter (verified zero
+  # leakage). Keyword param does loose pre-filtering only, not a hard filter —
+  # shared title/skill checks do the real work, same as Nagarro. India titles
+  # name the stack directly ("Senior Software Engineer - .Net Core and
+  # Cloud") rather than generic banding — require_tech_in_description left
+  # off per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+phonepe_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/PHONEPELIMITED) — migrated
+  # off Greenhouse (old job-boards.greenhouse.io/phonepe now 404s). "q"
+  # keyword param is a loose server-side pre-filter only (full-text match,
+  # not just title) — title/skill filters do the real work. country=in is a
+  # reliable server-side filter. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+atlassian_search:
+  max_listings: 300
+  inter_page_delay: 0.1
+  # First-party JSON proxy (www.atlassian.com/endpoint/careers/listings)
+  # fronting an iCIMS backend — keyword ignored server-side (byte-identical
+  # response regardless of query), full ~234-job global pool returned in one
+  # call, description already inline. DO NOT add require_tech_in_description
+  # — titles carry real tech signal, not IT-services banding.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+intuit_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (same platform as Optum), org 27595. Keyword param genuinely
+  # honored server-side; "l=" location param is ignored (rely on
+  # is_india_job()). Pagination param is "p=" not "pg=" (differs from Optum's
+  # tenant). Description needs a separate detail-page fetch.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+swiggy_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # MyNextHire (swiggy.mynexthire.com, embedded via careers-integration.js
+  # iframe). No keyword/pagination params — full ~79-job pool cached once.
+  # DO NOT add require_tech_in_description unless explicitly asked.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zerodha_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Custom Vue 3 SPA, same-origin /api/jobs, zero params. Board has been
+  # confirmed empty for 6+ months (verified via 3 Wayback Machine captures
+  # spanning Feb-Aug 2026) — 0 matches expected, this is a genuine current
+  # fact, not a fetcher defect. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+amdocs_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Eightfold (amdocs.eightfold.ai) -- hit this host directly to bypass the
+  # Incapsula bot-protection layer on the jobs.amdocs.com/careers.amdocs.com
+  # branded fronts (same backend, confirmed via x-ef-* headers). Keyword
+  # ignored server-side (identical pool for any query) -- location IS a real
+  # server-side filter, sortBy=date IS genuinely newest-first. DO NOT add
+  # require_tech_in_description -- titles carry real tech signal directly
+  # (e.g. "Software Engineer(C# Developer)", "(Gen AI Developer)").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bnpparibas_search:
+  max_listings: 700
+  inter_page_delay: 0.2
+  # Custom in-house Symfony site at group.bnpparibas (India Solutions Pvt
+  # Ltd entity), Akamai-fronted -- plain requests hard-blocked at the edge
+  # (not a JS challenge), Playwright/Firefox required throughout. City
+  # facets (Mumbai/Bengaluru) are mandatory -- an unscoped keyword search
+  # leaks global (Vienna/Milan/Manila) results. BNPP's own list-card HTML
+  # mislabels ~257 genuine Mumbai postings as "Tamil Nadu" -- fetcher
+  # overrides location with the known city facet rather than trusting BNPP's
+  # own text, to avoid a false exclude_locations match. DO NOT add
+  # require_tech_in_description -- titles carry explicit tech signal
+  # (".NET Developer", "AI engineer", "Java Full Stack Developer").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+citiustech_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # RippleHire (citiustech.ripplehire.com, token bCKlfz3OO8vQIgiM2vuI) --
+  # same platform as LTIMindtree. "search" param genuinely filters
+  # server-side. No location facet -- "geo" param silently zeroes results,
+  # omit entirely; falls back to facility-name token matching. Titles are
+  # level-banded ("Lead Engineer - I/II", "Technical Specialist - II") --
+  # require_tech_in_description active.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+crisil_search:
+  max_listings: 700
+  inter_page_delay: 0.2
+  # Zwayam ATS, shared multi-tenant endpoint (public.zwayam.com, companyId
+  # 15438 -- base64 "MTU0Mzg=" for search, decoded "15438" for detail).
+  # Keyword genuinely narrows server-side here (unlike Persistent) but
+  # ignored anyway for simplicity -- full ~650-job pool (~594 India) cached
+  # once. DO NOT add require_tech_in_description -- titles carry real tech
+  # signal ("Senior AI Engineer - GenAI & ML solutions", "Dotnet Full stack
+  # developer").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+flipkart_search:
+  max_listings: 8000
+  inter_page_delay: 0.1
+  # TurboHire ATS (flipkart.turbohire.co, backend thapi.azurewebsites.net).
+  # Anonymous GET /api/token/noauth -> bearer JWT -> full ~6690-job
+  # company-wide pool in one bulk POST, cached in-module (in-memory slice
+  # after the one fetch -- inter_page_delay has no real network cost here).
+  # max_listings MUST exceed the pool size or real matches deep in the list
+  # get truncated. DO NOT add require_tech_in_description -- titles carry
+  # real signal (SDE 1/2/3, "Senior Staff AI Engineer").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+google_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Plain unauthenticated requests against Google's own careers SPA --
+  # server-side-rendered AF_initDataCallback JSON blob in the raw HTML
+  # (same pattern as Google Search/Flights), no auth/CAPTCHA/bot-challenge.
+  # Keyword AND location genuinely filter server-side; full JD already
+  # inline, no detail call needed. DO NOT add require_tech_in_description --
+  # titles are specific ("Staff Software Engineer, Agentic AI Engineering"),
+  # not generic level-banded.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+jioplatforms_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Legacy ASP.NET WebForms (careers.jio.com) -- static, non-session-bound
+  # encrypted category tokens (could rotate on a Jio redeploy; re-scrape
+  # frmJobCategories.aspx if fetch_jobs() ever returns 0). Only the
+  # "Engineering & Technology" and "IT & Systems" categories are scraped --
+  # the other 22 categories (tens of thousands of Freelancer/Ops/Sales jobs)
+  # can never match title_family. Keyword/location form is a red herring --
+  # it only filters which category TILES show, never actual jobs; ignored.
+  # DO NOT add require_tech_in_description -- descriptions here are generic
+  # boilerplate with zero concrete tech-stack naming, so Layer 4 would be moot.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mastek_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic theme (careers.mastek.com, company
+  # masteklimi, career44.sapsf.com) -- server-rendered on first load, no JS
+  # needed. Keyword search is UNSAFE: any non-matching query silently
+  # returns a default fallback set instead of empty -- ignore entirely,
+  # cache the full ~39-job India pool once via blank q= + locationsearch=india.
+  # Pagination wraps around past the true total (drops the location filter
+  # and returns unrelated global jobs) -- fetcher tracks total from the
+  # first page and never requests past it. Titles are generic IT-services
+  # bands hiding wildly different stacks -- require_tech_in_description active.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+
+meta_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Internal GraphQL endpoint (metacareers.com/graphql) -- unauthenticated,
+  # no CSRF-tied session, no CAPTCHA; office-filtered to India cities
+  # (Bangalore/Gurgaon/Hyderabad/Mumbai/New Delhi), cached once. MAINTENANCE
+  # RISK: the query's doc_id is an internal per-build identifier Meta can
+  # rotate on a frontend deploy -- fails cleanly (404 -> RateLimitError)
+  # rather than silently wrong; if fetch_jobs() starts erroring, re-open
+  # /jobs in DevTools, filter Network for graphql, read the new doc_id off
+  # CareersJobSearchResultsV2DataQuery.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nykaa_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Skima AI ATS (careers.nykaa.com, server-rendered Astro SSR, new vendor
+  # for this repo) -- whole board cached once, each job's detail page
+  # fetched separately for description. Confirmed 0 live postings as of
+  # 2026-08-31 (verified via empty sitemap.xml too, not a bot-block) --
+  # self-heals once Nykaa posts through this portal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+policybazaar_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Trakstar Hire (legacy RecruiterBox rebrand, policybazaar.hire.trakstar.com
+  # -- new ATS vendor for this repo). RSS feed (/jobfeeds/Policybazaar)
+  # returns the whole board with inline descriptions in one request;
+  # keyword/location ignored server-side. Only 1 open req system-wide as of
+  # 2026-08-31 (PolicyBazaar's real engineering hiring appears to bypass
+  # this board entirely, LinkedIn-only) -- near-zero matches expected
+  # long-term, not a fetcher defect. RSS pubDate is a fixed per-tenant
+  # template default, never a real date -- posting_date is "".
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sharechat_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # MyNextHire (sharechat.mynexthire.com) -- same ATS as Swiggy. No
+  # keyword/pagination params; full JD inline. Currently 0 engineering
+  # postings (all Content/Ops roles) as of 2026-08-31 -- real current fact,
+  # not a bug. DO NOT add require_tech_in_description unless explicitly asked.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zomato_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Darwinbox ATS (eternal.darwinbox.in -- Zomato's parent renamed itself
+  # Eternal Ltd; new vendor for this repo). Unauthenticated candidate API
+  # (/ms/candidateapi/job), keyword/search ignored server-side. Board is
+  # genuinely empty right now (jobscount: 0, verified twice) -- parsing
+  # logic validated against two populated sibling Darwinbox tenants
+  # (Zepto, Hetero) since the product's API is identical company-wide.
+  # New postings will flow through automatically once Eternal/Zomato hires
+  # through this portal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dtcc_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM CE (ebxr.fa.us2.oraclecloud.com, site CX_1) -- same pattern as
+  # Chubb/Amex/Hexaware/eClerx/BNY. No India location facet -- fetches
+  # globally per keyword, filters India client-side via PrimaryLocation.
+  # DO NOT add require_tech_in_description -- real engineering titles seen
+  # directly (Software Engineer, SDET) in Chennai/Hyderabad.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+arcesium_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Greenhouse board token "arcesiumllc" (~35 postings). Keyword/location
+  # ignored server-side, full board cached once, description inline.
+  # Current India titles are Infra/SRE/Principal-Engineer level (JVM/Python/
+  # Scala/Kubernetes stack, no .NET or LangChain/RAG signal) and mostly
+  # don't match the shared title_family phrasing either -- a real current
+  # near-zero, same class as CitiusTech's leveling gap (see Wave 2 "Known
+  # Gaps"). DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+aig_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant aig.wd1.myworkdayjobs.com, site "aig". Global req board
+  # has ZERO India-tagged entries as of 2026-08-31 (confirmed via full
+  # locationCountry/locations facet enumeration) despite AIG having a real
+  # ~4,000-person India GCC -- a genuine current fact, not a fetcher defect.
+  # Watch for "IN-" location prefixes meaning Indiana (US state), not India.
+  # DO NOT add require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bloomberg_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Avature ATS (bloomberg.avature.net/careers) -- same platform as
+  # Macquarie. Keyword genuinely filters server-side. Bloomberg is a
+  # C++/Python/Java shop, not .NET (all .NET-style keywords return 0). All
+  # current India engineering postings are in Pune, which is globally
+  # excluded -- 0 matches expected, working as intended, not a bug.
+  # DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ice_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # iCIMS/Jibe (careers.ice.com/api/jobs, same family as spglobal_careers/
+  # gallagher) -- offset ignored server-side, keyword narrows real results
+  # but breaks pagination the same way; full ~36-job India pool cached once
+  # instead. Description inline. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+moodys_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (same vendor as Optum, org 49841, careers.moodys.com) --
+  # different theme skin from Optum's (title <a> nested inside <h2>,
+  # pagination param "p=" not "pg="). Keyword genuinely filters server-side;
+  # location "l=" is inert, rely on is_india_job() instead.
+  # DO NOT add require_tech_in_description -- descriptions
+  # are genuinely role-specific, no boilerplate-reuse false-positive
+  # pattern observed.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nasdaq_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant nasdaq.wd1.myworkdayjobs.com, site Global_External_Site.
+  # Facet key "Location_Country" (capitalized, like Marsh McLennan/State
+  # Street); India WID c4f78be1a8f14da0ab49ce1162348a5e. limit hard-capped
+  # at 20; pagination wraps around past the true total (MUFG-style bug) --
+  # fetcher memoizes the first job ID per keyword to detect and stop it.
+  # DO NOT add require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+swissre_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (careers.swissre.com, same family as
+  # Nomura/Capgemini/SAP Labs/Mastek). Small ~33-job India pool, keyword
+  # genuinely narrows server-side but ignored anyway (cache once, cheaper).
+  # require_tech_in_description active: titles are mostly actuarial/ops
+  # bands plus a handful of ambiguous engineering titles (SAP S4HANA,
+  # ServiceNow, UiPath) with zero live .NET/C# mentions -- precision
+  # tightener, same rationale as Sabre/Autodesk/Adobe/eBay.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+alphasense_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Greenhouse board token "alphasense" (~235 postings). Keyword/location
+  # ignored server-side, full board cached once. India offices split across
+  # "Remote - India" and bare city names (Bengaluru/Delhi/Pune) -- ", India"
+  # appended only for recognized cities. DO NOT add
+  # require_tech_in_description -- titles are specific, not generic bands.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+anz_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (careers.anz.com, same family as Nomura/
+  # Capgemini/SAP Labs/Mastek/Swiss Re). Small ~20-job India pool (all
+  # Bengaluru), keyword unreliable/loose -- cached once instead. Pagination
+  # silently drops the India filter past the true total (new wraparound
+  # variant) -- cache-once-and-slice sidesteps it. DO NOT add
+  # require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+lloyds_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Workday tenant lbg.wd3.myworkdayjobs.com, site "Lloyds_Technology_Centre"
+  # -- the dedicated India GCC portal (Hyderabad-only by construction, no
+  # country facet needed). limit hard-capped at 20; pagination wraps around
+  # past the true total (MUFG-style bug) -- fetcher memoizes first job ID
+  # per keyword. require_tech_in_description active: zero live postings
+  # mention a real .NET/AI hard term, but 4 postings mention "SQL Server"
+  # only as one entry in a generic ETL tools list (Pentaho/Snowflake/
+  # BigQuery) -- same false-positive shape as Citi/State Street/Adobe.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  require_tech_in_description:
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
+
+uipath_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Ashby ATS (jobs.ashbyhq.com/uipath) -- new vendor for this repo. GET
+  # api.ashbyhq.com/posting-api/job-board/uipath returns the full board (119
+  # jobs) in one call, no pagination, keyword/location ignored server-side.
+  # Full plain-text description inline. DO NOT add
+  # require_tech_in_description -- titles/descriptions carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+visa_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant visa.wd5.myworkdayjobs.com, site "Visa". locationCountry
+  # facet works despite being nested under locationMainGroup (same quirk as
+  # Adobe/WTW/Fiserv) -- genuine server-side India filter. India titles name
+  # real tech signal directly ("Java/Python, RAG, GenAI Development",
+  # "Python, Gen AI, Agentic AI") -- DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+blackrock_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (org 45831) -- a third distinct theme skin from Optum's and
+  # Moody's (pagination "p="; page size 10; nested location markup). "l="
+  # location param ignored server-side, rely on is_india_job(). Stack is
+  # heavily Java/Python (Aladdin platform), not .NET -- the AI/ML track is
+  # where BlackRock India matches come from. DO NOT add
+  # require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+natwest_search:
+  max_listings: 100
+  inter_page_delay: 5.0
+  # Talemetry ATS (jobs.natwestgroup.com) -- new vendor for this repo.
+  # Cloudflare managed-challenge blocks plain requests entirely; needs
+  # headless Chromium (Firefox gets stuck on the challenge indefinitely --
+  # opposite of Honeywell/IBM/Tech Mahindra), with an enforced ~5s gap
+  # between navigations or every request after the first gets re-challenged.
+  # Full ~65-job India pool cached once, keyword/location ignored
+  # server-side (loose/unreliable q= match). DO NOT add
+  # require_tech_in_description -- titles here carry the tech signal
+  # ("Python Software Engineer, VP") while descriptions are often generic
+  # corporate boilerplate; Layer 4 would risk dropping genuine matches.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 notifications:
   email:

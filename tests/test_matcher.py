@@ -28,6 +28,7 @@ from matcher import (
     matches_skills,
     passes_exclude_check,
     passes_title_family_check,
+    _derive_tags,
     _normalize_text,
     _strip_html,
 )
@@ -102,6 +103,52 @@ OUT_OF_STACK_JOB = {
 OUT_OF_STACK_DESCRIPTION = (
     "Join our machine-learning platform team. You will use Python, Java, "
     "TensorFlow, and Spark to build scalable data pipelines. Strong ML background preferred."
+)
+
+# A job that should pass via the AI/ML/Python track only
+AI_JOB = {
+    "id":               "200099004",
+    "title":            "Machine Learning Engineer",
+    "location":         "India, Karnataka, Bangalore",
+    "posting_date":     "2026-06-01",
+    "application_url":  "https://apply.careers.microsoft.com/careers/job/1970393556999004?domain=microsoft.com",
+}
+AI_DESCRIPTION = (
+    "We are building a production retrieval augmented generation platform using "
+    "LangChain and LangGraph, with a vector database (ChromaDB) backing our "
+    "generative ai search experience. Strong Python skills required."
+)
+
+# Deliberately mentions ONLY hard AI tool names -- no "Python"/"machine learning"/
+# other soft `skills` term, and no .NET term either. Regression guard: `skills`
+# and `primary_skills` are two INDEPENDENT checks (a job must pass both), so every
+# primary_skills term must also be listed in `skills` or a pure-AI-tooling
+# description like this one gets silently dropped by the broad `skills` gate
+# even though it clearly qualifies.
+AI_ONLY_JOB = {
+    "id":               "200099006",
+    "title":            "Machine Learning Engineer",
+    "location":         "India, Karnataka, Bangalore",
+    "posting_date":     "2026-06-01",
+    "application_url":  "https://apply.careers.microsoft.com/careers/job/1970393556999006?domain=microsoft.com",
+}
+AI_ONLY_DESCRIPTION = (
+    "Build a production RAG platform using LangChain and LangGraph with a "
+    "ChromaDB vector database."
+)
+
+# A job that genuinely spans both tracks and should carry both tags
+HYBRID_JOB = {
+    "id":               "200099005",
+    "title":            "Senior Software Engineer",
+    "location":         "India, Karnataka, Bangalore",
+    "posting_date":     "2026-06-01",
+    "application_url":  "https://apply.careers.microsoft.com/careers/job/1970393556999005?domain=microsoft.com",
+}
+HYBRID_DESCRIPTION = (
+    "Migrating legacy .NET Core and C# services onto a modern LangChain-based "
+    "RAG platform. ASP.NET backend experience required alongside hands-on "
+    "LangGraph and vector database work."
 )
 
 
@@ -251,6 +298,39 @@ def test_passes_exclude_check_rejects_principal():
 
 def test_passes_exclude_check_rejects_manager():
     assert passes_exclude_check({**GOOD_JOB, "title": "Engineering Manager"}, EXCLUDE) is False
+
+
+# --- word-boundary fix regression tests (Batch Onboarding Wave 1/2 bug) ---
+# "VP" and "director" are real exclude_terms entries, but a plain substring
+# check also matched them inside unrelated words ("AVP"/"SVP" banking title
+# tiers, "Active Directory") — costing real matches at MUFG/Moody's/
+# BlackRock. Fixed via word-boundary matching in passes_exclude_check.
+
+def test_passes_exclude_check_avp_not_excluded():
+    """'AVP' (a distinct banking title tier, not 'VP') must NOT be excluded."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "Full Stack Developer - AVP"}, EXCLUDE) is True
+
+
+def test_passes_exclude_check_svp_not_excluded():
+    assert passes_exclude_check({**GOOD_JOB, "title": "SVP, Software Engineering"}, EXCLUDE) is True
+
+
+def test_passes_exclude_check_evp_not_excluded():
+    assert passes_exclude_check({**GOOD_JOB, "title": "EVP - Backend Engineer"}, EXCLUDE) is True
+
+
+def test_passes_exclude_check_bare_vp_still_excluded():
+    """A genuine standalone 'VP' title must still be excluded."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "VP - Software Engineering"}, EXCLUDE) is False
+
+
+def test_passes_exclude_check_active_directory_not_excluded():
+    """'Active Directory' (the Microsoft product) must NOT match 'director'."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "Active Directory Senior Engineer"}, EXCLUDE) is True
+
+
+def test_passes_exclude_check_bare_director_still_excluded():
+    assert passes_exclude_check({**GOOD_JOB, "title": "Director of Engineering"}, EXCLUDE) is False
 
 
 # --- matches_skills ---
@@ -462,3 +542,94 @@ def test_find_matching_jobs_keeps_job_when_description_empty(monkeypatch):
     assert any(j["id"] == GOOD_JOB["id"] for j in matched), (
         "A job with an empty description must still appear in results"
     )
+
+
+# ---------------------------------------------------------------------------
+# _derive_tags — unit tests
+# ---------------------------------------------------------------------------
+
+GROUPS = {
+    ".NET / C#": [".NET", "C#"],
+    "AI / ML / Python": ["LangChain", "RAGAS"],
+}
+
+
+def test_derive_tags_single_group():
+    assert _derive_tags(_normalize_text("Strong C# background required."), GROUPS) == [".NET / C#"]
+
+
+def test_derive_tags_other_group():
+    assert _derive_tags(_normalize_text("Experience with LangChain pipelines."), GROUPS) == ["AI / ML / Python"]
+
+
+def test_derive_tags_both_groups():
+    normed = _normalize_text("C# backend feeding a LangChain pipeline.")
+    assert _derive_tags(normed, GROUPS) == [".NET / C#", "AI / ML / Python"]
+
+
+def test_derive_tags_no_match():
+    assert _derive_tags(_normalize_text("Java and Spring Boot only."), GROUPS) == []
+
+
+# ---------------------------------------------------------------------------
+# find_matching_jobs — tags on the matched dict (AI/ML/Python track + hybrid)
+# ---------------------------------------------------------------------------
+
+def test_find_matching_jobs_tags_dotnet_job(monkeypatch):
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: GOOD_DESCRIPTION)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next(j for j in matched if j["id"] == GOOD_JOB["id"])
+    assert job["tags"] == [".NET / C#"]
+
+
+def test_find_matching_jobs_keeps_and_tags_ai_role(monkeypatch):
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(AI_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: AI_DESCRIPTION)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next((j for j in matched if j["id"] == AI_JOB["id"]), None)
+    assert job is not None, "A Machine Learning Engineer role with LangChain/RAG in the JD should match"
+    assert job["tags"] == ["AI / ML / Python"]
+
+
+def test_find_matching_jobs_keeps_ai_role_with_no_soft_skill_overlap(monkeypatch):
+    """Regression guard: a description naming ONLY hard AI tools (LangChain/
+    LangGraph/ChromaDB), with no 'Python'/'machine learning'/other soft `skills`
+    term and no .NET term, must still match -- `skills` and `primary_skills`
+    are independent checks, so every primary_skills term must also live in
+    `skills` or this exact case is silently dropped."""
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(AI_ONLY_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: AI_ONLY_DESCRIPTION)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next((j for j in matched if j["id"] == AI_ONLY_JOB["id"]), None)
+    assert job is not None, (
+        "A role naming only hard AI tools (no soft-skill/.NET overlap) must still match"
+    )
+    assert job["tags"] == ["AI / ML / Python"]
+
+
+def test_find_matching_jobs_tags_hybrid_role_with_both_tags(monkeypatch):
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(HYBRID_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: HYBRID_DESCRIPTION)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next((j for j in matched if j["id"] == HYBRID_JOB["id"]), None)
+    assert job is not None
+    assert job["tags"] == [".NET / C#", "AI / ML / Python"]
+
+
+def test_find_matching_jobs_tags_unverified_when_description_fetch_fails(monkeypatch):
+    """A job kept via the fail-open path (no skill check ran) must be tagged
+    'Unverified' rather than silently implying a confirmed .NET match."""
+    def _always_raise(*a, **kw):
+        raise RuntimeError("simulated network error")
+
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", _always_raise)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next(j for j in matched if j["id"] == GOOD_JOB["id"])
+    assert job["tags"] == ["Unverified"]

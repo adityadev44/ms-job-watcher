@@ -15,3 +15,7 @@ __pycache__/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Personal documents — this repo is public; never commit resumes or similar
+# files dropped into the project folder for reference.
+*.docx

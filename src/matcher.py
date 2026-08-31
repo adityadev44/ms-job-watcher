@@ -74,6 +74,24 @@ def _contains_any(text: str, terms: list[str]) -> bool:
     return any(_normalize_text(t) in normed for t in terms)
 
 
+def _contains_any_whole_word(text: str, terms: list[str]) -> bool:
+    """Normalised whole-word/phrase check: does *text* contain any of *terms*
+    with a word boundary on both sides (not embedded in a longer word)?
+
+    Used for exclude_terms, where a plain substring check has real false
+    positives short single-word terms are prone to — "VP" inside "AVP"/"SVP",
+    "director" inside "Active Directory" (see PLAYBOOK "Batch Onboarding
+    Wave 1/2"). title_family/skills/primary_skills deliberately keep plain
+    substring matching instead (e.g. "SDE" must still match inside "SDE2").
+    """
+    normed = _normalize_text(text)
+    for t in terms:
+        normed_term = _normalize_text(t)
+        if re.search(rf"\b{re.escape(normed_term)}\b", normed):
+            return True
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Individual filter predicates (pure functions, easy to unit-test)
 # ---------------------------------------------------------------------------
@@ -94,13 +112,29 @@ def passes_title_family_check(job: dict, title_family: list[str]) -> bool:
 
 
 def passes_exclude_check(job: dict, exclude_terms: list[str]) -> bool:
-    """True if the job title contains *none* of the configured exclude terms."""
-    return not _contains_any(job["title"], exclude_terms)
+    """True if the job title contains *none* of the configured exclude terms
+    as a whole word/phrase (not embedded inside an unrelated word)."""
+    return not _contains_any_whole_word(job["title"], exclude_terms)
 
 
 def matches_skills(description: str, skills: list[str]) -> bool:
     """True if the plain-text description mentions at least one required skill."""
     return _contains_any(description, skills)
+
+
+def _derive_tags(normed_description: str, primary_skill_groups: dict[str, list[str]]) -> list[str]:
+    """Return the name of every primary_skills group with a hit in *normed_description*.
+
+    *normed_description* must already be normalised (see ``_normalize_text``); each
+    group's own terms are normalised here before comparison. A job can carry more
+    than one tag if it genuinely mentions terms from multiple groups (e.g. a hybrid
+    role) — that's surfaced as-is in the outgoing alert rather than picking one.
+    """
+    return [
+        name
+        for name, terms in primary_skill_groups.items()
+        if any(_normalize_text(t) in normed_description for t in terms)
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -154,7 +188,11 @@ def find_matching_jobs(
         Total unique jobs retrieved across all keyword/location combinations.
     matched : list[dict]
         Jobs that passed every filter.  Each dict has the standard five fields
-        plus a ``description`` key with the plain-text job description.
+        plus a ``description`` key with the plain-text job description, and a
+        ``tags`` key (list[str]) naming which ``primary_skills`` group(s) it
+        matched on — e.g. ``[".NET / C#"]`` or ``["AI / ML / Python"]`` — or
+        ``["Unverified"]`` if the description fetch failed and no skill check
+        actually ran.
     """
     cfg = (
         config_path_or_cfg
@@ -169,7 +207,11 @@ def find_matching_jobs(
     exclude_locs: list[str] = [loc.lower() for loc in cfg["search"].get("exclude_locations", [])]
     matching: dict = cfg.get("matching", {})
     skills: list[str] = matching.get("skills", [])
-    primary_skills: list[str] = matching.get("primary_skills", [])
+    # A mapping of tag name -> hard-skill terms (e.g. ".NET / C#", "AI / ML / Python").
+    # Flattened into a plain list for the pass/fail check below; kept as a mapping
+    # so a matched job can also be tagged with which group(s) it hit on.
+    primary_skill_groups: dict[str, list[str]] = matching.get("primary_skills", {}) or {}
+    primary_skills: list[str] = [term for terms in primary_skill_groups.values() for term in terms]
     title_family: list[str] = matching.get("title_family", [])
     exclude: list[str] = matching.get("exclude_terms", [])
 
@@ -304,7 +346,7 @@ def find_matching_jobs(
                 f"  [warn] description unavailable for '{job['title']}'"
                 f"{reason} — keeping"
             )
-            matched.append({**job, "description": ""})
+            matched.append({**job, "description": "", "tags": ["Unverified"]})
             continue
 
         normed_desc = _normalize_text(description)
@@ -315,7 +357,8 @@ def find_matching_jobs(
             if primary_skills else non_react  # empty primary_skills → no extra check
         )
         if non_react and primary_found:
-            matched.append({**job, "description": description})
+            tags = _derive_tags(normed_desc, primary_skill_groups)
+            matched.append({**job, "description": description, "tags": tags})
         elif non_react:  # broad skills only (Azure/Angular/TypeScript etc.)
             filtered_out.append(
                 f"[broad-only]    {job['title']} "

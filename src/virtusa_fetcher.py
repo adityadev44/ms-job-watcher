@@ -175,8 +175,15 @@ def fetch_jobs(
     if r is None:
         raise RateLimitError(f"Virtusa fetch: no response — {last_exc}")
 
+    payload = r.json()
+    if payload.get("careerSectionUnAvailable"):
+        # Taleo reports the whole career section as temporarily down by setting
+        # every other field to null instead of returning an error status —
+        # treat as a transient empty result rather than crashing on None.
+        return []
+
     jobs: list[dict] = []
-    for req in r.json().get("requisitionList", []):
+    for req in payload.get("requisitionList") or []:
         job_id = req.get("jobId", "")
         cols = req.get("column", [])
         title = (cols[0] if len(cols) > 0 else "").strip()

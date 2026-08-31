@@ -90,6 +90,25 @@ def test_format_message_two_jobs():
     assert "Software Engineer II" in msg
 
 
+def test_format_message_shows_tag_when_present():
+    job = [{**ONE_JOB[0], "tags": [".NET / C#"]}]
+    msg = format_message(job)
+    assert "[.NET / C#] Senior Software Engineer" in msg
+
+
+def test_format_message_joins_multiple_tags():
+    job = [{**ONE_JOB[0], "tags": [".NET / C#", "AI / ML / Python"]}]
+    msg = format_message(job)
+    assert "[.NET / C# + AI / ML / Python] Senior Software Engineer" in msg
+
+
+def test_format_message_falls_back_to_unspecified_without_tags_key():
+    """Backward compatibility: job dicts without a 'tags' key (old shape) must
+    still render, just with a generic placeholder instead of a real tag."""
+    msg = format_message(ONE_JOB)
+    assert "[Unspecified] Senior Software Engineer" in msg
+
+
 # ---------------------------------------------------------------------------
 # _build_telegram_chunks
 # ---------------------------------------------------------------------------
