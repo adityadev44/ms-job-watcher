@@ -119,6 +119,24 @@ AI_DESCRIPTION = (
     "generative ai search experience. Strong Python skills required."
 )
 
+# Real production false positive (Citi, 2026-08-31): a genuinely Python/AI role
+# was ALSO tagged [.NET / C#] purely because it mentioned "SQL Server" as its
+# database -- SQL Server is usable from any language, not a .NET-specific
+# signal. Regression guard for the fix (SQL Server/T-SQL/Web API demoted out
+# of the .NET/C# primary_skills group, kept only in the broader `skills` list).
+PYTHON_JOB_WITH_SQL_SERVER = {
+    "id":               "200099007",
+    "title":            "Senior Python Application Developer",
+    "location":         "India, Karnataka, Bangalore",
+    "posting_date":     "2026-08-31",
+    "application_url":  "https://apply.careers.microsoft.com/careers/job/1970393556999007?domain=microsoft.com",
+}
+PYTHON_JOB_WITH_SQL_SERVER_DESCRIPTION = (
+    "We are looking for a Senior Python Developer to build generative ai "
+    "features. The service persists data in SQL Server. Strong Python and "
+    "prompt engineering experience required."
+)
+
 # Deliberately mentions ONLY hard AI tool names -- no "Python"/"machine learning"/
 # other soft `skills` term, and no .NET term either. Regression guard: `skills`
 # and `primary_skills` are two INDEPENDENT checks (a job must pass both), so every
@@ -592,6 +610,22 @@ def test_find_matching_jobs_keeps_and_tags_ai_role(monkeypatch):
     job = next((j for j in matched if j["id"] == AI_JOB["id"]), None)
     assert job is not None, "A Machine Learning Engineer role with LangChain/RAG in the JD should match"
     assert job["tags"] == ["AI / ML / Python"]
+
+
+def test_find_matching_jobs_does_not_mistag_python_role_via_sql_server(monkeypatch):
+    """Regression guard for the real Citi false positive (2026-08-31): a
+    Python/AI role that merely mentions 'SQL Server' as its database must be
+    tagged ONLY AI / ML / Python, never also .NET / C# -- SQL Server is not
+    .NET-specific and must not live in the .NET/C# primary_skills group."""
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(PYTHON_JOB_WITH_SQL_SERVER))
+    monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: PYTHON_JOB_WITH_SQL_SERVER_DESCRIPTION)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next((j for j in matched if j["id"] == PYTHON_JOB_WITH_SQL_SERVER["id"]), None)
+    assert job is not None
+    assert job["tags"] == ["AI / ML / Python"], (
+        f"SQL Server mention must not add a spurious .NET / C# tag, got {job['tags']}"
+    )
 
 
 def test_find_matching_jobs_keeps_ai_role_with_no_soft_skill_overlap(monkeypatch):

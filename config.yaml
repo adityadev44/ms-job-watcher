@@ -184,6 +184,20 @@ matching:
   # "Go" matches inside "going"/"ongoing"/"algorithm", "ML" matches inside
   # "HTML". Use full distinctive terms (LangChain, generative ai, large
   # language model, Golang, ...) instead — same signal, no false positives.
+  #
+  # "SQL Server"/"T-SQL"/"Web API" are deliberately NOT in the .NET/C# group
+  # below (kept only in the broader `skills` list) — they're a database and a
+  # generic REST-API phrase any language's app can use, not .NET-specific.
+  # Confirmed 2026-08-31: a Citi "Senior Python Application Developer" JD got
+  # wrongly tagged [.NET / C#] purely because it mentioned "SQL Server" as its
+  # database — the actual FI Risk role was fine ("Java (or .NET Core)"
+  # explicitly accepts either), but the Python role's mistagging was a real
+  # false positive Shivangi flagged directly. This was already a known
+  # weakness before the AI/ML track existed (see the per-company
+  # require_tech_in_description comments below — several explicitly call out
+  # "SQL Server/EF" as a shared-primary-skill false-positive risk) but only
+  # started producing visibly wrong TAGS once a second track existed for a
+  # job to be wrongly attributed to.
   primary_skills:
     ".NET / C#":
       - ".NET"
@@ -193,9 +207,6 @@ matching:
       - "C#"
       - "ASP.NET"
       - "Entity Framework"
-      - "Web API"
-      - "SQL Server"
-      - "T-SQL"
     "AI / ML / Python":
       - "LangChain"
       - "LangGraph"
@@ -2217,6 +2228,114 @@ natwest_search:
   # require_tech_in_description -- titles here carry the tech signal
   # ("Python Software Engineer, VP") while descriptions are often generic
   # corporate boilerplate; Layer 4 would risk dropping genuine matches.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zeta_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # Lever board token "zeta" (~20 postings, cache-once, same family as
+  # CRED/Meesho/Paytm). country=="IN" used for India detection.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+juspay_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # Custom Next.js career-site JSON API (juspay.in/careers), cache-once, full
+  # description inline. Small board (~10 jobs).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+m2p_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Custom Next.js career-site API (m2pfintech.com/careers), cache-once,
+  # full description inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+yubi_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Zoho Recruit ATS (go-yubi.com/careers) -- new vendor for this repo.
+  # Cache-once, full description inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+signzy_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Keka ATS embedded-jobs widget (signzy.com/careers) -- new vendor for
+  # this repo. Cache-once, full description inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+automationanywhere_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday. Keyword genuinely filters server-side. Description AI/ML/Python
+  # heavy -- clean match, no .NET signal expected. DO NOT add
+  # require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+servicenow_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Custom Umbraco CMS career site (careers.servicenow.com). Keyword ignored
+  # server-side; India scoping applied server-side via ?country=India
+  # (genuine server-side location filter). ~40-job India pool, cache-once.
+  # DO NOT add require_tech_in_description -- specific engineering/research
+  # titles, not generic bands.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+datarobot_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # WordPress AJAX career-page endpoint (datarobot.com/careers). Small board
+  # (16 total worldwide as of 2026-08-31) -- confirmed 0 India postings via
+  # the site's own location-filter list (no India/Bangalore/Hyderabad option
+  # exists at all), a genuine current fact not a fetcher defect.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+thomsonreuters_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday. Keyword genuinely filters server-side. DO NOT add
+  # require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+glean_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Greenhouse (glean.com/careers). Cache-once, ignores keyword/location
+  # server-side, same family as Groww/Razorpay/AlphaSense. DO NOT add
+  # require_tech_in_description -- specific product-engineering titles.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+perfios_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # Darwinbox "candidatev2" SPA behind Cloudflare (perfios.darwinbox.in).
+  # Tiny board (~3 postings), cache-once, ignores keyword/location
+  # server-side, same family as Zeta/Juspay/M2P. DO NOT add
+  # require_tech_in_description -- board is too small to need it.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations

@@ -47,6 +47,7 @@ _PIPELINE_DATA = (
     ("arcesium", "Arcesium", False),
     ("atlassian", "Atlassian", False),
     ("autodesk", "Autodesk", True),
+    ("automationanywhere", "Automation Anywhere", False),
     ("bankofamerica", "Bank of America", True),
     ("barclays", "Barclays", False),
     ("blackrock", "BlackRock", False),
@@ -61,6 +62,7 @@ _PIPELINE_DATA = (
     ("cognizant", "Cognizant", True),
     ("cred", "CRED", False),
     ("crisil", "CRISIL", False),
+    ("datarobot", "DataRobot", False),
     ("dell", "Dell Technologies", False),
     ("deutsche", "Deutsche Bank", False),
     ("dtcc", "DTCC", False),
@@ -76,6 +78,7 @@ _PIPELINE_DATA = (
     ("gallagher", "Gallagher", False),
     ("generalmotors", "General Motors", False),
     ("genpact", "Genpact", True),
+    ("glean", "Glean", False),
     ("goldmansachs", "Goldman Sachs", False),
     ("google", "Google", False),
     ("groww", "Groww", False),
@@ -92,12 +95,14 @@ _PIPELINE_DATA = (
     ("invesco", "Invesco", False),
     ("jioplatforms", "Jio Platforms", False),
     ("jpmorgan", "JPMorgan Chase", False),
+    ("juspay", "Juspay", False),
     ("kyndryl", "Kyndryl", False),
     ("lenskart", "Lenskart", False),
     ("lloyds", "Lloyds Banking Group", True),
     ("lowes", "Lowe's", True),
     ("lseg", "LSEG", False),
     ("ltimindtree", "LTIMindtree", True),
+    ("m2p", "M2P Fintech", False),
     ("macquarie", "Macquarie", False),
     ("maersk", "Maersk", False),
     ("marshmclennan", "Marsh McLennan", False),
@@ -124,6 +129,7 @@ _PIPELINE_DATA = (
     ("oracle", "Oracle", True),
     ("paypal", "PayPal", False),
     ("paytm", "Paytm", False),
+    ("perfios", "Perfios", False),
     ("persistent", "Persistent Systems", True),
     ("phonepe", "PhonePe", False),
     ("policybazaar", "PolicyBazaar", False),
@@ -131,8 +137,10 @@ _PIPELINE_DATA = (
     ("sabre", "Sabre", True),
     ("saplabs", "SAP Labs", True),
     ("schwab", "Charles Schwab", True),
+    ("servicenow", "ServiceNow", False),
     ("sharechat", "ShareChat", False),
     ("siemens", "Siemens", False),
+    ("signzy", "Signzy", False),
     ("societegenerale", "Societe Generale", True),
     ("spglobal", "S&P Global", False),
     ("spglobal_careers", "S&P Global Careers", False),
@@ -144,6 +152,7 @@ _PIPELINE_DATA = (
     ("target", "Target", False),
     ("tcs", "TCS", True),
     ("techmahindra", "Tech Mahindra", True),
+    ("thomsonreuters", "Thomson Reuters", False),
     ("ubs", "UBS", False),
     ("uipath", "UiPath", False),
     ("verizon", "Verizon", False),
@@ -152,7 +161,9 @@ _PIPELINE_DATA = (
     ("wellsfargo", "Wells Fargo", True),
     ("wipro", "Wipro", True),
     ("wtw", "WTW", False),
+    ("yubi", "Yubi", False),
     ("zerodha", "Zerodha", False),
+    ("zeta", "Zeta", False),
     ("zomato", "Zomato", False),
 )
 
@@ -160,26 +171,31 @@ _IGNORES_KEYWORDS = frozenset(
     {
         "alphasense", "amdocs", "anz", "arcesium", "atlassian",
         "bankofamerica", "bnpparibas", "cognizant", "cred", "crisil",
-        "deutsche", "flipkart", "groww", "hcltech", "honeywell", "ice",
-        "infosys", "jioplatforms", "lenskart", "maersk", "mastek", "meesho",
+        "datarobot", "deutsche", "flipkart", "glean", "groww", "hcltech",
+        "honeywell", "ice",
+        "infosys", "jioplatforms", "juspay", "lenskart", "m2p", "maersk",
+        "mastek", "meesho",
         "meta", "metlife", "morningstar", "msci", "natwest", "nomura",
-        "nykaa", "paytm",
-        "persistent", "policybazaar", "razorpay", "schwab", "sharechat",
+        "nykaa", "paytm", "perfios",
+        "persistent", "policybazaar", "razorpay", "schwab", "servicenow",
+        "sharechat", "signzy",
         "societegenerale", "standardchartered", "swiggy", "swissre",
-        "techmahindra", "ubs", "uipath", "wipro", "zerodha", "zomato",
+        "techmahindra", "ubs", "uipath", "wipro", "yubi", "zerodha",
+        "zeta", "zomato",
     }
 )
 _SUPPORTS_LOCATION = frozenset(
-    {"amdocs", "gallagher", "google", "hsbc", "morganstanley", "siemens",
-     "spglobal_careers", "visa"}
+    {"amdocs", "gallagher", "google", "hsbc", "morganstanley", "servicenow",
+     "siemens", "spglobal_careers", "visa"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
         "amazon", "arcesium", "atlassian", "cognizant", "cred", "gallagher",
-        "google", "groww", "ice", "lenskart", "meesho", "morningstar", "msci", "paytm",
-        "uipath",
+        "glean", "google", "groww", "ice", "juspay", "lenskart", "m2p",
+        "meesho", "morningstar", "msci", "paytm",
+        "uipath", "signzy",
         "policybazaar", "razorpay", "sharechat", "spglobal_careers",
-        "swiggy", "ubs", "zerodha",
+        "swiggy", "ubs", "yubi", "zerodha", "zeta",
     }
 )
 _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
