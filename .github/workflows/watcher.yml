@@ -40,14 +40,42 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-firefox-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          key: playwright-v2-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
 
-      - name: Install Playwright browser
+      - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: playwright install firefox
+        # firefox: every Playwright-based fetcher except natwest. chromium:
+        # natwest specifically -- its Cloudflare challenge blocks Firefox
+        # indefinitely but passes cleanly under Chromium (see natwest_fetcher.py).
+        run: playwright install firefox chromium
+
+      - name: Verify Playwright browsers (repair corrupted or stale-version cache)
+        run: |
+          # A file existing under the cache path is not enough -- a stale
+          # cache (browser build left over from a previously-installed
+          # playwright version) can satisfy a naive existence check while
+          # still being the wrong build for the *currently installed*
+          # playwright package, which fails at launch with "Executable
+          # doesn't exist at <expected-build-path>". Actually launch both
+          # browsers to catch that case. Confirmed root cause of a real
+          # production incident (2026-09-01): this exact failure, retried
+          # 3x per company by several fetchers, went on to leak a partially
+          # -started Playwright instance into the retry, which then failed
+          # a *second*, unrelated-looking way ("Sync API inside the asyncio
+          # loop") that masked the true cause for hours of investigation.
+          if ! python -c "
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              for name in ('firefox', 'chromium'):
+                  b = getattr(p, name).launch(headless=True)
+                  b.close()
+          " 2>/dev/null; then
+            echo "Browser missing or wrong build for the installed playwright version — reinstalling"
+            playwright install firefox chromium
+          fi
 
       - name: Install Playwright system deps
-        run: playwright install-deps firefox
+        run: playwright install-deps firefox chromium
 
       - name: Run all watchers with bounded concurrency
         env:

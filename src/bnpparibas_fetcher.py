@@ -115,7 +115,19 @@ def _ensure_browser() -> None:
     if _browser is None:
         with STARTUP_LOCK:
             _pw = sync_playwright().start()
-            _browser = _pw.firefox.launch(headless=True)
+            try:
+                _browser = _pw.firefox.launch(headless=True)
+            except Exception:
+                # A failed launch (e.g. a stale/wrong-build cached browser)
+                # must not leave `_pw` pointing at a live, never-stopped
+                # Playwright instance -- a caller-level retry would then
+                # call sync_playwright().start() again on the SAME thread
+                # while the leaked instance's own dispatcher loop is still
+                # alive, which fails with the unrelated-looking "Sync API
+                # inside the asyncio loop" error and masks the real cause.
+                _pw.stop()
+                _pw = None
+                raise
         atexit.register(_shutdown_browser)
 
 
