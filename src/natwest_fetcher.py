@@ -70,6 +70,7 @@ from bs4 import BeautifulSoup
 
 try:
     from playwright.sync_api import sync_playwright, TimeoutError as PWTimeoutError
+    from _playwright_startup import STARTUP_LOCK
     _PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     _PLAYWRIGHT_AVAILABLE = False
@@ -111,11 +112,12 @@ def _ensure_browser() -> None:
             "playwright install chromium"
         )
     if _browser is None:
-        _pw = sync_playwright().start()
-        _browser = _pw.chromium.launch(
-            headless=True,
-            args=["--disable-blink-features=AutomationControlled"],
-        )
+        with STARTUP_LOCK:
+            _pw = sync_playwright().start()
+            _browser = _pw.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"],
+            )
         atexit.register(_shutdown_browser)
 
 
