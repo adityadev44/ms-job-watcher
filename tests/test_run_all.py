@@ -46,6 +46,42 @@ def test_bounded_runner_continues_and_returns_deterministic_statuses() -> None:
     assert peak <= 2
 
 
+def test_playwright_backed_companies_get_a_dedicated_pool() -> None:
+    # honeywell/virtusa are uses_playwright=True; amazon/optum are not. The
+    # general pool is capped at 1 worker -- if Playwright-backed companies
+    # shared it, total concurrency could never exceed 1. They must run in
+    # their own separate pool instead, so overall peak concurrency exceeds
+    # the general pool's cap.
+    import threading
+    import time
+
+    active = 0
+    peak = 0
+    lock = threading.Lock()
+
+    def fake_main(argv: list[str]) -> int:
+        nonlocal active, peak
+        with lock:
+            active += 1
+            peak = max(peak, active)
+        time.sleep(0.05)
+        with lock:
+            active -= 1
+        return 0
+
+    with patch("run_all.run_company.main", side_effect=fake_main):
+        statuses = run_all.run_companies(
+            ["amazon", "optum", "honeywell", "virtusa"],
+            ROOT / "config.yaml",
+            max_workers=1,
+        )
+
+    assert statuses == {
+        "amazon": "ok", "optum": "ok", "honeywell": "ok", "virtusa": "ok",
+    }
+    assert peak > 1
+
+
 def test_main_exits_nonzero_if_one_pipeline_fails(capsys) -> None:
     with patch(
         "run_all.run_companies",

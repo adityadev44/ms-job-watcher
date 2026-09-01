@@ -67,6 +67,20 @@ def test_registry_exposes_conservative_fetcher_capabilities() -> None:
     assert COMPANY_REGISTRY["barclays"].supports_location_filter is False
 
 
+def test_registry_flags_playwright_backed_fetchers() -> None:
+    # These fetchers drive headless Firefox via Playwright's sync API, which
+    # leaves an asyncio loop bound to whichever OS thread runs them for the
+    # rest of the process's life. run_all.py must give each one a dedicated
+    # thread (see run_companies()) instead of sharing the general pool, or a
+    # second Playwright-backed company reusing that thread fails outright.
+    expected = {
+        "bnpparibas", "honeywell", "ibm", "natwest", "perfios",
+        "servicenow", "techmahindra", "virtusa",
+    }
+    assert {slug for slug, spec in COMPANY_REGISTRY.items() if spec.uses_playwright} == expected
+    assert COMPANY_REGISTRY["amazon"].uses_playwright is False
+
+
 def test_keyword_ignoring_pipeline_allows_intentional_empty_query() -> None:
     spec = COMPANY_REGISTRY["metlife"]
     cfg = _pipeline_config(

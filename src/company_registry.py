@@ -26,6 +26,7 @@ class CompanyPipeline:
     supports_location_filter: bool = False
     description_inline: bool = False
     newest_first: bool = False
+    uses_playwright: bool = False
 
     @property
     def requires_tech_in_description(self) -> bool:
@@ -200,6 +201,22 @@ _INLINE_DESCRIPTIONS = frozenset(
 )
 _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
 
+# Fetchers that drive headless Firefox via Playwright's sync API. A
+# ThreadPoolExecutor worker thread that runs one of these leaves an asyncio
+# event loop permanently bound to it (Playwright's sync API never tears this
+# down mid-process — these modules keep their browser alive as a
+# process-lifetime singleton, closed only via atexit). If that same OS
+# thread is later reused by the pool for a *different* Playwright-based
+# company, the second one fails with "Playwright Sync API inside the
+# asyncio loop" — confirmed live in production logs (every scheduled run
+# since at least 2026-08-28 lost 7-8 of these companies to this collision).
+# run_all.py uses this flag to give each one a dedicated thread instead of
+# sharing the general pool, so no OS thread ever runs two of them.
+_USES_PLAYWRIGHT = frozenset(
+    {"bnpparibas", "honeywell", "ibm", "natwest", "perfios", "servicenow",
+     "techmahindra", "virtusa"}
+)
+
 
 def _build_registry() -> dict[str, CompanyPipeline]:
     result = {
@@ -227,6 +244,7 @@ def _build_registry() -> dict[str, CompanyPipeline]:
             supports_location_filter=slug in _SUPPORTS_LOCATION,
             description_inline=slug in _INLINE_DESCRIPTIONS,
             newest_first=slug in _NEWEST_FIRST,
+            uses_playwright=slug in _USES_PLAYWRIGHT,
         )
     return result
 

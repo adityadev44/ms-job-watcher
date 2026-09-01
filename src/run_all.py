@@ -71,14 +71,41 @@ def validate_companies(companies: list[str], config_path: Path) -> dict[str, str
 def run_companies(
     companies: list[str], config_path: Path, max_workers: int
 ) -> dict[str, str]:
-    """Run every selected pipeline, allowing failures without cancelling peers."""
+    """Run every selected pipeline, allowing failures without cancelling peers.
+
+    Playwright-based fetchers (COMPANY_REGISTRY[...].uses_playwright) run in
+    their own pool, sized 1:1 with how many are selected, instead of sharing
+    the general pool. A ThreadPoolExecutor worker thread that runs one of
+    them keeps an asyncio event loop bound to it for the rest of the
+    process's life (Playwright's sync API never tears this down mid-run —
+    these fetchers hold their browser open as a process-lifetime singleton).
+    If the general pool later reused that same thread for a *different*
+    Playwright-based company, the second one always failed with "Playwright
+    Sync API inside the asyncio loop" — confirmed happening in every
+    production run since at least 2026-08-28, silently losing most of these
+    companies' alerts. A dedicated one-thread-per-company pool guarantees no
+    OS thread ever runs two of them, which fixes it without needing to
+    understand Playwright's internal event-loop bookkeeping.
+    """
     statuses: dict[str, str] = {}
 
     def invoke(slug: str) -> int:
         return run_company.main([slug, "--config", str(config_path)])
 
-    with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="watcher") as pool:
-        future_to_slug = {pool.submit(invoke, slug): slug for slug in companies}
+    playwright_companies = [s for s in companies if COMPANY_REGISTRY[s].uses_playwright]
+    general_companies = [s for s in companies if not COMPANY_REGISTRY[s].uses_playwright]
+
+    with (
+        ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="watcher") as general_pool,
+        ThreadPoolExecutor(
+            max_workers=len(playwright_companies) or 1, thread_name_prefix="watcher-pw"
+        ) as playwright_pool,
+    ):
+        future_to_slug = {
+            general_pool.submit(invoke, slug): slug for slug in general_companies
+        } | {
+            playwright_pool.submit(invoke, slug): slug for slug in playwright_companies
+        }
         for future in as_completed(future_to_slug):
             slug = future_to_slug[future]
             try:
