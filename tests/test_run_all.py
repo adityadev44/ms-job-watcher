@@ -46,40 +46,51 @@ def test_bounded_runner_continues_and_returns_deterministic_statuses() -> None:
     assert peak <= 2
 
 
-def test_playwright_backed_companies_get_a_dedicated_pool() -> None:
-    # honeywell/virtusa are uses_playwright=True; amazon/optum are not. The
-    # general pool is capped at 1 worker -- if Playwright-backed companies
-    # shared it, total concurrency could never exceed 1. They must run in
-    # their own separate pool instead, so overall peak concurrency exceeds
-    # the general pool's cap.
-    import threading
-    import time
-
-    active = 0
-    peak = 0
-    lock = threading.Lock()
+def test_playwright_backed_companies_run_in_isolated_subprocesses() -> None:
+    # honeywell/virtusa are uses_playwright=True; amazon/optum are not. Two
+    # in-process fixes (dedicated threads, then a shared startup lock) were
+    # each verified against a real production run and still hit "Playwright
+    # Sync API inside the asyncio loop" -- something about GitHub Actions'
+    # runner made it fire even across supposedly-independent dedicated
+    # threads. Playwright-backed companies now run each in its own
+    # subprocess instead, which has no possible shared Python state at all.
+    from unittest.mock import Mock
 
     def fake_main(argv: list[str]) -> int:
-        nonlocal active, peak
-        with lock:
-            active += 1
-            peak = max(peak, active)
-        time.sleep(0.05)
-        with lock:
-            active -= 1
-        return 0
+        return 1 if argv[0] == "amazon" else 0
 
-    with patch("run_all.run_company.main", side_effect=fake_main):
+    subprocess_calls: list[list[str]] = []
+
+    def fake_run(cmd, **kwargs):
+        subprocess_calls.append(cmd)
+        return Mock(returncode=1 if cmd[-3] == "virtusa" else 0)
+
+    with (
+        patch("run_all.run_company.main", side_effect=fake_main) as runner,
+        patch("run_all.subprocess.run", side_effect=fake_run) as sub_run,
+    ):
         statuses = run_all.run_companies(
             ["amazon", "optum", "honeywell", "virtusa"],
             ROOT / "config.yaml",
             max_workers=1,
         )
 
+    # General (non-Playwright) companies still go through the in-process path.
+    assert runner.call_count == 2
+    assert {call.args[0][0] for call in runner.call_args_list} == {"amazon", "optum"}
+
+    # Playwright-backed companies each get their own `python run_company.py <slug> ...` subprocess.
+    assert sub_run.call_count == 2
+    invoked_slugs = {cmd[-3] for cmd in subprocess_calls}
+    assert invoked_slugs == {"honeywell", "virtusa"}
+    for cmd in subprocess_calls:
+        assert cmd[0] == sys.executable
+        assert cmd[1].endswith("run_company.py")
+        assert cmd[-2:] == ["--config", str(ROOT / "config.yaml")]
+
     assert statuses == {
-        "amazon": "ok", "optum": "ok", "honeywell": "ok", "virtusa": "ok",
+        "amazon": "failed", "optum": "ok", "honeywell": "ok", "virtusa": "failed",
     }
-    assert peak > 1
 
 
 def test_main_exits_nonzero_if_one_pipeline_fails(capsys) -> None:
