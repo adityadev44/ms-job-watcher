@@ -2340,6 +2340,87 @@ perfios_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+unitedairlines_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  # DO NOT add require_tech_in_description -- titles are specific enough
+  # (e.g. "Senior AI Engineer - Cybersecurity", "Engineer - Generative AI")
+  # that the shared Layer 3 skill check already produces zero false
+  # positives at this pool size (32 jobs total).
+
+nvidia_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # Workday (nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite). India
+  # filtered server-side via the nested "locationHierarchy1" facet
+  # (tenant-specific WID, not the shared cross-tenant India GUID); ~236
+  # India jobs. Keyword search genuinely narrows server-side. DO NOT add
+  # require_tech_in_description -- titles are specific enough (e.g.
+  # "Senior AI/ML Software Engineer", "System Software Engineer - Deep
+  # Learning") that the shared Layer 3 skill check is sufficient.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+shell_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+  # DO NOT add require_tech_in_description -- Shell's own India titles are
+  # specific ("Software Engineer ENDUR") and the pool is far too small
+  # (33 total) for Layer 4's precision rationale to apply.
+
+pfizer_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (pfizer.wd1.myworkdayjobs.com/PfizerCareers); keyword genuinely
+  # narrows server-side (unlike most tenants in this repo). Small, volatile
+  # India pool (~17-22 jobs) skewed toward manufacturing/QA/medical roles.
+  # DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+boeing_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (jobs.boeing.com), same vendor as Optum. Tenant ignores the
+  # free-text "?l=" location param (opposite of Optum's tenant) -- India
+  # scoping uses the dedicated location-facet URL instead. India pool is
+  # tiny right now (2 jobs) and churns fast.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+pepsico_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # iCIMS/Jibe (pepsicojobs.com), not "custom". offset param is ignored and
+  # limit hard-caps at 100 -- fetcher caches per-keyword like
+  # UBS/Deutsche Bank. DO NOT add require_tech_in_description -- not
+  # applicable (see PLAYBOOK.md Key Bugs).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+walmart_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday (walmart.wd504.myworkdayjobs.com/WalmartExternal) -- single
+  # global tenant, no separate India Tech sub-board. 300 (not the usual
+  # 200) because the unfiltered India pool is ~277 jobs and the single
+  # broadest keyword alone totals 233. DO NOT add
+  # require_tech_in_description -- Layer 3 alone already produces a
+  # healthy non-noisy match ratio here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
