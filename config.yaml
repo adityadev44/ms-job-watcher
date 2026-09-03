@@ -2421,6 +2421,112 @@ walmart_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+disney_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (disneycareers.com, org 391) -- same vendor as
+  # Optum/Boeing, NOT "custom". keyword/location query params are ignored
+  # server-side even on the India location-facet URL; fetcher caches the
+  # whole India pool (paginated, ~27 jobs currently) once per process.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+expedia_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # WordPress "Appcast Job Search" plugin (careers.expediagroup.com), not
+  # "custom" -- verified via DevTools from scratch, not the prior secondary
+  # research label. Fully server-rendered HTML, keyword and filter[country]
+  # both genuinely server-side. India pool is tiny (13 jobs, Bangalore +
+  # Gurgaon only). DO NOT add require_tech_in_description -- every live
+  # posting sampled is pure Python/AI-stack with zero .NET/C# mentions;
+  # Layer 3 alone is already precise here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+geaerospace_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday (geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite), NOT "custom"
+  # -- the public careers.geaerospace.com frontend is actually Phenom People
+  # (same family as Morningstar/United Airlines), but every job's own
+  # applyUrl reveals the real backend ATS is Workday -- same "ATS skin over
+  # a different real ATS" shape as Boeing/TalentBrew. No locationCountry
+  # facet on this tenant -- India scoped via 3 hardcoded city WIDs (2
+  # Bengaluru + Pune), same pattern as Barclays' city WIDs. Current entire
+  # India pool is tiny (9 jobs) and zero are software-engineering titled
+  # right now -- a genuine current fact, not a fetcher defect. DO NOT add
+  # require_tech_in_description -- pool far too small for Layer 4.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+gehealthcare_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Phenom People (careers.gehealthcare.com) -- NOT Oracle HCM CE, the
+  # prior recon guess from URL shape alone was wrong (see PLAYBOOK.md Key
+  # Bugs / Wave 5). No location facet actually narrows server-side --
+  # fetches globally per keyword (genuinely server-side), filters India
+  # client-side via each job's own `country` field. Real apply/description
+  # backend is Workday (gehc.wd5.myworkdayjobs.com) even though the public
+  # search frontend is Phenom People. DO NOT add
+  # require_tech_in_description -- titles are genuine, not generic
+  # IT-services banding; Layer 3 alone is the right precision level here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cisco_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Phenom People (careers.cisco.com/global/en/india/search-results) -- NOT
+  # "custom". ~275 total India jobs, real full-board India search (the
+  # assigned etr-jobs URL is a tiny 13-job curated subset, not the full
+  # board). Bare "AI" is a no-op keyword here (returns the entire pool, same
+  # as no filter) -- default_keywords' "AI engineer"/"generative ai
+  # engineer" passes are slow but harmless (dedup handles it). DO NOT add
+  # require_tech_in_description -- pool is small/precise enough that Layer 3
+  # alone is sufficient.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nutanix_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Jobvite (jobs.jobvite.com/nutanix) -- careers.nutanix.com itself is
+  # Cloudflare-managed-challenge-gated, but the actual board lives on this
+  # separate, un-gated Jobvite domain; no Playwright needed. Keyword genuinely
+  # narrows server-side (loose OR/token matching, not exact phrase). No
+  # usable generic "India" location facet (l=India returns "No results
+  # found"; only an exact "Bangalore, India" composite value works) --
+  # fetches globally per keyword, India filtered client-side same as
+  # Genpact/Fiserv/FactSet. DO NOT add require_tech_in_description -- small
+  # pool (~35 India jobs), current India titles are infra/kernel/storage
+  # with no hard .NET/C# or AI/ML signal as of 2026-09-03.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+schneiderelectric_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # iCIMS via Jibe Careers Site Builder (careers.se.com/api/jobs), NOT
+  # "custom" -- same platform family as PepsiCo/Gallagher/S&P Global
+  # Careers. 533 total India postings; keyword/location genuinely filter
+  # server-side; pagination does not wrap around (unlike PepsiCo's tenant on
+  # the same ATS family). Confirmed genuine zero for both tracks as of
+  # 2026-09-03 -- India engineering stack here is Java/Spring/Angular/Azure/
+  # embedded-IoT, not .NET or LangChain/RAG. DO NOT add
+  # require_tech_in_description -- wouldn't change today's already-zero
+  # outcome.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

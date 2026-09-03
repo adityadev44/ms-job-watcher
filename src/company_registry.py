@@ -59,6 +59,7 @@ _PIPELINE_DATA = (
     ("broadridge", "Broadridge", False),
     ("capgemini", "Capgemini", True),
     ("chubb", "Chubb", False),
+    ("cisco", "Cisco", False),
     ("citi", "Citi", True),
     ("citiustech", "CitiusTech", True),
     ("cognizant", "Cognizant", True),
@@ -67,10 +68,12 @@ _PIPELINE_DATA = (
     ("datarobot", "DataRobot", False),
     ("dell", "Dell Technologies", False),
     ("deutsche", "Deutsche Bank", False),
+    ("disney", "Disney", False),
     ("dtcc", "DTCC", False),
     ("dxc", "DXC Technology", True),
     ("ebay", "eBay", True),
     ("eclerx", "eClerx", True),
+    ("expedia", "Expedia Group", False),
     ("factset", "FactSet", False),
     ("fidelity", "Fidelity", False),
     ("firstamerican", "First American", True),
@@ -78,6 +81,8 @@ _PIPELINE_DATA = (
     ("fiserv", "Fiserv", False),
     ("flipkart", "Flipkart", False),
     ("gallagher", "Gallagher", False),
+    ("geaerospace", "GE Aerospace", False),
+    ("gehealthcare", "GE HealthCare", False),
     ("generalmotors", "General Motors", False),
     ("genpact", "Genpact", True),
     ("glean", "Glean", False),
@@ -126,6 +131,7 @@ _PIPELINE_DATA = (
     ("necsws", "NEC Software Solutions", False),
     ("nomura", "Nomura", False),
     ("northerntrust", "Northern Trust", False),
+    ("nutanix", "Nutanix", False),
     ("nvidia", "Nvidia", False),
     ("nykaa", "Nykaa", False),
     ("optum", "Optum", False),
@@ -141,6 +147,7 @@ _PIPELINE_DATA = (
     ("razorpay", "Razorpay", False),
     ("sabre", "Sabre", True),
     ("saplabs", "SAP Labs", True),
+    ("schneiderelectric", "Schneider Electric", False),
     ("schwab", "Charles Schwab", True),
     ("servicenow", "ServiceNow", False),
     ("sharechat", "ShareChat", False),
@@ -179,7 +186,7 @@ _IGNORES_KEYWORDS = frozenset(
     {
         "alphasense", "amdocs", "anz", "arcesium", "atlassian",
         "bankofamerica", "bnpparibas", "boeing", "cognizant", "cred", "crisil",
-        "datarobot", "deutsche", "flipkart", "glean", "groww", "hcltech",
+        "datarobot", "deutsche", "disney", "flipkart", "glean", "groww", "hcltech",
         "honeywell", "ice",
         "infosys", "jioplatforms", "juspay", "lenskart", "m2p", "maersk",
         "mastek", "meesho",
@@ -194,13 +201,13 @@ _IGNORES_KEYWORDS = frozenset(
 )
 _SUPPORTS_LOCATION = frozenset(
     {"amdocs", "gallagher", "google", "hsbc", "morganstanley", "pepsico",
-     "servicenow", "siemens", "spglobal_careers", "visa"}
+     "schneiderelectric", "servicenow", "siemens", "spglobal_careers", "visa"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
         "amazon", "arcesium", "atlassian", "cognizant", "cred", "gallagher",
         "glean", "google", "groww", "ice", "juspay", "lenskart", "m2p",
-        "meesho", "morningstar", "msci", "paytm", "pepsico",
+        "meesho", "morningstar", "msci", "paytm", "pepsico", "schneiderelectric",
         "uipath", "signzy",
         "policybazaar", "razorpay", "sharechat", "spglobal_careers",
         "swiggy", "ubs", "yubi", "zerodha", "zeta",
