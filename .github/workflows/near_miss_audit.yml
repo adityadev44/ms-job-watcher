@@ -1,0 +1,45 @@
+name: Near-Miss Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: 'How many recent completed Job Watcher runs to analyze'
+        required: false
+        default: '10'
+
+permissions:
+  contents: read
+  actions: read     # needed to read other workflow runs' logs via `gh run view --log`
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run near-miss audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python src/near_miss_audit.py \
+            --runs "${{ github.event.inputs.runs || '10' }}" \
+            --out-dir audit_output
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: near-miss-audit-${{ github.run_id }}
+          path: audit_output/
+          retention-days: 90

@@ -16,6 +16,10 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
+# Local near_miss_audit.py runs — persisted via the near_miss_audit.yml
+# workflow's GitHub Actions artifact instead, not committed to the repo.
+audit_output/
+
 # Personal documents — this repo is public; never commit resumes or similar
 # files dropped into the project folder for reference.
 *.docx

@@ -98,11 +98,15 @@ def _apply_description_filter(
         if any(term in description for term in normalized_terms):
             passed.append(job)
         else:
-            dropped.append(job.get("title", "<untitled>"))
+            dropped.append(job)
     if dropped:
         print(f"{spec.source} description-tech filtered out (near-misses):")
-        for title in dropped:
-            print(f"  [desc-tech]     {title}")
+        for job in dropped:
+            title = job.get("title", "<untitled>")
+            print(
+                f"  [desc-tech]     {title} "
+                f"[co={spec.source} id={job.get('id', '')} loc={job.get('location', '')}]"
+            )
     return passed
 
 
@@ -160,7 +164,7 @@ def run_company_pipeline(
     seen_ids = load_seen_ids(state_path)
 
     total_fetched, matched = find_matching_jobs(
-        pipeline_cfg, fetcher, known_ids=seen_ids
+        pipeline_cfg, fetcher, known_ids=seen_ids, source_label=spec.source
     )
     matched = _apply_description_filter(matched, pipeline_cfg["search"], spec)
     new_matches = [job for job in matched if job["id"] not in seen_ids]

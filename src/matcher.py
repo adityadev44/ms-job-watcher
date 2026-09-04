@@ -122,6 +122,25 @@ def matches_skills(description: str, skills: list[str]) -> bool:
     return _contains_any(description, skills)
 
 
+def _near_miss_line(tag: str, job: dict, extra: str = "", source_label: str = "") -> str:
+    """Format one near-miss log line, tagged and carrying enough job identity
+    (company, id, location) for offline audit tooling (see
+    ``near_miss_audit.py``) to reconstruct which real posting each rejection
+    refers to without changing any pass/fail decision made above.
+
+    The company label is embedded in every line, not inferred from
+    surrounding print-order, because ``run_all.py`` runs multiple companies'
+    pipelines concurrently in threads sharing one stdout — their near-miss
+    blocks can interleave in the captured log."""
+    parts = [f"[{tag}]".ljust(16), job["title"]]
+    if extra:
+        parts.append(f"({extra})")
+    parts.append(
+        f"[co={source_label or '?'} id={job.get('id', '')} loc={job.get('location', '')}]"
+    )
+    return " ".join(parts)
+
+
 def _derive_tags(normed_description: str, primary_skill_groups: dict[str, list[str]]) -> list[str]:
     """Return the name of every primary_skills group with a hit in *normed_description*.
 
@@ -179,6 +198,8 @@ def find_matching_jobs(
     config_path_or_cfg,   # str | Path for existing callers; dict for new multi-board callers
     fetcher=None,         # None → use module-level MS functions; pass optum_fetcher for Optum
     known_ids: Collection[str] | None = None,
+    *,
+    source_label: str = "",
 ) -> tuple[int, list[dict]]:
     """Fetch all jobs from the API, apply every filter, and return results.
 
@@ -284,10 +305,12 @@ def find_matching_jobs(
         if exclude_locs and any(loc in job["location"].lower() for loc in exclude_locs):
             continue
         if not passes_exclude_check(job, exclude):
-            filtered_out.append(f"[exclude]       {job['title']}")
+            filtered_out.append(_near_miss_line("exclude", job, source_label=source_label))
             continue
         if not passes_title_family_check(job, title_family):
-            filtered_out.append(f"[title family]  {job['title']}")
+            filtered_out.append(
+                _near_miss_line("title family", job, source_label=source_label)
+            )
             continue
         # Known jobs cannot generate another alert.  Prune them only after the
         # cheap filters so fetched/matching diagnostics remain useful, but
@@ -361,16 +384,25 @@ def find_matching_jobs(
             matched.append({**job, "description": description, "tags": tags})
         elif non_react:  # broad skills only (Azure/Angular/TypeScript etc.)
             filtered_out.append(
-                f"[broad-only]    {job['title']} "
-                f"(skills={','.join(non_react)})"
+                _near_miss_line(
+                    "broad-only",
+                    job,
+                    extra=f"skills={','.join(non_react)}",
+                    source_label=source_label,
+                )
             )
         elif found:  # React is the only match
-            filtered_out.append(f"[react-only]    {job['title']}")
+            filtered_out.append(
+                _near_miss_line("react-only", job, source_label=source_label)
+            )
         else:
             filtered_out.append(
-                f"[skill]         {job['title']} "
-                f"(desc={len(description)} chars, "
-                f"skills_found=none)"
+                _near_miss_line(
+                    "skill",
+                    job,
+                    extra=f"desc={len(description)} chars, skills_found=none",
+                    source_label=source_label,
+                )
             )
 
     if filtered_out:
