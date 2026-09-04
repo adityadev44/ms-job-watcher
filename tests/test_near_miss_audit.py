@@ -9,9 +9,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+import near_miss_audit
 from near_miss_audit import (
     classify_exclude_reason,
     dedupe,
+    main,
     parse_run_log,
     title_family_impact,
 )
@@ -109,3 +111,53 @@ def test_classify_exclude_reason_distinguishes_hard_and_soft_terms():
     assert classify_exclude_reason("Software Engineering Intern") == "likely correct"
     assert classify_exclude_reason("Engineering Manager, Platform") == "worth review"
     assert classify_exclude_reason("Some Unrelated Title") == "unclear"
+
+
+def _fake_run(databaseId, createdAt):
+    return {"databaseId": databaseId, "createdAt": createdAt, "conclusion": "success", "event": "schedule"}
+
+
+def test_main_writes_all_output_files_end_to_end(tmp_path, monkeypatch):
+    """Full main() path, all-old-format input (high_conf == 0) -- this is
+    exactly the combination that shipped a live TypeError in production
+    (summary_lines.append() called with two positional args instead of
+    one) because it was only exercised manually, not under test. Covering
+    it here so a future edit to that code path fails CI, not a real run."""
+    runs = [_fake_run(1, "2026-09-04T00:00:00Z")]
+    log = _gh_line(
+        "watch", "s", "2026-09-04T00:00:00.000000Z",
+        "[title family]  Data Engineer (skills=Python)",
+    )
+    monkeypatch.setattr(near_miss_audit, "list_recent_runs", lambda repo, wf, n: runs)
+    monkeypatch.setattr(near_miss_audit, "fetch_run_log", lambda repo, run_id: log)
+
+    out_dir = tmp_path / "audit_output"
+    rc = main(["--runs", "1", "--out-dir", str(out_dir)])
+
+    assert rc == 0
+    for name in (
+        "near_misses_deduped.csv", "aggregate_by_stage.csv",
+        "aggregate_by_company.csv", "title_family_candidate_impact.csv",
+        "exclude_worth_review.csv", "summary.md",
+    ):
+        assert (out_dir / name).exists(), f"missing {name}"
+    summary = (out_dir / "summary.md").read_text()
+    assert "UNATTRIBUTABLE" in summary or "tagging deploy" in summary
+
+
+def test_main_writes_all_output_files_with_high_confidence_data(tmp_path, monkeypatch):
+    """Same as above but with tagged (post-enrichment) input, so
+    high_conf > 0 and the other branch of the same summary block runs."""
+    runs = [_fake_run(1, "2026-09-04T00:00:00Z")]
+    log = _gh_line(
+        "watch", "s", "2026-09-04T00:00:00.000000Z",
+        "[title family]  Data Engineer [co=Acme id=1 loc=Pune, India]",
+    )
+    monkeypatch.setattr(near_miss_audit, "list_recent_runs", lambda repo, wf, n: runs)
+    monkeypatch.setattr(near_miss_audit, "fetch_run_log", lambda repo, run_id: log)
+
+    out_dir = tmp_path / "audit_output"
+    rc = main(["--runs", "1", "--out-dir", str(out_dir)])
+
+    assert rc == 0
+    assert "Acme" in (out_dir / "summary.md").read_text()

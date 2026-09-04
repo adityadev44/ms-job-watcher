@@ -364,9 +364,9 @@ def main(argv: list[str] | None = None) -> int:
             "_All analyzed runs predate the `[co=/id=/loc=]` tagging deploy, so "
             "per-company attribution isn't available yet — everything below is one "
             "honest `UNATTRIBUTABLE` bucket rather than a guess. Re-run this audit "
-            "after a few scheduled runs post-deploy for a real per-company breakdown._",
-            "",
+            "after a few scheduled runs post-deploy for a real per-company breakdown._"
         )
+        summary_lines.append("")
     for company, count in by_company.most_common(15):
         summary_lines.append(f"- {company}: {count}")
     summary_lines += [
