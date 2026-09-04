@@ -2770,6 +2770,103 @@ irissoftware_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+alegeus_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Workday tenant alegeus.wd1.myworkdayjobs.com, site
+  # Alegeus_External_Careers. Confirmed 2026-09-04: Alegeus still runs its
+  # own distinct careers site/tenant -- NOT absorbed into Optum's hiring
+  # pipeline despite Optum Financial's acquisition closing 2026-07-02
+  # (hiringOrganization.name on every job detail reads "Alegeus
+  # Technologies India Private Limited", no Optum/UnitedHealth branding
+  # anywhere). No flat locationCountry facet on this small tenant -- India
+  # scoped via the "Bangalore - India" value under the `locations` facet;
+  # all current India postings are Bangalore. keyword genuinely filters
+  # server-side. DO NOT add require_tech_in_description -- titles are
+  # specific, not generic IT-services level bands.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+energyexemplar_search:
+  max_listings: 50
+  inter_page_delay: 0.1
+  # Greenhouse board token "energyexemplarllc" -- a GLOBAL board (~38
+  # postings), not India-only. Keyword/location ignored server-side, full
+  # board cached once. India engineering reqs are jointly posted across
+  # Bengaluru + Pune in one semicolon-separated location string -- the
+  # fetcher's location picker prefers a non-excluded segment (e.g.
+  # Bengaluru) rather than dropping the job outright because Pune is also
+  # listed on the same req. DO NOT add require_tech_in_description --
+  # titles are descriptive.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+insightsoftware_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # Workday, tenant magnitudesoftware.wd1.myworkdayjobs.com (left over from
+  # the 2021 Magnitude Software acquisition -- confirmed this IS
+  # insightsoftware's real, active India careers portal). No location
+  # facet at all -- fetches globally per keyword (searchText genuinely
+  # narrows server-side) and filters India client-side via locationsText,
+  # same pattern as Genpact/Fiserv/FactSet. ~5% of postings have
+  # locationsText entirely absent (not blank) -- fetcher falls back to a
+  # one-off detail-page lookup in that case rather than silently dropping
+  # a possible India match. Small ~99-job global pool. DO NOT add
+  # require_tech_in_description -- titles carry real tech signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+payoneer_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Greenhouse board token "payoneer" -- payoneer.com/careers is bot-gated
+  # (rhino-core-shield) with no passable path; real board found via
+  # robots.txt's Sitemap: line pointing at a third-party "TeamMe"
+  # career-site product, which itself proxies this standard Greenhouse
+  # board (apply links carry the ?gh_jid= Greenhouse fingerprint).
+  # Keywords ignored server-side, full ~123-job global board cached once
+  # and filtered to India client-side (50 India jobs, Bangalore/Gurugram
+  # only). DO NOT add require_tech_in_description -- genuinely tech-named
+  # titles, not generic IT-services banding.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sita_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # iCIMS (Jibe Careers Site Builder), careers.sita.aero -- GET /api/jobs,
+  # ats_code":"icims" confirmed in the response, apply_url points at
+  # careers-sita.icims.com (405s -- links use the public
+  # careers.sita.aero/jobs/{id} page instead). limit caps at 100 (422
+  # above), offset silently broken -- whole ~63-job India pool cached once,
+  # keywords ignored despite genuinely narrowing server-side. Titles name
+  # the stack directly ("Senior Software Developer (C#)"), so
+  # require_tech_in_description is NOT enabled.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+yash_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic ("data-row" theme), careers.yash.com --
+  # same family as Capgemini/Nomura/SAP Labs/Dover. locationsearch=india
+  # reliable; q= is real but noisy OR-of-words matching (not phrase), so
+  # ignored -- full ~315-job India pool cached once. max_listings set
+  # above the known total as defense-in-depth against the Iris Software
+  # silent-truncation shape. Location field is always country-code
+  # ("City, ST, IN") -- normalized client-side. DO NOT add
+  # require_tech_in_description -- titles self-disclose their stack
+  # directly (e.g. "Sr. Software Engineer - .NET C# Job").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
