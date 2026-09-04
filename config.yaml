@@ -2629,6 +2629,24 @@ dazn_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+salesforce_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # ATS backend is Workday (salesforce.wd12.myworkdayjobs.com), but the
+  # public careers site never calls the Workday CXS search API -- it
+  # fetches a static, unauthenticated CDN JSON export instead
+  # (a.sfdcstatic.com/digital/xsf/careers/prod/jobs_2.json, ~1479 global
+  # jobs incl. full HTML descriptions inline; a near-identical jobs_1.json
+  # also exists but has an empty Job_Description for 1459/1479 entries --
+  # use jobs_2.json only). Keyword/location ignored server-side (no search
+  # API to filter with); ~121 India jobs (Hyderabad/Bengaluru/Gurgaon/
+  # Mumbai) filtered client-side via each job's own Countries list, cached
+  # once per process. DO NOT add require_tech_in_description -- titles are
+  # descriptive, not generic IT-services banding.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
