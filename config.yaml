@@ -2647,6 +2647,129 @@ salesforce_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+appliedsystems_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Bare classic iCIMS tenant india-appliedsystems.icims.com -- a dedicated
+  # India career portal (17/17 postings Bengaluru, no country facet needed).
+  # AWS WAF CAPTCHA-gates every route except requests carrying
+  # `?in_iframe=1` AND a non-default User-Agent (this repo's usual shared UA
+  # string is itself blocklisted here -- see PLAYBOOK.md Key Bugs). Keyword/
+  # location ignored (small board cached once). DO NOT add
+  # require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+definitivehealthcare_search:
+  max_listings: 50
+  inter_page_delay: 0.1
+  # Greenhouse board token "definitivehcindia" (job-boards.greenhouse.io/
+  # definitivehcindia) -- India entity is "Analytical Wizards", part of the
+  # Definitive Healthcare family; a dedicated India-only board, separate
+  # from the US/global Greenhouse board. Keyword/location ignored
+  # server-side, full ~9-job board cached once. DO NOT add
+  # require_tech_in_description -- board is tiny, titles descriptive
+  # enough.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+deltatre_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Deltatre's own self-hosted Next.js careers site IS the data source --
+  # no ATS is ever queried (server-rendered listing + detail pages);
+  # "Intervieweb" (deltatre.intervieweb.it) only handles apply-registration,
+  # never job data. Location field is always a bare "India" (no city) --
+  # verified safe today since all 8 India postings independently confirm
+  # Mumbai in their JD body, but a future Pune/Chennai posting would not be
+  # caught by exclude_locations from the location field alone. No
+  # posting-date field exists anywhere on the site.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+deltek_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # IBM BrassRing (Kenexa), sjobs.brassring.com, partnerid=25397
+  # siteid=5259 -- same ATS/API shape as UBS, different tenant.
+  # careers.deltek.com's own WordPress/Findly front end is a marketing skin
+  # whose "View All Jobs" link points straight at this BrassRing portal.
+  # Small tenant (~34 India jobs, all Bengaluru); keyword search genuinely
+  # narrows server-side but is ignored in favor of the India Work-Location
+  # facet, discovered dynamically from the response's own Facets block --
+  # returns the true India total in one request, sidestepping BrassRing's
+  # known page-1 pagination wraparound bug (UBS/MUFG/Nvidia/Walmart
+  # pattern). Descriptions inline in the search response. DO NOT add
+  # require_tech_in_description -- titles are descriptive.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dover_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W (classic theme), careers.dovercorporation.com --
+  # NOT the Cloudflare-challenge-gated www.dovercareers.com brand domain
+  # (no passable path found even with anti-detection headless Chromium).
+  # Same classic-theme ATS family as Nomura/Capgemini/SAP Labs/Mastek.
+  # locationsearch=India reliably restricts to genuine India postings.
+  # Keyword search is unreliable full-text matching on this tenant
+  # (verified live: narrows away the exact target role for some terms) --
+  # ignored entirely, whole ~39-job India pool cached once. DO NOT add
+  # require_tech_in_description -- titles are descriptive.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+healthedge_search:
+  max_listings: 50
+  inter_page_delay: 0.1
+  # iCIMS via Jibe Careers Site Builder (careers.healthedge.com/api/jobs),
+  # NOT "custom" -- same platform family as PepsiCo/Schneider Electric.
+  # keywords genuinely filter server-side but are ignored anyway -- fetcher
+  # always caches the full ~34-job India pool once (location=India narrows
+  # the global 80-job board reliably). offset is broken (PepsiCo pattern)
+  # but irrelevant since the whole pool fits under the 100-job limit cap.
+  # Coimbatore is Tamil Nadu but the location text never says so (State
+  # Street pattern) -- excluded explicitly below. DO NOT add
+  # require_tech_in_description -- titles are descriptive.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations:
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Coimbatore"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+    - "Kolkata"
+    - "Indore"
+
+irissoftware_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W (classic "tile" theme, same family as Mastek).
+  # careers.irissoftware.com/search/ -- keywords ignored (full ~340-job
+  # India pool cached once); all jobs observed in Noida/Gurugram, no
+  # exclude_locations hits. Titles name their own tech stack directly, so
+  # require_tech_in_description is NOT enabled. max_listings set above the
+  # ~340 known total (not the 200 default): the fetcher requests
+  # sortColumn=referencedate&sortDirection=desc on every page including the
+  # first -- before that fix, a real on-target match sat at position
+  # 339/340 in unsorted order and was silently excluded under the 200
+  # default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
