@@ -33,7 +33,7 @@ def test_registry_exactly_covers_fetchers_config_and_state() -> None:
     }
     fetcher_slugs.add("microsoft")  # Microsoft's adapter is fetcher.py.
     assert set(COMPANY_REGISTRY) == fetcher_slugs
-    assert len(COMPANY_REGISTRY) == 145
+    assert len(COMPANY_REGISTRY) == 152
 
     config = run_company.load_config(ROOT / "config.yaml")
     configured_slugs = {

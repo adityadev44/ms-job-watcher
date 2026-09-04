@@ -2527,6 +2527,108 @@ schneiderelectric_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+qualcomm_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Eightfold (careers.qualcomm.com / qualcomm.eightfold.ai), NOT "custom" --
+  # same platform family as Microsoft/Morgan Stanley/Amdocs/HSBC. Unlike
+  # HSBC, the public pcsx/search endpoint is fully enabled here. `q` keyword
+  # param is genuinely ignored server-side; `location=India` genuinely
+  # filters server-side (~565 India jobs of ~1961 global). DO NOT add
+  # require_tech_in_description -- India titles are dominated by
+  # embedded/hardware roles (correctly excluded), no generic-title precision
+  # problem like the IT-services shops this filter was built for.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+abinbev_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Sense CRM domain (ab-inbev-gcc.sensehq.com) fronting a Skillate
+  # career-page backend ("hosting_type":"SKILLATE") -- a genuinely new ATS
+  # pattern for this repo, only half-matching the prior "SenseHQ" guess.
+  # pageSize silently no-ops above 10; pagination breaks past page 2
+  # regardless of true total -- fetcher unions oldest-10 + newest-10 sort
+  # orders to cover the whole (currently tiny, ~15-job) India board. DO NOT
+  # add require_tech_in_description -- board is analytics/ops/finance-heavy,
+  # not a generic-title precision problem.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+novartis_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (novartis.wd3.myworkdayjobs.com/Novartis_Careers) -- tenant
+  # guess held up but the exact site code (underscored, not hyphenated)
+  # needed independent discovery. ~130 India jobs (Hyderabad); keyword is a
+  # genuine full-text match against JD body (SAP Labs pattern), not ignored.
+  # Pagination wraps around past the true total (page-1-first-ID memo). 0
+  # current matches -- every India title is level-banded
+  # (Director/Manager/Analyst), not a fetcher defect. DO NOT add
+  # require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+delta_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Avature (dth.avature.net) -- Delta's own "Delta Technology Hub" India
+  # (Bangalore-only) microsite, found via that branded name, NOT the
+  # Talent500 lead from initial recon (Talent500 has a real, working,
+  # company-scoped API but Delta's own profile there returns 0 jobs right
+  # now) and NOT Eightfold (delta.eightfold.ai has PCSX disabled, same as
+  # HSBC, with no usable anchor job). Keyword/location ignored server-side,
+  # cache-once pattern; clean `?jobOffset=N` pagination, no wraparound.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+lufthansa_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # milch & zucker "Global Jobboard" API (api-apply.lufthansagroup.careers)
+  # -- same product family as Deutsche Bank's Beesite API, different
+  # tenant. No country-level search filter exists -- whole global pool
+  # (~355 jobs) cached once, filtered client-side via
+  # PositionLocation.CountryCode == "IN". Real India presence is Lufthansa
+  # Systems India Private Ltd. (Bangalore) plus occasional Lufthansa Cargo
+  # AG (Mumbai) -- not Pune. DO NOT add require_tech_in_description --
+  # small pool, not needed.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+astrazeneca_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (careers.astrazeneca.com, org 7684) -- same vendor/HTML
+  # pattern as Optum/Boeing/Disney. Keyword and the generic
+  # `/search-jobs?l=India` location filter are both ignored server-side --
+  # fetcher caches the dedicated India-facet page once per process. 34
+  # total India jobs (Bengaluru/Chennai/Mumbai only -- no Hyderabad facet on
+  # this tenant despite that being AstraZeneca's usual India framing). DO
+  # NOT add require_tech_in_description -- titles are the limiting factor
+  # here, not an overly-broad skill list.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dazn_search:
+  max_listings: 60
+  inter_page_delay: 0.1
+  # Pinpoint ATS (dazn.pinpointhq.com/postings.json) -- new ATS vendor for
+  # this repo. Keyword/location ignored server-side, full ~117-job global
+  # board cached once and filtered to India client-side (word-boundary
+  # \bindia\b guard against the known "US - Indiana" false positive). DO
+  # NOT add require_tech_in_description -- board is small, titles
+  # descriptive enough.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

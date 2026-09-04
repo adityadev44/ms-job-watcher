@@ -36,6 +36,7 @@ class CompanyPipeline:
 # slug, alert/display source, strict description filter.  The remaining names
 # follow the conventions used by all 73 non-Microsoft adapters.
 _PIPELINE_DATA = (
+    ("abinbev", "AB InBev GCC", False),
     ("accenture", "Accenture", True),
     ("adobe", "Adobe", True),
     ("aig", "AIG", False),
@@ -46,6 +47,7 @@ _PIPELINE_DATA = (
     ("amex", "American Express", False),
     ("anz", "ANZ", False),
     ("arcesium", "Arcesium", False),
+    ("astrazeneca", "AstraZeneca", False),
     ("atlassian", "Atlassian", False),
     ("autodesk", "Autodesk", True),
     ("automationanywhere", "Automation Anywhere", False),
@@ -66,7 +68,9 @@ _PIPELINE_DATA = (
     ("cred", "CRED", False),
     ("crisil", "CRISIL", False),
     ("datarobot", "DataRobot", False),
+    ("dazn", "DAZN", False),
     ("dell", "Dell Technologies", False),
+    ("delta", "Delta Air Lines", False),
     ("deutsche", "Deutsche Bank", False),
     ("disney", "Disney", False),
     ("dtcc", "DTCC", False),
@@ -109,6 +113,7 @@ _PIPELINE_DATA = (
     ("lowes", "Lowe's", True),
     ("lseg", "LSEG", False),
     ("ltimindtree", "LTIMindtree", True),
+    ("lufthansa", "Lufthansa Group", False),
     ("m2p", "M2P Fintech", False),
     ("macquarie", "Macquarie", False),
     ("maersk", "Maersk", False),
@@ -131,6 +136,7 @@ _PIPELINE_DATA = (
     ("necsws", "NEC Software Solutions", False),
     ("nomura", "Nomura", False),
     ("northerntrust", "Northern Trust", False),
+    ("novartis", "Novartis", False),
     ("nutanix", "Nutanix", False),
     ("nvidia", "Nvidia", False),
     ("nykaa", "Nykaa", False),
@@ -144,6 +150,7 @@ _PIPELINE_DATA = (
     ("pfizer", "Pfizer", False),
     ("phonepe", "PhonePe", False),
     ("policybazaar", "PolicyBazaar", False),
+    ("qualcomm", "Qualcomm", False),
     ("razorpay", "Razorpay", False),
     ("sabre", "Sabre", True),
     ("saplabs", "SAP Labs", True),
@@ -184,15 +191,17 @@ _PIPELINE_DATA = (
 
 _IGNORES_KEYWORDS = frozenset(
     {
-        "alphasense", "amdocs", "anz", "arcesium", "atlassian",
+        "abinbev", "alphasense", "amdocs", "anz", "arcesium", "atlassian",
         "bankofamerica", "bnpparibas", "boeing", "cognizant", "cred", "crisil",
-        "datarobot", "deutsche", "disney", "flipkart", "glean", "groww", "hcltech",
+        "datarobot", "dazn", "delta", "deutsche", "disney", "flipkart", "glean",
+        "groww", "hcltech",
         "honeywell", "ice",
-        "infosys", "jioplatforms", "juspay", "lenskart", "m2p", "maersk",
-        "mastek", "meesho",
+        "infosys", "jioplatforms", "juspay", "lenskart", "lufthansa", "m2p",
+        "maersk", "mastek", "meesho",
         "meta", "metlife", "morningstar", "msci", "natwest", "nomura",
         "nykaa", "paytm", "perfios",
-        "persistent", "policybazaar", "razorpay", "schwab", "servicenow",
+        "persistent", "policybazaar", "qualcomm", "razorpay", "schwab",
+        "servicenow",
         "sharechat", "signzy",
         "societegenerale", "standardchartered", "swiggy", "swissre",
         "techmahindra", "ubs", "uipath", "wipro", "yubi", "zerodha",
@@ -201,11 +210,13 @@ _IGNORES_KEYWORDS = frozenset(
 )
 _SUPPORTS_LOCATION = frozenset(
     {"amdocs", "gallagher", "google", "hsbc", "morganstanley", "pepsico",
-     "schneiderelectric", "servicenow", "siemens", "spglobal_careers", "visa"}
+     "qualcomm", "schneiderelectric", "servicenow", "siemens",
+     "spglobal_careers", "visa"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
-        "amazon", "arcesium", "atlassian", "cognizant", "cred", "gallagher",
+        "abinbev", "amazon", "arcesium", "atlassian", "cognizant", "cred",
+        "dazn", "gallagher",
         "glean", "google", "groww", "ice", "juspay", "lenskart", "m2p",
         "meesho", "morningstar", "msci", "paytm", "pepsico", "schneiderelectric",
         "uipath", "signzy",
