@@ -2904,6 +2904,115 @@ eurofins_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+hartford_search:
+  max_listings: 60
+  inter_page_delay: 0.15
+  # Workday (thehartford.wd5.myworkdayjobs.com/Careers_External) behind a
+  # TalentBrew-skinned jointhehartford.com front-end (found via a
+  # /Careers_External/login link embedded in the rendered India-jobs page).
+  # India filtered server-side via the standard flat locationCountry facet
+  # (WID c4f78be1a8f14da0ab49ce1162348a5e, the same shared cross-tenant
+  # India GUID seen at Fidelity/Wells Fargo/Citi/Northern Trust/MUFG/
+  # Accenture) -- 33 total India jobs, all one Hyderabad GCC office
+  # ("India GCC-Puppalaguda Village", opened Feb 2026 per public
+  # reporting). Keyword search (searchText) genuinely narrows server-side.
+  # Pagination wraps around past the true per-keyword total instead of
+  # returning empty (same bug class as MUFG/Nvidia/Pfizer/Walmart/SimCorp);
+  # fetcher guards it via a page1-first-id memo. DO NOT add
+  # require_tech_in_description -- board is small and titles/descriptions
+  # are specific enough for the shared Layer 3 skill check alone.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+luxoft_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # career.luxoft.com -- Luxoft's own DXC-branded, custom in-house career
+  # site (Vue.js frontend served from /theme/luxoft/assets/dxc.min.<hash>.js;
+  # every posting's schema.org hiringOrganization reads "DXC Luxoft"). NOT a
+  # Workday tenant and NOT the same dataset as this repo's existing
+  # dxc_fetcher.py (DXC's own separate Workday tenant) -- Luxoft kept its own
+  # independent, non-overlapping job pool (1211 global, 437 India at
+  # investigation time) even though the site's platform/branding was
+  # absorbed into DXC's. `country` and `keyword` both genuinely filter
+  # server-side (verified: 0 results for a nonsense keyword, distinct counts
+  # per real term). Paging past the last real page returns HTTP 404 (not an
+  # empty 200) -- handled as end-of-results. A WAF 403-blocks lowercase
+  # "python "/"java "/"ruby "-prefixed keyword phrases (an interpreter-
+  # invocation false positive) -- fetcher upper-cases just the keyword's
+  # first letter to dodge it, with zero effect on real results (search is
+  # case-insensitive). No usable posting date on the listing page; detail
+  # page's schema.org datePosted is used instead (a few postings carry an
+  # implausible future date -- a client-side data artifact, harmless here).
+  # Titles are specific enough that require_tech_in_description is not
+  # needed.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+omnissa_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Workday tenant omnissa.wd501.myworkdayjobs.com, site
+  # Omnissa_External_Career_Site -- a fresh, independent tenant (Omnissa is
+  # the 2023 VMware/Broadcom EUC spinoff, later KKR-acquired), not shared
+  # with VMware/Broadcom. Whole company pool is small (105 jobs globally);
+  # this tenant DOES expose a real, reliable location facet (unlike
+  # Genpact/SimCorp) -- 4 facet IDs cover every India-labelled posting
+  # (Bengaluru/Chennai/Kalyani Vista/Remote-India), confirmed zero leakage
+  # and zero ambiguous "N Locations" postings inside that facet-filtered
+  # set. Keyword genuinely filters server-side but the fetcher ignores it
+  # and caches the ~21-job India-faceted pool once (tiny pool, and the
+  # literal ".NET developer" default keyword returns 0 here -- see fetcher
+  # docstring). 4 real .NET/C# matches confirmed live; no AI/ML/Python
+  # match yet (genuine current zero -- the only two candidates mention only
+  # bare "python", not sufficient alone by design).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+resideo_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # Resideo's branded careers domain 404s (stale Sitecore link); the real
+  # site is a separate www.careers.resideo.com (Webflow). Its own backing
+  # ATS is Oracle Fusion HCM (ehtl.fa.us6.oraclecloud.com, site "CX") but
+  # that tenant's own REST search returns TotalJobsCount 0 under that site
+  # slug -- the real siteNumber was never recovered. The working
+  # integration point is instead a first-party Webflow Cloud proxy API,
+  # https://www.careers.resideo.com/app/api/jobs -- found via the
+  # career-search page's own careercategorymap JS. Ignores every query
+  # param (verified: keyword/page/limit all return the identical 63-job
+  # pool) -- whole pool cached once, India-filtered via each job's own
+  # structured `country` field. Full JD text is inline (in `searchExtras`,
+  # NOT `description`/`aiSnippet` -- see fetcher module docstring). Tiny
+  # board (7 India jobs total right now); 2 confirmed .NET/C# matches.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+saxobank_search:
+  max_listings: 60
+  inter_page_delay: 0.15
+  # Workday tenant saxobank.wd3.myworkdayjobs.com, site CareeratSaxoBank.
+  # The branded careers page's own "workday"-themed widget is a decoy --
+  # it calls a category-only aggregator (saxotrader.com/oapi/jobsandholidays),
+  # not the real ATS. The real Workday CXS API works with a plain requests
+  # POST, no Playwright needed. No usable location facet exists (only
+  # Skills/timeType/jobFamilyGroup) -- whole ~40-job board cached once
+  # in-module; India detected client-side via a small Gurugram/Gurgaon city
+  # whitelist (Saxo's only confirmed India office). searchText genuinely
+  # filters server-side but is deliberately unused (board too small to
+  # benefit from per-keyword re-querying). Pagination wraps around past
+  # total (offset==total replays page 1) -- guarded the same way as
+  # SimCorp. Titles are specific enough (".NET", "C#/.NET Core", "ASP.NET")
+  # that the default Layer 3 primary_skills check is sufficient -- no
+  # require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

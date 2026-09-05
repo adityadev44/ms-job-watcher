@@ -1,6 +1,6 @@
 # ms-job-watcher
 
-A Python job-board monitor for 168 companies. It searches every 30 minutes for India-based .NET/C# and AI/ML/Python software-engineering roles, removes previously alerted jobs, and sends new matches through Telegram and Gmail — each match tagged `[.NET / C#]` or `[AI / ML / Python]` so the two tracks are easy to tell apart in one feed.
+A Python job-board monitor for 173 companies. It searches every 30 minutes for India-based .NET/C# and AI/ML/Python software-engineering roles, removes previously alerted jobs, and sends new matches through Telegram and Gmail — each match tagged `[.NET / C#]` or `[AI / ML / Python]` so the two tracks are easy to tell apart in one feed.
 
 ## Quick start
 

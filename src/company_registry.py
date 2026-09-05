@@ -101,6 +101,7 @@ _PIPELINE_DATA = (
     ("goldmansachs", "Goldman Sachs", False),
     ("google", "Google", False),
     ("groww", "Groww", False),
+    ("hartford", "The Hartford", False),
     ("hcltech", "HCLTech", True),
     ("healthedge", "HealthEdge", False),
     ("hexaware", "Hexaware", True),
@@ -125,6 +126,7 @@ _PIPELINE_DATA = (
     ("lseg", "LSEG", False),
     ("ltimindtree", "LTIMindtree", True),
     ("lufthansa", "Lufthansa Group", False),
+    ("luxoft", "Luxoft", False),
     ("m2p", "M2P Fintech", False),
     ("macquarie", "Macquarie", False),
     ("maersk", "Maersk", False),
@@ -151,6 +153,7 @@ _PIPELINE_DATA = (
     ("nutanix", "Nutanix", False),
     ("nvidia", "Nvidia", False),
     ("nykaa", "Nykaa", False),
+    ("omnissa", "Omnissa", False),
     ("optum", "Optum", False),
     ("oracle", "Oracle", True),
     ("payoneer", "Payoneer", False),
@@ -164,9 +167,11 @@ _PIPELINE_DATA = (
     ("policybazaar", "PolicyBazaar", False),
     ("qualcomm", "Qualcomm", False),
     ("razorpay", "Razorpay", False),
+    ("resideo", "Resideo", False),
     ("sabre", "Sabre", True),
     ("salesforce", "Salesforce", False),
     ("saplabs", "SAP Labs", True),
+    ("saxobank", "Saxo Bank", False),
     ("schneiderelectric", "Schneider Electric", False),
     ("schwab", "Charles Schwab", True),
     ("servicenow", "ServiceNow", False),
@@ -218,8 +223,9 @@ _IGNORES_KEYWORDS = frozenset(
         "lufthansa", "m2p",
         "maersk", "mastek", "meesho",
         "meta", "metlife", "morningstar", "msci", "natwest", "nomura",
-        "nykaa", "payoneer", "paytm", "perfios",
-        "persistent", "policybazaar", "qualcomm", "razorpay", "salesforce",
+        "nykaa", "omnissa", "payoneer", "paytm", "perfios",
+        "persistent", "policybazaar", "qualcomm", "razorpay", "resideo",
+        "salesforce", "saxobank",
         "schwab",
         "servicenow",
         "sharechat", "signzy", "simcorp", "sita",
@@ -229,8 +235,8 @@ _IGNORES_KEYWORDS = frozenset(
     }
 )
 _SUPPORTS_LOCATION = frozenset(
-    {"amdocs", "gallagher", "google", "hsbc", "morganstanley", "pepsico",
-     "qualcomm", "schneiderelectric", "servicenow", "siemens",
+    {"amdocs", "gallagher", "google", "hsbc", "luxoft", "morganstanley",
+     "pepsico", "qualcomm", "schneiderelectric", "servicenow", "siemens",
      "spglobal_careers", "visa"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
