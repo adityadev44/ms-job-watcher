@@ -1340,6 +1340,20 @@ genpact_search:
     - "large language model"
     - "retrieval augmented generation"
 
+simcorp_search:
+  max_listings: 300
+  inter_page_delay: 0.15
+  # Workday tenant simcorp.wd3.myworkdayjobs.com, site SimCorp_Jobs. No
+  # usable location facet — whole ~273-job board cached once in-module;
+  # genuine India postings (Noida/Hyderabad) resolved client-side, including
+  # ~15 that only show up as an ambiguous "N Locations" label and need a
+  # one-off detail-page lookup to confirm country == India. Titles are
+  # specific enough (".NET", "C#/.NET", "Angular and C#") that the default
+  # Layer 3 primary_skills check is sufficient — no require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 ibm_search:
   max_listings: 400
   inter_page_delay: 0.2
@@ -2863,6 +2877,29 @@ yash_search:
   # ("City, ST, IN") -- normalized client-side. DO NOT add
   # require_tech_in_description -- titles self-disclose their stack
   # directly (e.g. "Sr. Software Engineer - .NET C# Job").
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+eurofins_search:
+  max_listings: 350
+  inter_page_delay: 0.15
+  # SmartRecruiters public REST API (api.smartrecruiters.com/v1/companies/
+  # Eurofins/postings) -- careers.eurofins.com/in/ is just a marketing
+  # front-end whose own job list fetches from a legacy custom aggregator
+  # (atsintegration.eurofins.com) that itself proxies SmartRecruiters
+  # (every job's applyUrl points at jobs.smartrecruiters.com/Eurofins/...).
+  # country=in and q= both genuinely filter server-side; ~332 total India
+  # postings, ~215 under the IT department (Eurofins IT Solutions India
+  # Pvt Ltd / EITSI, a dedicated ~3000-person Global Software Delivery
+  # Center in Bengaluru) -- a real software-engineering presence, not
+  # lab-only. Region codes are real Indian state abbreviations; Coimbatore/
+  # Tiruppur carry region "TN" but no "Tamil Nadu"/"Chennai" in the city
+  # text, so the fetcher appends the state name itself so this list's
+  # default Tamil Nadu exclusion catches them. Titles are unusually
+  # specific for a company this size (76% of title_family-passing IT jobs
+  # have a genuine .NET/C# skill hit) -- require_tech_in_description is
+  # deliberately NOT enabled.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
