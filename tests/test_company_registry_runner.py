@@ -33,7 +33,7 @@ def test_registry_exactly_covers_fetchers_config_and_state() -> None:
     }
     fetcher_slugs.add("microsoft")  # Microsoft's adapter is fetcher.py.
     assert set(COMPANY_REGISTRY) == fetcher_slugs
-    assert len(COMPANY_REGISTRY) == 202
+    assert len(COMPANY_REGISTRY) == 203
 
     config = run_company.load_config(ROOT / "config.yaml")
     configured_slugs = {
@@ -74,7 +74,7 @@ def test_registry_flags_playwright_backed_fetchers() -> None:
     # thread (see run_companies()) instead of sharing the general pool, or a
     # second Playwright-backed company reusing that thread fails outright.
     expected = {
-        "bnpparibas", "honeywell", "ibm", "natwest", "perfios",
+        "bnpparibas", "darwinbox", "honeywell", "ibm", "natwest", "perfios",
         "servicenow", "sonatasoftware", "techmahindra", "virtusa",
     }
     assert {slug for slug, spec in COMPANY_REGISTRY.items() if spec.uses_playwright} == expected

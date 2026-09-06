@@ -926,3 +926,19 @@ Closes out Wave 13. Both remaining batches completed on their relaunch attempt.
 - Test count: 193 → 202; README: 193 → 202 companies
 
 All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 202 companies. This closes out Wave 13 in full.
+
+## Wave 14 (2026-09-06): Darwinbox — a "requires Playwright" rejection was wrong, corrected
+
+Batch 5 (Wave 13) had marked Darwinbox's own careers page "infeasible" solely because its API returned Cloudflare 403s to plain `requests` calls. **That reasoning was invalid** — this repo already has 10 companies (bnpparibas, honeywell, ibm, natwest, perfios, servicenow, sonatasoftware, techmahindra, virtusa, and now darwinbox) onboarded specifically by using headless Firefox via Playwright to get past exactly this class of gate; "would require Playwright" is not a valid reason to skip a company here. Corrected by relaunching with an explicit instruction to use the established Playwright browser-singleton pattern.
+
+**Darwinbox** (the HR-tech vendor's own careers page — distinct from the many *other* companies in this repo that merely use Darwinbox as their ATS) — tenant `dbx` (`dbx.darwinbox.in`), the newer `candidatev2` SPA tier (same as Perfios, not Zomato/Sonata's older `candidate` SPA). Real API: `POST /ms/candidateapi/job/alljobs?companyId=main`. Cloudflare blocks a bare `requests.post()` by User-Agent alone; Playwright is used both because a realistic UA alone isn't reliable from CI (GitHub Actions runner IPs get harsher treatment) and to match this repo's established convention for this class of tenant. 35 total jobs, 18 India, 0 matches today (current openings are Payroll/CS/Sales/Legal/Finance roles plus two AI-adjacent titles that don't literally match any configured `title_family` phrase — verified against the real matcher logic, a genuine current fact not a bug). Keywords/location ignored server-side — full pool cached once.
+
+One gotcha worth flagging for future Playwright-based fetchers: this tenant's `/ms/candidateapi/job/alljobs` endpoint is a JSON POST, which triggers a CORS preflight that a blank `about:blank` page (sonata's per-call `new_page()` idiom) can't satisfy — fixed by keeping the *same* page that navigated to `dbx.darwinbox.in` open and reusing it for all API calls (same-origin, no preflight).
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `darwinbox`
+- `_IGNORES_KEYWORDS`, `_USES_PLAYWRIGHT`: added `darwinbox`
+- `config.yaml`: added `darwinbox_search`
+- Test count: 202 → 203; README: 202 → 203 companies
+
+All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 203 companies. Allianz Technology (the other Batch 5 company wrongly marked infeasible for the same reason) is still being re-investigated — a CSRF-token-capture approach (`phApp.sessionParams.csrfToken` embedded in page HTML) looked promising before an unrelated session rate limit interrupted the first re-attempt; relaunched.

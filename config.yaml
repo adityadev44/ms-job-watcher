@@ -3452,6 +3452,24 @@ pwcac_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+darwinbox_search:
+  max_listings: 40
+  inter_page_delay: 0.2
+  # Darwinbox's own careers page (dbx.darwinbox.in, tenant "dbx", the newer
+  # candidatev2 SPA -- distinct from every OTHER company in this repo that
+  # merely uses Darwinbox as their ATS vendor). Cloudflare blocks a bare
+  # requests.post() by User-Agent alone -- requires Playwright (headless
+  # Firefox). Keyword/location params are silently ignored server-side; full
+  # 35-job pool (18 India) cached once per process, matcher.py does the real
+  # filtering. Descriptions inline in the list response (jd field) -- no
+  # separate detail call. 0 matches today (current India openings are
+  # Payroll/CS/Sales/Legal/Finance roles plus 2 AI-adjacent titles that don't
+  # literally match any configured title_family phrase) -- a genuine current
+  # fact, not a fetcher defect.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
