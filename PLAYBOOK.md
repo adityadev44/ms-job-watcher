@@ -941,4 +941,18 @@ One gotcha worth flagging for future Playwright-based fetchers: this tenant's `/
 - `config.yaml`: added `darwinbox_search`
 - Test count: 202 → 203; README: 202 → 203 companies
 
-All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 203 companies. Allianz Technology (the other Batch 5 company wrongly marked infeasible for the same reason) is still being re-investigated — a CSRF-token-capture approach (`phApp.sessionParams.csrfToken` embedded in page HTML) looked promising before an unrelated session rate limit interrupted the first re-attempt; relaunched.
+All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 203 companies.
+
+## Wave 14 continued (2026-09-06): Allianz Technology — also wrongly marked infeasible, and Playwright wasn't even needed
+
+Closes out the Batch 5 correction. The original "infeasible" verdict tested the SPA's client-side widget API (`/api/apply/v2/jobs`, which genuinely does require a session/CSRF token) and stopped there. The actual fix needed no Playwright at all: a **cold, single-shot `requests.get()`** against `careers.allianz.com/global/en/search-results?keywords=...` returns the full result set as SSR JSON embedded in `phApp.ddo.eagerLoadRefineSearch` — the same Phenom People pattern already used for Cisco/United Airlines in this repo. Worth remembering: a Phenom tenant's *client-side widget* API failing is not proof the *page itself* isn't server-rendered — check the page's own SSR payload before reaching for Playwright.
+
+**Allianz Technology** — Phenom People, tenant scoped by business `unit == "Allianz Technology"` (the group-wide board mixes in Allianz Partners and Allianz Services postings too — filtering by unit is required, not optional). `country=`/`location=` params are silent no-ops on this tenant; only `keywords=` genuinely narrows, and even that is an exact contiguous-phrase match (several real default keywords legitimately return 0, e.g. `.NET developer`, `dot net`, `python developer` — a real fact about current postings, not a bug). Fetcher therefore ignores the per-call `keyword`/`location` args entirely, always queries the one confirmed-reliable `keywords=India`, and lets matcher.py's own filters do the real work — same idiom as this repo's Darwinbox/Morningstar/ING fetchers. ~27-28 India postings (of ~1634 group-wide), 3 title matches today (2 "Senior Software Engineer", 1 "Senior One Identity Angular Developer").
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `allianztech`
+- `_IGNORES_KEYWORDS`: added `allianztech`
+- `config.yaml`: added `allianztech_search`
+- Test count: 203 → 204; README: 203 → 204 companies
+
+All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 204 companies. Both Batch 5 companies wrongly marked infeasible for "requires Playwright"/session-auth reasons are now corrected — the lesson for future batches: neither Cloudflare/bot-gating nor a client-side widget API failing is a valid reason to mark a company infeasible in this repo, since Playwright (10 companies) and SSR-payload scraping (this fix) both already have working precedent here.

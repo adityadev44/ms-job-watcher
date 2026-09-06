@@ -41,6 +41,7 @@ _PIPELINE_DATA = (
     ("adobe", "Adobe", True),
     ("aig", "AIG", False),
     ("alegeus", "Alegeus", False),
+    ("allianztech", "Allianz Technology", False),
     ("alphasense", "AlphaSense", False),
     ("amazon", "Amazon", False),
     ("amdocs", "Amdocs", False),
@@ -242,7 +243,8 @@ _PIPELINE_DATA = (
 
 _IGNORES_KEYWORDS = frozenset(
     {
-        "abinbev", "alphasense", "amdocs", "anz", "appliedsystems", "arcesium",
+        "abinbev", "allianztech", "alphasense", "amdocs", "anz",
+        "appliedsystems", "arcesium",
         "atlassian",
         "bankofamerica", "birlasoft", "bnpparibas", "boeing", "clevertap",
         "coforge", "cognizant",

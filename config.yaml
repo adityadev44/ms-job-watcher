@@ -3470,6 +3470,28 @@ darwinbox_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+allianztech_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Phenom People (careers.allianz.com), same platform as Cisco/United
+  # Airlines in this repo. NO Playwright needed -- a cold single-shot
+  # requests.get() returns the full result set as SSR JSON embedded in
+  # phApp.ddo.eagerLoadRefineSearch (a prior attempt wrongly assumed
+  # Playwright was required by testing the SPA's separate client-side
+  # widget API instead of the page's own server-rendered data). country=/
+  # location= params are silent no-ops on this tenant; only keywords=
+  # genuinely narrows (exact contiguous-phrase match -- several real
+  # default keywords legitimately return 0). Fetcher ignores the per-call
+  # keyword/location args, always queries the one confirmed-reliable
+  # keywords=India, paginates to exhaustion once, and scopes results to
+  # unit=="Allianz Technology" (~27-28 of the ~1634 group-wide postings;
+  # Allianz Partners/Services are separate business units, not this
+  # company). 3 title matches currently (2 Senior Software Engineer, 1
+  # Senior One Identity Angular Developer).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
