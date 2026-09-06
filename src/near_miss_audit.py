@@ -62,34 +62,41 @@ _DESC_UNAVAILABLE_RE = re.compile(
 # rejections (intern/hardware/etc.) -- distinct from the "soft" terms below,
 # which this session repeatedly found hiding genuine IC roles (BlackRock,
 # Moody's, PepsiCo, Nutanix -- see PLAYBOOK.md).
+#
+# 2026-09-05 precision-pass audit: "principal", "director", "vice president",
+# "VP", and "data scientist" were REMOVED from config.yaml's real
+# exclude_terms (see that file's own comment for the full evidence-based
+# reasoning) after this exact classification helped surface the review
+# shortlist. They're removed from both sets here too -- matcher.py will never
+# tag a real "[exclude]" near-miss line for them again, so leaving them
+# classified would just silently stop matching anything in future audits
+# rather than reflect the current config. "manager"/"engineering manager"
+# were deliberately kept (real evidence of them blocking far more genuine
+# people-manager titles than IC ones -- see config.yaml) and remain "soft"
+# since the known PepsiCo/Nutanix counter-examples are still a live,
+# documented residual gap worth a human's attention if they resurface here.
 _HARD_EXCLUDE_TERMS = {
     "intern", "internship", "trainee", "apprentice", "fresher", "graduate",
     "new grad", "university", "mechanical", "electrical", "industrial",
     "hardware", "firmware", "embedded", "datacenter technician",
     "network engineer", "sales engineer", "solutions engineer",
-    "customer engineer", "support engineer", "data scientist",
+    "customer engineer", "support engineer",
 }
 _SOFT_EXCLUDE_TERMS = {
-    "principal", "director", "vice president", "VP", "head of",
-    "engineering manager", "manager",
+    "head of", "engineering manager", "manager",
 }
 
 # Candidate title_family additions surfaced by real findings across this
-# session's onboarding waves (CitiusTech, Novartis, Lufthansa, DAZN) plus the
-# ones proposed in chat. NOT applied to config.yaml -- only tested here,
-# offline, against already-rejected near-miss titles, to show what each
-# addition would actually flip. Uses matcher.py's own normalization so the
-# result matches real matcher behavior exactly.
-_CANDIDATE_TITLE_FAMILY_ADDITIONS = [
-    "lead engineer",
-    "lead developer",
-    "lead software engineer",
-    "platform engineer",
-    "data engineer",
-    "conversational developer",
-    "cloud engineer",
-    "devops engineer",
-]
+# session's onboarding waves (CitiusTech, Novartis, Lufthansa, DAZN, Eurofins,
+# Resideo, Saxo Bank, Omnissa) plus the ones proposed in chat. All of the
+# original 8 below (lead engineer .. devops engineer) were applied to
+# config.yaml in the 2026-09-05 precision pass (along with several more
+# found directly rather than through this candidate list -- C#/.NET engineer,
+# fullstack developer/engineer, site reliability engineer, performance
+# engineer, member of technical staff -- see config.yaml's title_family
+# comment). Left empty for now; add fresh candidates here as new gaps are
+# found in future waves, the same way this list was built.
+_CANDIDATE_TITLE_FAMILY_ADDITIONS: list[str] = []
 
 
 @dataclass

@@ -124,6 +124,23 @@ matching:
     - "ai platform engineer"
     - "python developer"
     - "python engineer"
+    - "C# developer"
+    - ".NET engineer"
+    - "C# engineer"
+    - "fullstack developer"
+    - "fullstack engineer"
+    - "lead engineer"
+    - "lead developer"
+    - "lead software engineer"
+    - "platform engineer"
+    - "data engineer"
+    - "cloud engineer"
+    - "devops engineer"
+    - "site reliability engineer"
+    - "performance engineer"
+    - "member of technical staff"
+    - "member technical staff"
+    - "conversational developer"
 
   # Keep a job only if its description mentions at least one of these skills.
   # A job must match BOTH this list AND primary_skills (below) — they are
@@ -225,6 +242,39 @@ matching:
   # whole word/phrase (matched via word boundaries, not plain substring — so
   # "VP" rejects "VP - Engineering" but not "AVP"/"SVP", and "director"
   # rejects "Director of Engineering" but not "Active Directory").
+  #
+  # 2026-09-05 precision-pass audit (near_miss_audit.py over the last 20 live
+  # runs, ~45.6k deduped real rejections): "principal", "director",
+  # "vice president", "VP", and "data scientist" were REMOVED from this list.
+  # Real evidence across dozens of tagged rejections (BlackRock, Citi, Goldman
+  # Sachs, Deutsche Bank, PepsiCo, Luxoft, The Hartford — see PLAYBOOK.md)
+  # showed these four consistently killing genuine hands-on .NET/C#/AI IC
+  # roles that use "Principal"/"Director"/"VP"/"Assistant Vice President" as a
+  # seniority band rather than a people-management signal (e.g. BlackRock's
+  # "Application Engineer, Vice President", Citi's "Senior AI/ML Engineer -
+  # Vice President", Atlassian's "Principal Backend Software Engineer"), and
+  # hybrid "Software Engineer/Data Scientist" titles at The Hartford. This is
+  # safe because two independent gates still apply after this one: a title
+  # must also match `title_family` (a bare "VP, Business Finance" or
+  # "Director of Legal" never will), and the description must still name a
+  # real primary_skills term — a genuine non-technical VP/Director posting's
+  # JD won't mention concrete .NET/LangChain/RAG content even if its title
+  # slips past this gate.
+  #
+  # "manager"/"engineering manager" were deliberately KEPT despite two known
+  # real counter-examples (PepsiCo's "Senior Development Manager - AI
+  # Engineering", Nutanix's "Engineering Manager – Agentic AI & SaaS" — both
+  # confirmed genuine IC AI roles via their JD content in earlier waves):
+  # sampling the same live audit data found far more titles where "Manager"
+  # is a real people-management signal that would otherwise slip past
+  # `title_family`'s loose substring matching purely because "Engineering"
+  # contains "engineer" as a prefix (e.g. Atlassian's "Senior Engineering
+  # Manager, Search Infrastructure", eBay's/CRISIL's/FactSet's "Data/Software
+  # Engineering Manager" roles — all real managers, not IC). Removing
+  # "manager" would have recovered 2 known roles at the cost of reopening
+  # this much larger, already-fixed false-positive class. PepsiCo's and
+  # Nutanix's 2 specific titles remain a known, deliberate residual gap —
+  # not silently dropped, just not safely fixable with a global term change.
   exclude_terms:
     - "intern"
     - "internship"
@@ -234,10 +284,6 @@ matching:
     - "graduate"
     - "new grad"
     - "university"
-    - "principal"
-    - "director"
-    - "vice president"
-    - "VP"
     - "head of"
     - "engineering manager"
     - "manager"
@@ -253,7 +299,6 @@ matching:
     - "solutions engineer"
     - "customer engineer"
     - "support engineer"
-    - "data scientist"
 
 siemens_search:
   max_listings: 200

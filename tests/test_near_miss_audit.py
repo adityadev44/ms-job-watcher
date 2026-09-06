@@ -87,7 +87,17 @@ def test_dedupe_counts_repeats_and_keeps_first_high_confidence():
     assert deduped[0]["last_seen"] == "2026-09-04T01:00:00.000000Z"
 
 
-def test_title_family_impact_uses_real_matcher_normalization():
+def test_title_family_impact_uses_real_matcher_normalization(monkeypatch):
+    # _CANDIDATE_TITLE_FAMILY_ADDITIONS holds whatever speculative additions
+    # the *next* precision pass is considering -- it's expected to churn
+    # (the 2026-09-05 pass emptied it after promoting its 8 entries straight
+    # into config.yaml). Patch in fixed test candidates so this test verifies
+    # the mechanism (real matcher.py normalization) rather than depending on
+    # today's backlog contents.
+    monkeypatch.setattr(
+        near_miss_audit, "_CANDIDATE_TITLE_FAMILY_ADDITIONS",
+        ["lead engineer", "platform engineer"],
+    )
     log = "\n".join([
         _gh_line("watch", "s", "2026-09-04T00:00:00.000000Z",
                   "[title family]  Lead Engineer [co=Acme id=1 loc=Pune, India]"),
