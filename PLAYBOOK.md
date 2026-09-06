@@ -822,3 +822,22 @@ The dedicated audit flagged as "overdue" at the end of every wave since Wave 7 (
 `near_miss_audit.py` itself was updated to stay accurate: `_HARD_EXCLUDE_TERMS`/`_SOFT_EXCLUDE_TERMS` now mirror the real config (no longer classify `principal`/`director`/`vice president`/`VP`/`data scientist`, which will never appear in a real `[exclude]` log line again), and `_CANDIDATE_TITLE_FAMILY_ADDITIONS` — its job done — was emptied out with a comment explaining it's meant to be repopulated by the *next* precision pass, not a permanent record of this one. `tests/test_near_miss_audit.py`'s normalization test was updated to monkeypatch its own candidate list rather than depend on the module's real (now-empty) one, the same decoupling `test_matcher.py` already used for its own `TITLE_FAMILY`/`EXCLUDE` fixtures.
 
 All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 173 companies. No company-specific `config.yaml` blocks or fetchers were touched — this pass only changed the shared `matching` section and `near_miss_audit.py`.
+
+## Batch Onboarding Wave 12 (2026-09-06): Mid-Cap IT Services — Zensar, Birlasoft, Coforge, Happiest Minds, Cyient
+
+5 companies onboarded. Sonata Software was investigated in the same batch but deferred (agent hit session rate limit; no fetcher created yet — will be onboarded in the next wave).
+
+**ATS breakdown:**
+- **Zensar Technologies** — Oracle HCM Cloud CXS REST API (`fa-etvl-saasfaprod1.fa.ocs.oraclecloud.com`, site `CX_1`). Keywords genuinely narrow server-side (confirmed by comparing response counts for nonsense vs real tokens) — NOT registered in `_IGNORES_KEYWORDS`. An important gotcha unique to this tenant: an empty keyword returns 0 jobs (not the full pool like Hexaware/Chubb-style CXS tenants) — so the fetcher must always pass a real keyword. India scoped server-side via `selectedLocationsFacet`. 13 matches across the default keyword set.
+- **Birlasoft** — SAP SuccessFactors J2W (`jobs.birlasoft.com`, company ID `birlasoftl`). `locationsearch=India` filter is reliable (confirmed zero non-India leakage across the full ~591-job pool). Keywords ignored (full pool cached once — same "cache-once" reasoning as UBS/Deutsche/Persistent). Coimbatore added to `exclude_locations`: Birlasoft has a real office there ("INDIA-COIMBATORE-BIRLASOFT OFFICE, IN") but its location text never contains "Tamil Nadu" or "Chennai" — the same silent-city-leak class already handled for Eurofins/HealthEdge/State Street/Razorpay. 2 matches.
+- **Coforge** (formerly NIIT Technologies) — Zwayam ATS (`public.zwayam.com`, companyId base64 `MTUxNzM=` = 15173). Third Zwayam `public.zwayam.com` tenant after CRISIL (15438) and Persistent's own subdomain. 70 of 113 total postings are India-located (country field `"INDIA"` in structured `jobLocationRecord`). Registered in `_IGNORES_KEYWORDS`. 2 matches.
+- **Happiest Minds** — Zwayam ATS (`public.zwayam.com`, companyId base64 `MTU5NzQ=` = 15974). 323 of 360 company-wide jobs are India-located. `hasMoreData` terminates correctly (no wraparound observed). Titles are ALL-CAPS by Zwayam tenant convention — harmless since matcher normalises case. Registered in `_IGNORES_KEYWORDS`. 5 matches.
+- **Cyient** — Zwayam ATS (`public.zwayam.com`, companyId base64 `MTU0ODY=` = 15486). Investigation path: `content-security-policy` named `*.zwayam.com`; Naukri webhook reference confirmed Zwayam as the vendor; bundle's `environment` object gave API host and companyId. 96 India jobs. Empty-string keyword always passed to API (fetcher hardcodes `anyOfTheseWords: ""`); config uses `keywords: [""]` to document this explicitly (valid under the validation rule because `_IGNORES_KEYWORDS` exempts the non-empty-string check). Registered in `_IGNORES_KEYWORDS`. 2 matches.
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `birlasoft`, `coforge`, `cyient`, `happiestminds`, `zensar`
+- `_IGNORES_KEYWORDS`: added `birlasoft`, `coforge`, `cyient`, `happiestminds`
+- `config.yaml`: added `birlasoft_search`, `coforge_search`, `cyient_search`, `happiestminds_search`, `zensar_search`
+- Test count: 173 → 178; README: 173 → 178 companies
+
+All 20 registry tests pass.

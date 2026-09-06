@@ -3058,6 +3058,78 @@ saxobank_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+birlasoft_search:
+  max_listings: 700
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W (jobs.birlasoft.com, company=birlasoftl). India
+  # scoped server-side via locationsearch=India (every result confirmed
+  # "INDIA-..." location). Keywords ignored -- full ~591-job India pool cached
+  # once per process (same reasoning as UBS/Deutsche Bank/Persistent).
+  # Coimbatore added to exclude_locations: Birlasoft has a real office there
+  # ("INDIA-COIMBATORE-BIRLASOFT OFFICE, IN") but location text never says
+  # "Tamil Nadu" or "Chennai" -- same leak class as Eurofins/HealthEdge.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations:
+    - "Coimbatore"
+    - "Chennai"
+    - "Tamil Nadu"
+    - "Pune"
+    - "Chandigarh"
+    - "Kochi"
+    - "Kerala"
+    - "Trivandrum"
+    - "Lucknow"
+    - "Nagpur"
+    - "Madurai"
+    - "Kolkata"
+    - "Indore"
+
+coforge_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # Zwayam ATS (public.zwayam.com, companyId base64 "MTUxNzM=" = 15173).
+  # Global pool 113 jobs; 70 India. Keywords ignored -- full pool cached once,
+  # India filtered client-side per-job via jobLocationRecord country field.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cyient_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Zwayam ATS (public.zwayam.com, companyId base64 "MTU0ODY=" = 15486).
+  # 96 India jobs. Fetcher always passes empty keyword to API -- full India
+  # pool fetched once and cached. keywords: [""] is intentional (documents
+  # actual fetcher behaviour; _IGNORES_KEYWORDS ensures only one loop pass).
+  keywords:
+    - ""
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+happiestminds_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Zwayam ATS (public.zwayam.com, companyId base64 "MTU5NzQ=" = 15974).
+  # 323 India jobs. Keywords ignored -- full India pool cached once per
+  # process (same reasoning as CRISIL). Titles are ALL-CAPS (Zwayam tenant
+  # convention) -- harmless, matcher normalises case.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zensar_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM Cloud CXS REST API (fa-etvl-saasfaprod1.fa.ocs.oraclecloud.com,
+  # site CX_1). India scoped server-side via selectedLocationsFacet.
+  # Keywords genuinely narrow server-side (NOT in _IGNORES_KEYWORDS) -- empty
+  # keyword returns 0 jobs on this tenant (unusual vs. other Oracle CXS
+  # tenants in this repo). 13 India matches across default keyword set.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
