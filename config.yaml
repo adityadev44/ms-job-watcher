@@ -3058,6 +3058,32 @@ saxobank_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+aon_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # iCIMS REST API (jobs.aon.com/api/jobs). Both keyword and location=India
+  # genuinely filter server-side (verified: nonsense keyword -> 0; India
+  # location facet -> 42 of the global pool). Descriptions are inline in the
+  # search response -- fetch_job_description raises NotImplementedError.
+  # Pagination via page=N (1-indexed) + limit=N; offset param does not work.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+browserstack_search:
+  max_listings: 40
+  inter_page_delay: 0.2
+  # Workday CXS (browserstack.wd3.myworkdayjobs.com, site External). searchText
+  # genuinely narrows server-side (0 for nonsense token). No usable location
+  # facet -- India detected client-side via city substring (Mumbai). Server
+  # hard-caps limit at 20 (25+ returns HTTP 400) -- clamped defensively.
+  # Pagination wraps around past total -- guarded via _FIRST_PAGE_IDS.
+  # Currently mostly Sales/Ops roles -- 0 matches expected until BrowserStack
+  # posts India engineering openings.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 birlasoft_search:
   max_listings: 700
   inter_page_delay: 0.2
@@ -3139,6 +3165,80 @@ zensar_search:
   # Keywords genuinely narrow server-side (NOT in _IGNORES_KEYWORDS) -- empty
   # keyword returns 0 jobs on this tenant (unusual vs. other Oracle CXS
   # tenants in this repo). 13 India matches across default keyword set.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zurich_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  # SAP SuccessFactors J2W classic HTML (careers.zurich.com/search/), same
+  # family as Swiss Re/Nomura/Capgemini. Keyword (q=) and locationsearch=india
+  # both genuinely filter server-side. Currently 0 India jobs -- the
+  # Hyderabad GCC (launched April 2026) has not yet posted openings; fetcher
+  # self-activates once roles appear. Pagination via startrow=N, fixed 25/page.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+freshworks_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/Freshworks). country=in is
+  # hardcoded server-side (location param not used -- single-country facet,
+  # same pattern as Zensar). Keywords genuinely narrow server-side (0 for
+  # nonsense token). ~48 India postings (Chennai, Bengaluru).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+postman_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/postman/jobs?content=true).
+  # No server-side keyword/location filter -- full ~63-job global pool cached
+  # once, India filtered client-side via location.name substring. Descriptions
+  # fully inline (content field) -- no per-job detail fetch. ~4 India matches
+  # (Bengaluru/Hyderabad engineering roles).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+publicissapient_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # iCIMS Jibe REST (careers.publicisgroupe.com/api/jobs) -- Publicis Groupe's
+  # parent portal, not a Sapient-branded domain. Keywords deliberately NOT
+  # passed to the API: keyword-filtered results are overwhelmingly non-Sapient
+  # (mostly Epsilon) since the endpoint serves all Publicis Groupe brands.
+  # `location=India` genuinely filters server-side. A brand filter in the
+  # fetcher (apply_url tenant / tags2) isolates ~60 Sapient India postings
+  # from the ~200-job total Publicis Groupe India pool. Descriptions inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+soprasteria_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # SmartRecruiters (SopraSteria1 tenant). country=in hardcoded server-side
+  # (location param not used, single-country facet). Keywords genuinely
+  # narrow server-side (0 for nonsense token). ~113 India postings.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+xoriant_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # Oracle Taleo Recruiting CE (xoriant.taleo.net, portal 101430233). Tiny
+  # board -- 15 total requisitions in the DB, only 1 currently posted
+  # externally and publicly visible via the REST API (a networking QA role,
+  # no .NET/C#/AI/Python match today). Xoriant operates India-only, so all
+  # public postings are treated as India-based; keywords not server-side --
+  # the single visible job is cached once per process. Description is a
+  # skills/tags proxy from the search response (Taleo's own detail page is
+  # JS-rendered with no server-side job data).
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations

@@ -47,6 +47,7 @@ _PIPELINE_DATA = (
     ("ameriprise", "Ameriprise", False),
     ("amex", "American Express", False),
     ("anz", "ANZ", False),
+    ("aon", "Aon", False),
     ("appliedsystems", "Applied Systems", False),
     ("arcesium", "Arcesium", False),
     ("astrazeneca", "AstraZeneca", False),
@@ -62,6 +63,7 @@ _PIPELINE_DATA = (
     ("bny", "BNY Mellon", False),
     ("boeing", "Boeing", False),
     ("broadridge", "Broadridge", False),
+    ("browserstack", "BrowserStack", False),
     ("capgemini", "Capgemini", True),
     ("chubb", "Chubb", False),
     ("cisco", "Cisco", False),
@@ -95,6 +97,7 @@ _PIPELINE_DATA = (
     ("fis", "FIS Global", False),
     ("fiserv", "Fiserv", False),
     ("flipkart", "Flipkart", False),
+    ("freshworks", "Freshworks", False),
     ("gallagher", "Gallagher", False),
     ("geaerospace", "GE Aerospace", False),
     ("gehealthcare", "GE HealthCare", False),
@@ -169,6 +172,8 @@ _PIPELINE_DATA = (
     ("pfizer", "Pfizer", False),
     ("phonepe", "PhonePe", False),
     ("policybazaar", "PolicyBazaar", False),
+    ("postman", "Postman", False),
+    ("publicissapient", "Publicis Sapient", False),
     ("qualcomm", "Qualcomm", False),
     ("razorpay", "Razorpay", False),
     ("resideo", "Resideo", False),
@@ -187,6 +192,7 @@ _PIPELINE_DATA = (
     ("sita", "SITA", False),
     ("societegenerale", "Societe Generale", True),
     ("sonatasoftware", "Sonata Software", False),
+    ("soprasteria", "Sopra Steria", False),
     ("spglobal", "S&P Global", False),
     ("spglobal_careers", "S&P Global Careers", False),
     ("standardchartered", "Standard Chartered", False),
@@ -208,12 +214,14 @@ _PIPELINE_DATA = (
     ("wellsfargo", "Wells Fargo", True),
     ("wipro", "Wipro", True),
     ("wtw", "WTW", False),
+    ("xoriant", "Xoriant", False),
     ("yash", "YASH Technologies", False),
     ("yubi", "Yubi", False),
     ("zensar", "Zensar Technologies", False),
     ("zerodha", "Zerodha", False),
     ("zeta", "Zeta", False),
     ("zomato", "Zomato", False),
+    ("zurich", "Zurich Insurance", False),
 )
 
 _IGNORES_KEYWORDS = frozenset(
@@ -231,32 +239,34 @@ _IGNORES_KEYWORDS = frozenset(
         "maersk", "mastek", "meesho",
         "meta", "metlife", "morningstar", "msci", "natwest", "nomura",
         "nykaa", "omnissa", "payoneer", "paytm", "perfios",
-        "persistent", "policybazaar", "qualcomm", "razorpay", "resideo",
+        "persistent", "policybazaar", "postman", "publicissapient",
+        "qualcomm", "razorpay", "resideo",
         "salesforce", "saxobank",
         "schwab",
         "servicenow",
         "sharechat", "signzy", "simcorp", "sita",
         "societegenerale", "sonatasoftware", "standardchartered", "swiggy", "swissre",
-        "techmahindra", "ubs", "uipath", "wipro", "yash", "yubi", "zerodha",
-        "zeta", "zomato",
+        "techmahindra", "ubs", "uipath", "wipro", "xoriant", "yash", "yubi",
+        "zerodha", "zeta", "zomato",
     }
 )
 _SUPPORTS_LOCATION = frozenset(
-    {"amdocs", "gallagher", "google", "hsbc", "luxoft", "morganstanley",
-     "pepsico", "qualcomm", "schneiderelectric", "servicenow", "siemens",
-     "spglobal_careers", "visa"}
+    {"amdocs", "aon", "gallagher", "google", "hsbc", "luxoft", "morganstanley",
+     "pepsico", "publicissapient", "qualcomm", "schneiderelectric",
+     "servicenow", "siemens", "spglobal_careers", "visa", "zurich"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
-        "abinbev", "amazon", "arcesium", "atlassian", "cognizant", "cred",
+        "abinbev", "amazon", "aon", "arcesium", "atlassian", "cognizant", "cred",
         "dazn", "definitivehealthcare", "energyexemplar", "gallagher",
         "glean", "google", "groww", "healthedge", "ice", "juspay", "lenskart", "m2p",
         "meesho", "morningstar", "msci", "payoneer", "paytm", "pepsico", "salesforce",
         "schneiderelectric",
         "sita",
         "uipath", "signzy",
-        "policybazaar", "razorpay", "sharechat", "spglobal_careers",
-        "swiggy", "ubs", "yubi", "zerodha", "zeta",
+        "policybazaar", "postman", "publicissapient", "razorpay", "sharechat",
+        "spglobal_careers",
+        "swiggy", "ubs", "xoriant", "yubi", "zerodha", "zeta",
     }
 )
 _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})

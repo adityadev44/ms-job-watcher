@@ -841,3 +841,41 @@ All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 173 co
 - Test count: 173 → 178; README: 173 → 178 companies
 
 All 20 registry tests pass.
+
+## Batch Onboarding Wave 12 Addendum (2026-09-06): Sonata Software (Darwinbox/Playwright)
+
+Sonata Software's agent hit a session rate limit during the original Wave 12 dispatch and reported separately. ATS: **Darwinbox**, tenant `sonataone` (`sonataone.darwinbox.in`), older `new_careers:false` candidate SPA (same product tier as Zomato/Eternal). Discovery path: `www.sonata-software.com/careers` → "Apply Now" button → `custom.js` JS redirect to the Darwinbox tenant.
+
+Unlike Zomato's Darwinbox tenant (plain `requests` works), `sonataone.darwinbox.in` sits behind Cloudflare bot management that returns HTTP 403 to every plain `requests` call — confirmed live. Requires headless Firefox via Playwright (same gating class as Perfios/BNP Paribas). Added to `_USES_PLAYWRIGHT`.
+
+Keywords ignored server-side (Darwinbox silently returns the same full pool regardless of query, verified against sibling tenants zepto/hetero — added to `_IGNORES_KEYWORDS`). No usable location param (numeric location ID required, not a city name) — full board cached once and matcher.py's own India detection does the filtering.
+
+Test count: 178 → 179; README: 178 → 179 companies. All 171 tests pass.
+
+## Batch Onboarding Wave 13 (2026-09-06): 8 Companies Across Mid-Cap IT, Insurance GCC, and Dev-Tool SaaS
+
+Dispatched 6 parallel batches (~29 candidate companies) covering mid-cap IT services, GlobalLogic/Globant-style engineering services, insurance/HR-tech GCCs, dev-tool SaaS, and Big 4 India delivery centers. Two batches (Chargebee/Innovaccer/Whatfix/Zoho/CleverTap/MoEngage, and Deloitte USI/PwC AC/EY GDS/KPMG Global Services) hit the session rate limit before completing and are deferred to a future wave. Two batches (KPIT/LTTS/GlobalLogic/Globant/EPAM/ThoughtWorks) were still running as of this entry. This entry covers the two batches that finished: insurance/HR-tech GCCs (Batch 5) and dev-tool/consultancy SaaS (Batch 3).
+
+**Batch 5 — insurance & HR-tech GCCs: 2 of 6 feasible.**
+- **Aon** — iCIMS REST API (`jobs.aon.com/api/jobs`). Both `keywords` and `location=India` are genuine server-side filters (verified: nonsense keyword → 0; India facet → 42 of the global pool). Descriptions fully inline in the search response — `fetch_job_description` raises `NotImplementedError`. Pagination is `page=N` (1-indexed) + `limit`; `offset` does not work. 4 matches for "software engineer" (Bengaluru-based Full Stack/Engineering Lead roles).
+- **Zurich Insurance** — SAP SuccessFactors J2W classic HTML (`careers.zurich.com/search/`), same family as Swiss Re/Nomura/Capgemini. Both `q=` (keyword) and `locationsearch=india` genuinely filter server-side. **Currently 0 India jobs** — Zurich's Hyderabad GCC only launched April 2026 and hasn't posted openings yet; the fetcher is onboarded pre-emptively so it self-activates the moment roles appear, without needing a future onboarding pass.
+- **Darwinbox, Allianz Technology**: both Cloudflare-gated (403 to plain `requests`, would require Playwright) — deferred, not onboarded this wave.
+- **Liberty Mutual, Travelers**: confirmed **zero India presence** (Liberty Mutual: `location=India` returns 0 via its Eightfold/Findly API; Travelers: Workday facets list only Canada/Ireland/UK/US, no India) — permanently out of scope, not a fetcher gap.
+
+**Batch 3 — dev-tool & consultancy SaaS: 6 of 6 feasible.**
+- **Sopra Steria** — SmartRecruiters (`SopraSteria1` tenant, same platform family as Nagarro/Eurofins/NECSWS/PhonePe). `country=in` hardcoded server-side (single-country facet, `location` param unused — same pattern as Zensar). Keywords genuinely narrow server-side (0 for nonsense token). ~113 India postings.
+- **Publicis Sapient** — iCIMS Jibe REST via `careers.publicisgroupe.com/api/jobs` (Publicis Groupe's *parent* portal, not a Sapient-branded domain — same iCIMS Jibe family as Gallagher/Schneider Electric/S&P Global Careers). `location=India` genuinely filters server-side (added to `_SUPPORTS_LOCATION`) — but **keywords are deliberately NOT passed to the API**: the endpoint serves every Publicis Groupe brand, and keyword-filtered results are overwhelmingly non-Sapient (mostly Epsilon). A brand filter on `apply_url` tenant / `tags2` isolates ~60 genuine Sapient India postings from the ~200-job total Publicis Groupe India pool. Descriptions fully inline.
+- **Freshworks** — SmartRecruiters (same tenant family as Sopra Steria). `country=in` hardcoded, keywords genuine server-side filter. ~48 India postings (Chennai, Bengaluru).
+- **Postman** — Greenhouse (`boards-api.greenhouse.io/v1/boards/postman/jobs?content=true`). No server-side keyword or location filter at all — full ~63-job global pool cached once, India filtered client-side via `location.name`. Descriptions fully inline via `?content=true`. Only 4 India postings (Bengaluru/Hyderabad), all genuine engineering roles.
+- **BrowserStack** — Workday CXS (`browserstack.wd3.myworkdayjobs.com`). `searchText` genuinely narrows server-side; no usable location facet exists (job family/worker type/time type only) so India is detected client-side via a Mumbai city allowlist (same pattern as SimCorp/Genpact). Server hard-caps `limit` at 20 (25+ returns HTTP 400). Board is currently mostly Sales/Ops (0 engineering matches today) — a genuine current fact, fetcher will pick up India engineering roles once posted.
+- **Xoriant** — Oracle Taleo Recruiting CE (`xoriant.taleo.net`, legacy FTL portal). Tiny, unusual board: 15 total requisitions exist in the Taleo database but only 1 is configured "posted externally" and visible via the public REST API (a networking QA role — 0 .NET/C#/AI/Python matches today). Xoriant is India-only, so every visible posting is treated as India-based with no location filtering needed. The Taleo FTL detail page is JS-rendered with no server data, so `fetch_job_description` returns a skills/tags proxy string pulled from the search response instead of a real per-job fetch.
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `aon`, `browserstack`, `freshworks`, `postman`, `publicissapient`, `soprasteria`, `xoriant`, `zurich`
+- `_IGNORES_KEYWORDS`: added `postman`, `publicissapient`, `xoriant`
+- `_SUPPORTS_LOCATION`: added `aon`, `publicissapient`, `zurich`
+- `_INLINE_DESCRIPTIONS`: added `aon`, `postman`, `publicissapient`, `xoriant`
+- `config.yaml`: added `aon_search`, `browserstack_search`, `freshworks_search`, `postman_search`, `publicissapient_search`, `soprasteria_search`, `xoriant_search`, `zurich_search`
+- Test count: 179 → 187; README: 179 → 187 companies
+
+All 171 tests pass. Remaining Wave 13 batches (KPIT/LTTS/GlobalLogic/Globant/EPAM/ThoughtWorks; Chargebee/Innovaccer/Whatfix/Zoho/CleverTap/MoEngage; Deloitte USI/PwC AC/EY GDS/KPMG Global Services) to be merged in a follow-up entry once their agents complete or are relaunched past the rate limit.
