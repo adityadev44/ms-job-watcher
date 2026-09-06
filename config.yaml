@@ -3315,6 +3315,143 @@ thoughtworks_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+clevertap_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # careers.kula.ai/clevertap -- CleverTap's own Darwinbox tenant
+  # (clevertap.darwinbox.in) is now Cloudflare-gated platform-wide (same as
+  # Sonata's tenant), but this Kula.ai-hosted board is not gated and needs no
+  # Playwright. Data is a Next.js React Server Components "flight" payload,
+  # parsed by decoding self.__next_f.push() chunks. Most fragile fetcher in
+  # this wave (undocumented internal serialization, not a real API) -- every
+  # parse step degrades to empty rather than crashing if Kula's page format
+  # changes; only network failures raise RateLimitError. No server-side
+  # keyword/location filter -- single static SSR page, 17 total/11 India jobs
+  # cached once. Descriptions inline (flight payload backreferences).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+innovaccer_search:
+  max_listings: 80
+  inter_page_delay: 0.2
+  # Workable public widget API (apply.workable.com/api/v1/widget/accounts/
+  # innovaccer-analytics) -- NOTE the account slug is "innovaccer-analytics",
+  # not "innovaccer" (that 404s). No server-side keyword/location filter --
+  # full 75-job pool cached once (31 India). Descriptions via Workable's
+  # Markdown export endpoint (.../jobs/view/{shortcode}.md) -- a real per-job
+  # fetch, not inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+moengage_search:
+  max_listings: 40
+  inter_page_delay: 0.2
+  # Trakstar Hire (RecruiterBox), tenant "moengage" -- full-board RSS feed
+  # (moengage.hire.trakstar.com/jobfeeds/moengage), same platform as Whatfix.
+  # No query params on RSS -- full board (24 total, 16 India) fetched every
+  # time. Descriptions inline in the feed (no per-job HTTP call).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+whatfix_search:
+  max_listings: 40
+  inter_page_delay: 0.2
+  # Trakstar Hire (RecruiterBox), tenant "whatfix101" -- full-board RSS feed
+  # (whatfix101.hire.trakstar.com/jobfeeds/whatfix101). No query params on
+  # RSS -- full board (31 total, 28 India) fetched every time. Descriptions
+  # inline in the feed. locationCity sometimes already contains "India" as a
+  # full "City, State, India" string -- location builder checks for an
+  # existing "india" substring before appending to avoid duplication.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zoho_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # Zoho's own self-hosted "Career Site" product (careers.zohocorp.com/jobs/
+  # Careers) -- list data is HTML-entity-escaped JSON embedded in a hidden
+  # <input id="jobs">; full descriptions require a per-job detail page with a
+  # different (hex-escaped) JS-string encoding. No server-side keyword/
+  # location filter (confirmed via career-website-common.js's searchJob() --
+  # entirely client-side). Currently only 2 total postings company-wide
+  # (Technical Support / Sales roles, neither matching this repo's tracked
+  # keywords) -- a genuine current fact (same precedent as PolicyBazaar/ING/
+  # eClerx), not a fetcher defect. No posting-date field exists anywhere on
+  # this site -- left blank.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+deloitteusi_search:
+  max_listings: 1800
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (southasiacareers.deloitte.com), India-only
+  # board node /go/Deloitte-India/718244/ (same platform family as
+  # nomura/capgemini). ~1,678 total postings, all confirmed India (locationsText
+  # ends ", IN"). Keyword search on this tenant is a noisy full-text OR-match,
+  # NOT reliable per-word filtering (adding a third word INCREASES match count)
+  # -- ignored; full pool cached once per process, matcher.py's own title/skill
+  # filters do the real precision work. max_listings set above the full pool
+  # size so nothing is truncated.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+eygds_search:
+  max_listings: 2400
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (careers.ey.com/ey/search/), same platform
+  # as Deloitte USI in this batch but a single GLOBAL board (7,976 jobs
+  # worldwide) scoped to India via locationsearch=India (2,342 India postings,
+  # confirmed via genuine IN country codes/postal codes, not a keyword-match
+  # artifact). Keyword search has the same noisy OR-match problem as Deloitte
+  # USI (only worse -- ".NET developer" returns ~98% of the entire pool) --
+  # ignored; full India-scoped pool cached once. max_listings set above the
+  # full India pool size.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+kpmgglobal_search:
+  max_listings: 700
+  inter_page_delay: 0.2
+  # Oracle HCM Cloud CE REST API (ejgk.fa.em2.oraclecloud.com, site CX_3) --
+  # KPMG's dedicated GCC/GDC careers site (distinct from the generic
+  # kpmgindia.talentrecruit.com board, which is not this GCC entity). Unlike
+  # most Oracle HCM CE tenants here, this ENTIRE board is already India-only
+  # (699 total, matching the India location facet count exactly) -- no
+  # location filter needed. Keyword genuinely narrows server-side (nonsense
+  # token -> 0; every default keyword stays well under the ~699 total) --
+  # NOT ignored. Requires expand=requisitionList.workLocation,
+  # requisitionList.secondaryLocations or the API silently returns an empty
+  # requisitionList despite a correct TotalJobsCount (load-bearing quirk,
+  # not optional like on chubb_fetcher.py's tenant).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+pwcac_search:
+  max_listings: 1400
+  inter_page_delay: 0.2
+  # Workday CXS (pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers) -- a
+  # single GLOBAL tenant (~4,598 jobs worldwide), NOT India-scoped by the
+  # standard locationCountry facet (silently ignored by this tenant -- applying
+  # it still returns the full global pool). India is scoped instead via 33
+  # explicit per-city location WIDs in appliedFacets.locations (same technique
+  # as barclays_fetcher.py/maersk_fetcher.py, just a larger city set) --
+  # confirmed precise: querying with exactly these 33 WIDs returns total:1368,
+  # matching the sum of each WID's own count field. searchText genuinely
+  # narrows server-side within that India-scoped set (real per-keyword
+  # filtering, unlike Deloitte USI/EY GDS in this same batch) -- NOT ignored.
+  # Server hard-caps limit at 20 (25+ returns HTTP 400).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
