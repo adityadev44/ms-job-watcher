@@ -879,3 +879,23 @@ Dispatched 6 parallel batches (~29 candidate companies) covering mid-cap IT serv
 - Test count: 179 → 187; README: 179 → 187 companies
 
 All 171 tests pass. Remaining Wave 13 batches (KPIT/LTTS/GlobalLogic/Globant/EPAM/ThoughtWorks; Chargebee/Innovaccer/Whatfix/Zoho/CleverTap/MoEngage; Deloitte USI/PwC AC/EY GDS/KPMG Global Services) to be merged in a follow-up entry once their agents complete or are relaunched past the rate limit.
+
+## Batch Onboarding Wave 13 continued (2026-09-06): Engineering-Services Majors — KPIT, LTTS, GlobalLogic, Globant, EPAM, ThoughtWorks
+
+All 6 feasible. This closes out Wave 13's engineering-services batch.
+
+- **KPIT Technologies** — Real ATS (TalentOjo) is auth-gated and unreachable; scraped instead from the public WordPress job-listing page (`kpit.com/job-listing/?country=India&show_all=1`) — `show_all=1` bypasses the default 6-item short list. Keyword/location ignored (always returns the full pool); descriptions are the skills text already present in the listing (inline). 28 India jobs — KPIT is automotive/embedded-focused so .NET/AI overlap is thin (~1-2 matches expected).
+- **LTTS (L&T Technology Services)** — SAP SuccessFactors J2W classic (`jobs.ltts.com`), same platform family as Mastek/Capgemini. Both `q=` (keyword) and `locationsearch=india` genuinely filter server-side. Small board — 9 total India jobs.
+- **GlobalLogic** — Custom WordPress site (`globallogic.com/in/career-search-page/`). Both `location=india` and `keywords=` genuinely filter server-side. 143 total India jobs across 15 pages. Note: the *older* `/in/careers/?location=india` endpoint silently stopped filtering (returns US jobs) — the newer `career-search-page` endpoint is the one that still works, a "branded URL that looks right isn't proof it still works" variant of this repo's usual lesson.
+- **Globant** — SAP SuccessFactors via Globant's own Next.js proxy (`career.globant.com/api/sap/job-requisition-v1`), POST with `country: ["IN"]` as an **array**, not a string — passing a bare string silently returns nothing. Keywords accepted but not applied server-side; full India pool (15 jobs) cached once. Descriptions fully inline. `globant.com/careers` itself returns HTTP 403 — only the `career.globant.com` proxy subdomain is reachable.
+- **EPAM Systems** — Custom Next.js/ContentStack API (`careers.epam.com/api/jobs/v2/search/careers-india`), tenant `careers-india` hardcodes India scoping (the `epamgdo` tenant requires auth and 401s). Keyword genuinely narrows server-side but is **semantic/relevance-based, not exact-substring** (still verified: nonsense token → 0). Largest board in this batch — 318 total India jobs; page size hard-capped at 50 regardless of requested size. Descriptions fully inline.
+- **ThoughtWorks** — AEM REST API (`thoughtworks.com/rest/careers/jobs`) returns the *entire global* pool (36 jobs) in one call with no server-side keyword or location filter at all. India detected client-side via city name ("Bangalore") since the `country` field is empty on India postings. Very small India presence — typically 1-3 open roles at any time; the current one ("Senior Developer - Java with Azure") doesn't match this repo's tracked skill set, so 0 matches today is a genuine current fact, not a fetcher defect.
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `epam`, `globallogic`, `globant`, `kpit`, `ltts`, `thoughtworks`
+- `_IGNORES_KEYWORDS`: added `globant`, `kpit`, `thoughtworks`
+- `_INLINE_DESCRIPTIONS`: added `epam`, `globant`, `kpit`
+- `config.yaml`: added `epam_search`, `globallogic_search`, `globant_search`, `kpit_search`, `ltts_search`, `thoughtworks_search`
+- Test count: 187 → 193; README: 187 → 193 companies
+
+All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 193 companies. Two Wave 13 batches remain outstanding (Chargebee/Innovaccer/Whatfix/Zoho/CleverTap/MoEngage; Deloitte USI/PwC AC/EY GDS/KPMG Global Services) — both were relaunched after hitting the session rate limit on their first attempt and will be merged in a follow-up entry.

@@ -3243,6 +3243,78 @@ xoriant_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+epam_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Custom Next.js/ContentStack (careers.epam.com/api/jobs/v2/search/careers-india),
+  # tenant "careers-india" hardcodes India scoping. Keyword genuinely narrows
+  # server-side (semantic/relevance match, not exact substring -- nonsense
+  # token returns 0). Descriptions fully inline in the API response. 318
+  # total India jobs; page size capped at 50 server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+globallogic_search:
+  max_listings: 200
+  inter_page_delay: 0.3
+  # Custom WordPress site (globallogic.com/in/career-search-page/). Both
+  # location=india and keywords= genuinely filter server-side. 143 total
+  # India jobs across 15 pages (10/page). The older /in/careers/?location=india
+  # endpoint no longer filters correctly -- must use career-search-page.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+globant_search:
+  max_listings: 50
+  inter_page_delay: 0.3
+  # SAP SuccessFactors via Globant's own Next.js proxy (career.globant.com/api/sap/
+  # job-requisition-v1), POST with country: ["IN"] (array, not string). Keywords
+  # accepted but ignored server-side -- full India pool (15 jobs) cached once.
+  # Descriptions fully inline (jobDescription HTML in response). Direct
+  # globant.com/careers returns 403; only career.globant.com works.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+kpit_search:
+  max_listings: 50
+  inter_page_delay: 0.3
+  # KPIT's real ATS (TalentOjo) is auth-gated and unfetchable -- scraped
+  # instead from the public WordPress job-listing page
+  # (kpit.com/job-listing/?country=India&show_all=1). Keyword/location
+  # ignored -- always returns the full 28-job India pool; show_all=1 bypasses
+  # the default 6-item short list. Descriptions are the skills text already
+  # present in the listing (inline, no detail fetch).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ltts_search:
+  max_listings: 50
+  inter_page_delay: 0.3
+  # L&T Technology Services -- SAP SuccessFactors J2W classic (jobs.ltts.com,
+  # same platform family as Mastek/Capgemini). Both q= (keyword) and
+  # locationsearch=india genuinely filter server-side (verified: nonsense
+  # token -> 0). Small board -- 9 total India jobs (embedded/automotive
+  # company, limited .NET/AI overlap).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+thoughtworks_search:
+  max_listings: 50
+  inter_page_delay: 0.5
+  # AEM REST API (thoughtworks.com/rest/careers/jobs) -- returns the full
+  # global job pool (36 jobs) in one call, no server-side keyword or location
+  # filter. India detected client-side via city name ("Bangalore") since the
+  # `country` field is empty for India postings. Very small India presence
+  # (typically 1-3 open roles) -- fetcher self-activates as more are posted.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
