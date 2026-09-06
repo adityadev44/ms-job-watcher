@@ -3118,6 +3118,19 @@ happiestminds_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+sonatasoftware_search:
+  max_listings: 300
+  inter_page_delay: 0.3
+  # Darwinbox tenant "sonataone" (sonataone.darwinbox.in), older candidate
+  # SPA (new_careers:false). Cloudflare-gated -- requires Playwright
+  # (_USES_PLAYWRIGHT). Keywords ignored server-side (Darwinbox API silently
+  # returns full pool regardless of q/keyword param -- same as Zomato/Eternal).
+  # Location param expects numeric ID, not city name -- full board cached
+  # client-side and matcher.py handles India filtering.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 zensar_search:
   max_listings: 200
   inter_page_delay: 0.2

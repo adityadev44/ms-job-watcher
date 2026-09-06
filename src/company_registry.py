@@ -186,6 +186,7 @@ _PIPELINE_DATA = (
     ("simcorp", "SimCorp", False),
     ("sita", "SITA", False),
     ("societegenerale", "Societe Generale", True),
+    ("sonatasoftware", "Sonata Software", False),
     ("spglobal", "S&P Global", False),
     ("spglobal_careers", "S&P Global Careers", False),
     ("standardchartered", "Standard Chartered", False),
@@ -235,7 +236,7 @@ _IGNORES_KEYWORDS = frozenset(
         "schwab",
         "servicenow",
         "sharechat", "signzy", "simcorp", "sita",
-        "societegenerale", "standardchartered", "swiggy", "swissre",
+        "societegenerale", "sonatasoftware", "standardchartered", "swiggy", "swissre",
         "techmahindra", "ubs", "uipath", "wipro", "yash", "yubi", "zerodha",
         "zeta", "zomato",
     }
@@ -273,7 +274,7 @@ _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
 # sharing the general pool, so no OS thread ever runs two of them.
 _USES_PLAYWRIGHT = frozenset(
     {"bnpparibas", "honeywell", "ibm", "natwest", "perfios", "servicenow",
-     "techmahindra", "virtusa"}
+     "sonatasoftware", "techmahindra", "virtusa"}
 )
 
 
