@@ -3492,6 +3492,216 @@ allianztech_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+apple_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # jobs.apple.com's own server-rendered search (React Router v7 hydration
+  # payload embedded in plain HTML, no Playwright needed). location=india-INDC
+  # (Apple's internal country code) and search= (keyword) both genuinely
+  # filter server-side -- 176 total India postings. Keyword matching is
+  # OR-across-tokens, not phrase-AND (special-char tokens like "C#"/".NET"
+  # are stripped by the search tokenizer, only the plain word survives) --
+  # still genuine narrowing, not ignored.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+axisbank_search:
+  max_listings: 900
+  inter_page_delay: 0.3
+  # RippleHire (axisbank.ripplehire.com), same ATS/API shape as HDFC Bank/
+  # CitiusTech/LTIMindtree. `search` keyword REQUIRED and genuinely narrows
+  # server-side (empty search returns 0) but is loose/OR-based across
+  # tokens -- e.g. "machine learning engineer" surfaces ~2900 of this
+  # tenant's large branch/RM/teller pool. Over-inclusive, not
+  # under-inclusive -- safe, since matcher.py's own title/skill filters do
+  # the real precision work. This is Axis's single bank-wide tenant, NOT an
+  # IT-only board -- considerably noisier than HDFC Bank's equivalent
+  # (genuine "IT:"-department tech signal exists but is a small fraction of
+  # the total pool). max_listings set high since server responses can run
+  # into the thousands for broad keywords.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+canva_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # SmartRecruiters (api.smartrecruiters.com/v1/companies/Canva/postings) --
+  # Canva's own branded careers site is Cloudflare-gated, but this direct
+  # API host has no such wall. country=in hardcoded server-side (single-
+  # country facet, location arg unused -- same pattern as Zensar/
+  # SopraSteria/Freshworks). q= (keyword) genuinely narrows server-side.
+  # Small India pool -- 6 of 263 global postings.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cloudflare_search:
+  max_listings: 350
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true).
+  # No server-side keyword/location filter -- full ~331-job global pool
+  # cached once, India detected during cache fill. CRITICAL location
+  # gotcha: top-level location.name is a work-mode label ("Hybrid"/
+  # "Remote"/etc.) for most postings, NOT a place name -- the real signal
+  # is the per-job metadata field "Job Posting Location". Descriptions
+  # inline (content=true).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+databricks_search:
+  max_listings: 900
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true).
+  # No server-side keyword/location filter -- full ~870-job global pool
+  # cached once. location.name already says "Bengaluru, India"/"Pune,
+  # India"/etc. cleanly for every India posting -- no city normalization
+  # needed. Descriptions inline (content=true). max_listings set above the
+  # global pool size so nothing is truncated during cache fill.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+gitlab_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/gitlab/jobs?content=true).
+  # No server-side keyword/location filter -- full ~229-job global pool
+  # cached once. location.name already contains literal "india" for every
+  # India posting -- no normalization needed. Descriptions inline
+  # (content=true). Strongest India engineering signal of the Greenhouse
+  # boards onboarded this wave -- 40 India postings, almost entirely
+  # hands-on backend/SRE/security engineering roles.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+hdfcbank_search:
+  max_listings: 300
+  inter_page_delay: 0.3
+  # RippleHire (hdfcbank.ripplehire.com), same ATS/API shape as Axis Bank/
+  # CitiusTech/LTIMindtree. `search` keyword REQUIRED and genuinely narrows
+  # server-side (empty search returns 0) -- loose/OR-based across tokens but
+  # over-inclusive, not under-inclusive, same reasoning as Axis Bank. This
+  # is HDFC's single bank-wide tenant (not IT-only) but noticeably cleaner
+  # signal-to-noise than Axis's equivalent -- real "Tech & Digital-*Engineer*"
+  # titles appear directly in default-keyword results, with rich JDs
+  # literally listing "C# / VB.NET / JAVA / Xamarin / ASP.NET / .Net Core /
+  # Python / Angular / React" skill sections.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+kotakbank_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM Cloud CE (hcbt.fa.em2.oraclecloud.com, site CX) -- same REST
+  # pattern as Chubb/Hexaware/Icertis/WTW/eClerx, plain requests, no auth.
+  # Keyword REQUIRED on this tenant (empty keyword returns TotalJobsCount:0,
+  # NOT an empty board) and genuinely narrows server-side, though loosely/
+  # OR-based across tokens like the RippleHire-backed bank fetchers in this
+  # batch. Single bank-wide tenant, not IT-only -- fetches globally (no
+  # location facet used, same conservative approach as Hexaware/Icertis)
+  # and filters by "india" substring in PrimaryLocation client-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mongodb_search:
+  max_listings: 450
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/mongodb/jobs?content=true).
+  # No server-side keyword/location filter -- full ~415-job global pool
+  # cached once. Location quirk: location.name is a bare city name for
+  # India postings ("Gurugram"/"Bengaluru", no "india" substring) -- same
+  # family as Zeta/CRED/Lowe's/AB InBev -- normalized via a recognized-city
+  # whitelist. Descriptions inline (content=true). 65 India postings,
+  # strong genuine engineering signal (Senior Software Engineer, Staff
+  # Engineer, Senior Platform Engineer titles).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+netflix_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # explore.jobs.netflix.net's own server-rendered search (Eightfold
+  # platform, but the normal public search API is disabled for this tenant
+  # -- the careers PAGE itself is server-rendered with the full live search
+  # JSON embedded directly, no Playwright needed unlike HSBC's equivalent
+  # Eightfold wall). Both query= (keyword) and location= genuinely filter
+  # server-side. No working pagination -- start>0 always returns [] rather
+  # than re-fetching; the unfiltered embed caps at exactly 10 positions
+  # regardless of the reported total, immaterial here since India (8 of
+  # 501 company-wide) is well under that cap. max_listings kept small
+  # since nothing beyond the first page is ever reachable.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+rippling_search:
+  max_listings: 700
+  inter_page_delay: 0.2
+  # Rippling's own Algolia search index (public search-only API key, safe
+  # to call directly -- standard front-end Algolia integration pattern).
+  # keyword/location are accepted but ignored: Algolia's own relevance
+  # search produces a genuine false positive for "India" (matches
+  # "Indianapolis" via fuzzy-prefix), so the whole ~682-job global board is
+  # fetched once instead and filtered by structured countryCode. Real ATS
+  # backend is Rippling's own product (ats.rippling.com) -- descriptions
+  # require a separate per-job detail-page fetch (Next.js __NEXT_DATA__
+  # parse), not inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+snowflake_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Ashby public Job Board API (api.ashbyhq.com/posting-api/job-board/
+  # snowflake) -- Snowflake's own careers site is Phenom-fronted, but every
+  # job's real applyUrl points at Ashby; the Phenom layer's own location=
+  # param was tested and found unusable (geocode-radius search, bare
+  # "India" fails to geocode). Ashby's public API ignores all query params
+  # -- full ~376-job global pool cached once. descriptionHtml already
+  # inline in the same response -- no separate detail fetch needed.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+stripe_search:
+  max_listings: 650
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true).
+  # No server-side keyword/location filter -- full ~616-job global pool
+  # cached once. Location quirk: Bengaluru spelled wildly inconsistently
+  # across postings ("Bengaluru", "Bangalore", "IN-Bengaluru", etc.) --
+  # normalized via a recognized-variant whitelist. Descriptions inline
+  # (content=true). URL quirk: absolute_url is query-string based
+  # (gh_jid=<id>), unlike most Greenhouse boards in this repo.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+workday_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # Workday-the-employer's OWN corporate careers page (workday.wd5.
+  # myworkdayjobs.com/Workday) -- unrelated to this repo's many OTHER
+  # Workday-vendor fetchers (browserstack/aon/pwcac/etc.). searchText
+  # genuinely narrows server-side; unlike most Workday tenants here, this
+  # one exposes a real, reliable Location_Country facet for India (23 of
+  # 375 global postings, zero non-India leakage observed) -- hardcoded in
+  # the fetcher rather than driven by the passed location arg (same
+  # single-country-facet convention as Zensar). Server hard-caps limit at
+  # 20 (same as BrowserStack's tenant); pagination wraparound guarded via
+  # _FIRST_PAGE_IDS.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
