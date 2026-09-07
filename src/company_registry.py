@@ -282,7 +282,7 @@ _IGNORES_KEYWORDS = frozenset(
         "cred", "crisil", "cyient",
         "darwinbox", "databricks", "datarobot", "dazn", "deloitteusi",
         "delta", "deltatre", "deutsche", "disney", "dover",
-        "energyexemplar", "eygds", "flipkart", "gitlab", "glean", "globant",
+        "energyexemplar", "eygds", "flipkart", "gitlab", "glean", "globallogic", "globant",
         "groww", "happiestminds", "hcltech",
         "honeywell", "ice", "indigo", "innovaccer",
         "infosys", "irissoftware", "itc", "jioplatforms", "jsw", "juspay",
@@ -342,9 +342,9 @@ _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
 # run_all.py uses this flag to give each one a dedicated thread instead of
 # sharing the general pool, so no OS thread ever runs two of them.
 _USES_PLAYWRIGHT = frozenset(
-    {"bnpparibas", "darwinbox", "honeywell", "ibm", "indigo", "natwest",
-     "perfios", "servicenow", "sonatasoftware", "techmahindra", "uber",
-     "virtusa"}
+    {"bnpparibas", "darwinbox", "globallogic", "honeywell", "ibm", "indigo",
+     "natwest", "perfios", "servicenow", "sonatasoftware", "techmahindra",
+     "uber", "virtusa"}
 )
 
 

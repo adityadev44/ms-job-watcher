@@ -74,9 +74,9 @@ def test_registry_flags_playwright_backed_fetchers() -> None:
     # thread (see run_companies()) instead of sharing the general pool, or a
     # second Playwright-backed company reusing that thread fails outright.
     expected = {
-        "bnpparibas", "darwinbox", "honeywell", "ibm", "indigo", "natwest",
-        "perfios", "servicenow", "sonatasoftware", "techmahindra", "uber",
-        "virtusa",
+        "bnpparibas", "darwinbox", "globallogic", "honeywell", "ibm", "indigo",
+        "natwest", "perfios", "servicenow", "sonatasoftware", "techmahindra",
+        "uber", "virtusa",
     }
     assert {slug for slug, spec in COMPANY_REGISTRY.items() if spec.uses_playwright} == expected
     assert COMPANY_REGISTRY["amazon"].uses_playwright is False
