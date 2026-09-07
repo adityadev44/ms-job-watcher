@@ -487,7 +487,7 @@ matching:                         # shared across ALL companies
 - An uncaught pipeline error or failure of all configured delivery channels produces a failed company status; peers continue and the launcher exits non-zero after they finish. Search errors caught inside `matcher.py` only log warnings and stop that query's pagination: even an all-empty failed fetch can therefore report `ok`. Check real run logs, warnings, and fetched counts before declaring coverage healthy.
 - Playwright is pinned to `1.62.0`. Firefox and Chromium are **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`; the workflow launch-checks both and reinstalls on failure.
 - Tracked `seen_jobs*.json` and `pipeline_failures.json` changes are committed after each run with `[skip ci]`, including failed runs
-- The workflow runs every 30 minutes and also supports manual `workflow_dispatch`
+- **Cadence**: the workflow is self-chaining via `workflow_run` (fires on completion of any run) so the next run queues immediately when the current one finishes. A backup schedule (`7/7 * * * *`, off the :00/:30 GitHub high-load peaks) ensures a run queues within ≤7 min even if `workflow_run` is delayed. Manual `workflow_dispatch` also supported. Effective cadence ≈ run duration (~50 min) with no multi-hour gaps. Historical note: this repo previously relied on an external cron service calling `workflow_dispatch` every ~15 min for the same purpose — when that stopped, only the unreliable `*/30` GitHub schedule remained, producing median gaps of 104 min. `workflow_run` replaces the external service.
 - Queued runs fast-forward before scanning; state pushes retain the union merge driver and three-attempt rebase/push loop
 
 ---
