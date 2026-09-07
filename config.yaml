@@ -3756,6 +3756,193 @@ airindia_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+akasaair_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # Zoho Recruit (akasaair.zohorecruit.in), same vendor as yubi_fetcher.py
+  # (different tenant). Plain requests work, no bot gating. `?page=2`
+  # silently ignored -- full ~20-job board (one page) cached once.
+  # Descriptions inline (Job_Description field).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+indigo_search:
+  max_listings: 30
+  inter_page_delay: 0.3
+  # IndiGo's own in-house middleware (ms-careers-prod.goindigo.in), wrapping
+  # a SAP SuccessFactors OData tenant. Requires Playwright -- Akamai Bot
+  # Manager blocks plain requests outright (TLS/HTTP2-level resets) and
+  # fingerprints headless CHROMIUM specifically (serves a fake-200 soft-fail
+  # page) -- headless Firefox gets the real page reliably. The API itself is
+  # then called via page.evaluate(fetch(...)) from within that Firefox
+  # context (must NOT set credentials:'include' -- breaks CORS on this
+  # tenant). No query params work server-side -- full ~18-job board cached
+  # once. Descriptions inline (externalJobDescription field).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ixigo_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # SmartRecruiters (company id "ixigo"), same platform family as
+  # PhonePe/Nagarro already in this repo -- discovered by live-clicking a
+  # job card and capturing the resulting jobs.smartrecruiters.com URL
+  # (ixigo's own /api/openings wrapper uses a divergent ID scheme and isn't
+  # used). country=in reliably filters server-side; q= genuinely narrows
+  # (loose/OR-based, but a nonsense token correctly returns 0) -- NOT
+  # ignored. ~10 India postings, strong genuine engineering signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+makemytrip_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Custom in-house API (careers.makemytrip.com/api/jobs + /api/jobDetails),
+  # itself proxying MMT's own Darwinbox tenant under the hood (revealed via
+  # the detail response's applyUrl). Plain requests work, no bot gating.
+  # Query params silently ignored (byte-identical response) -- full ~37-job
+  # board cached once. job_created_timestamp used for posting_date, NOT
+  # job_updated_timestamp (bulk-touched daily by their sync, not a real
+  # signal). Descriptions require a separate /api/jobDetails call
+  # (double-HTML-escaped, same pattern as Darwinbox).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+adityabirla_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # careers.adityabirla.com's own first-party Next.js API, proxying the
+  # group's PeopleStrong tenant (abgcareers.peoplestrong.com), same vendor
+  # as larsentoubro_fetcher.py. Requires a static bearer token embedded in
+  # the site's own JS bundle -- confirmed reusable via plain requests.
+  # searchString genuinely narrows (real substring match). No location
+  # param -- India detection via the reliable locationHierarchyComplete
+  # country-prefix field. Descriptions mostly served from the fetch_jobs
+  # cache (jobDescription field) with a live-fetch fallback for cache
+  # misses -- not unconditionally inline. Gotcha: an invalid/expired token
+  # returns HTTP 200 with a JSON {"status":401,...} body instead of a real
+  # 401 -- checked explicitly.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+airtel_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Darwinbox candidatev2 SPA, tenant "airtel" -- same product tier as
+  # Darwinbox's own board but NOT Cloudflare-gated (plain requests.post()
+  # works, no Playwright needed unlike the "dbx" tenant). Keywords ignored
+  # server-side (confirmed via multiple param-name guesses, all no-ops) --
+  # full ~57-job pool cached once. Descriptions fully inline (jd field),
+  # never makes a network call even for an uncached id (falls back to
+  # empty strings).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+itc_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Zoho Recruit Career Site (recruitment.itcportal.com) -- same product as
+  # zoho_fetcher.py (Zoho Corp's own board), different tenant. Entirely
+  # client-side filtering (server always returns the identical full
+  # ~52-job array regardless of query params) -- cache-once. Descriptions
+  # mostly served from cache (list payload already carries the full
+  # description) with a live-fetch fallback for cache misses -- not
+  # unconditionally inline.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+jsw_search:
+  max_listings: 70
+  inter_page_delay: 0.2
+  # TurboHire (jswgroup.turbohire.co) -- same vendor as flipkart_fetcher.py,
+  # different tenant. Keyword genuinely narrows server-side but is ignored
+  # anyway (cache-once, same reasoning as Flipkart) -- full ~58-job pool
+  # cached once. Gotcha: TurboHire's `pageType` semantics are tenant-
+  # specific, NOT a shared convention -- Flipkart's big pool is pageType=1,
+  # but JSW's real "View All Jobs" pool is pageType=0 (58 jobs; pageType=1
+  # is only 14) -- re-verified live per tenant, not assumed from Flipkart's
+  # precedent. Descriptions via a separate detail endpoint (list preview is
+  # truncated at ~500 chars).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+larsentoubro_search:
+  max_listings: 1300
+  inter_page_delay: 0.2
+  # PeopleStrong "Candidate Portal" (larsentoubrocareers.peoplestrong.com)
+  # -- a new ATS vendor for this repo, no auth needed. This is L&T the
+  # parent engineering/construction conglomerate, DISTINCT from L&T
+  # Technology Services (ltts_search) and LTIMindtree (ltimindtree_search)
+  # which are separately onboarded. searchString is a genuine case-
+  # insensitive literal-substring match (narrower than most tenants here --
+  # e.g. "senior software engineer" returns 0 even though "senior engineer"
+  # and "software engineer" separately return real results). No location
+  # param -- India detection via the reliable locationHierarchyComplete
+  # country-prefix field. ~1204 total jobs, ~95% India. Descriptions via a
+  # separate detail API.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mahindra_search:
+  max_listings: 1100
+  inter_page_delay: 0.2
+  # Mahindra & Mahindra's OWN corporate/auto/farm-equipment careers site
+  # (jobs.mahindracareers.com), SAP SuccessFactors J2W classic theme (same
+  # platform family as Birlasoft/Dover) -- DISTINCT from Tech Mahindra
+  # (techmahindra_search) which is separately onboarded. locationsearch=
+  # India and q= (keyword) both genuinely narrow server-side, loose/OR-
+  # based across tokens. CRITICAL gotcha: this tenant does NOT return an
+  # empty page once a keyword's real results are exhausted -- it silently
+  # swaps in "the 25 most recent jobs" fallback content instead (both for
+  # nonsense tokens and mid-pagination past a real keyword's true count) --
+  # the fetcher explicitly detects this fallback's label text and treats
+  # it as zero results; a naive "stop on empty rows" guard would silently
+  # ingest wrong data here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+reliance_search:
+  max_listings: 30
+  inter_page_delay: 0.2
+  # Reliance Industries' OWN corporate/conglomerate careers portal
+  # (careers.ril.com/rilcareers, legacy ASP.NET WebForms) -- DISTINCT from
+  # Jio Platforms (jioplatforms_search) which has its own separate,
+  # tech-heavy careers site. Keyword search technically works through an
+  # encrypted-querystring redirect (confirmed live via Playwright) but that
+  # scheme is impractical to replicate in plain requests -- instead, the
+  # exact same results page serves the complete unfiltered ~16-job board on
+  # a bare GET with no query string, so keywords are ignored and the whole
+  # tiny board is cached once. No Playwright needed. Descriptions via a
+  # separate detail-page fetch.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+vedanta_search:
+  max_listings: 20
+  inter_page_delay: 0.2
+  # Darwinbox candidate portal, tenant "vhr" (older "candidate" SPA, same
+  # family as Zomato/Sonata) -- unlike Sonata's tenant, NOT Cloudflare-
+  # gated, plain requests work with no Playwright needed. Keyword/location
+  # both ignored/unreliable server-side (nonsense keyword returns the same
+  # count as none; location=India zeroes real results) -- full ~13-job
+  # pool cached once (mix of India and a few South Africa mining-ops
+  # postings; matcher.py's own India filter handles the split). Descriptions
+  # via a separate detail call.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

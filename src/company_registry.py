@@ -38,9 +38,12 @@ class CompanyPipeline:
 _PIPELINE_DATA = (
     ("abinbev", "AB InBev GCC", False),
     ("accenture", "Accenture", True),
+    ("adityabirla", "Aditya Birla Group", False),
     ("adobe", "Adobe", True),
     ("aig", "AIG", False),
     ("airindia", "Air India", False),
+    ("airtel", "Bharti Airtel", False),
+    ("akasaair", "Akasa Air", False),
     ("alegeus", "Alegeus", False),
     ("allianztech", "Allianz Technology", False),
     ("alphasense", "AlphaSense", False),
@@ -134,6 +137,7 @@ _PIPELINE_DATA = (
     ("ice", "ICE", False),
     ("icertis", "Icertis", False),
     ("icicibank", "ICICI Bank", False),
+    ("indigo", "IndiGo", False),
     ("infosys", "Infosys", True),
     ("ing", "ING", False),
     ("innovaccer", "Innovaccer", False),
@@ -141,13 +145,17 @@ _PIPELINE_DATA = (
     ("intuit", "Intuit", False),
     ("invesco", "Invesco", False),
     ("irissoftware", "Iris Software", False),
+    ("itc", "ITC Limited", False),
+    ("ixigo", "ixigo", False),
     ("jioplatforms", "Jio Platforms", False),
     ("jpmorgan", "JPMorgan Chase", False),
+    ("jsw", "JSW Group", False),
     ("juspay", "Juspay", False),
     ("kotakbank", "Kotak Mahindra Bank", False),
     ("kpit", "KPIT Technologies", False),
     ("kpmgglobal", "KPMG Global Services", False),
     ("kyndryl", "Kyndryl", False),
+    ("larsentoubro", "Larsen & Toubro", False),
     ("lenskart", "Lenskart", False),
     ("lloyds", "Lloyds Banking Group", True),
     ("lowes", "Lowe's", True),
@@ -159,6 +167,8 @@ _PIPELINE_DATA = (
     ("m2p", "M2P Fintech", False),
     ("macquarie", "Macquarie", False),
     ("maersk", "Maersk", False),
+    ("mahindra", "Mahindra & Mahindra", False),
+    ("makemytrip", "MakeMyTrip", False),
     ("marshmclennan", "Marsh McLennan", False),
     ("mastek", "Mastek", True),
     ("mastercard", "Mastercard", False),
@@ -202,6 +212,7 @@ _PIPELINE_DATA = (
     ("pwcac", "PwC Acceleration Centers", False),
     ("qualcomm", "Qualcomm", False),
     ("razorpay", "Razorpay", False),
+    ("reliance", "Reliance Industries", False),
     ("resideo", "Resideo", False),
     ("rippling", "Rippling", False),
     ("sabre", "Sabre", True),
@@ -238,6 +249,7 @@ _PIPELINE_DATA = (
     ("ubs", "UBS", False),
     ("uipath", "UiPath", False),
     ("unitedairlines", "United Airlines", False),
+    ("vedanta", "Vedanta", False),
     ("verizon", "Verizon", False),
     ("virtusa", "Virtusa", True),
     ("visa", "Visa", False),
@@ -260,7 +272,9 @@ _PIPELINE_DATA = (
 
 _IGNORES_KEYWORDS = frozenset(
     {
-        "abinbev", "airindia", "allianztech", "alphasense", "amdocs", "anz",
+        "abinbev", "airindia", "airtel", "akasaair", "allianztech",
+        "alphasense",
+        "amdocs", "anz",
         "appliedsystems", "arcesium",
         "atlassian",
         "bankofamerica", "birlasoft", "bnpparibas", "boeing", "clevertap",
@@ -270,21 +284,23 @@ _IGNORES_KEYWORDS = frozenset(
         "delta", "deltatre", "deutsche", "disney", "dover",
         "energyexemplar", "eygds", "flipkart", "gitlab", "glean", "globant",
         "groww", "happiestminds", "hcltech",
-        "honeywell", "ice", "innovaccer",
-        "infosys", "irissoftware", "jioplatforms", "juspay", "kpit", "lenskart",
+        "honeywell", "ice", "indigo", "innovaccer",
+        "infosys", "irissoftware", "itc", "jioplatforms", "jsw", "juspay",
+        "kpit", "lenskart",
         "lufthansa", "m2p",
-        "maersk", "mastek", "meesho", "moengage", "mongodb",
+        "maersk", "makemytrip", "mastek", "meesho", "moengage", "mongodb",
         "meta", "metlife", "morningstar", "msci", "natwest", "nomura",
         "nykaa", "omnissa", "payoneer", "paytm", "perfios",
         "persistent", "policybazaar", "postman", "publicissapient",
-        "qualcomm", "razorpay", "resideo", "rippling",
+        "qualcomm", "razorpay", "reliance", "resideo", "rippling",
         "salesforce", "saxobank",
         "schwab",
         "servicenow", "snowflake", "stripe",
         "sharechat", "signzy", "simcorp", "sita",
         "societegenerale", "sonatasoftware", "standardchartered", "swiggy", "swissre",
-        "techmahindra", "thoughtworks", "uber", "ubs", "uipath", "whatfix",
-        "wipro", "xoriant", "yash", "yubi", "zerodha", "zeta", "zoho", "zomato",
+        "techmahindra", "thoughtworks", "uber", "ubs", "uipath", "vedanta",
+        "whatfix", "wipro", "xoriant", "yash", "yubi", "zerodha", "zeta",
+        "zoho", "zomato",
     }
 )
 _SUPPORTS_LOCATION = frozenset(
@@ -295,12 +311,13 @@ _SUPPORTS_LOCATION = frozenset(
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
-        "abinbev", "amazon", "aon", "arcesium", "atlassian", "clevertap",
+        "abinbev", "airtel", "akasaair", "amazon", "aon", "arcesium",
+        "atlassian", "clevertap",
         "cloudflare", "cognizant", "cred",
         "databricks", "dazn", "definitivehealthcare", "energyexemplar",
         "epam", "gallagher",
         "gitlab", "glean", "globant", "google", "groww", "healthedge", "ice",
-        "juspay",
+        "indigo", "juspay",
         "kpit", "lenskart", "m2p", "moengage", "mongodb",
         "meesho", "morningstar", "msci", "payoneer", "paytm", "pepsico", "salesforce",
         "schneiderelectric",
@@ -325,8 +342,9 @@ _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
 # run_all.py uses this flag to give each one a dedicated thread instead of
 # sharing the general pool, so no OS thread ever runs two of them.
 _USES_PLAYWRIGHT = frozenset(
-    {"bnpparibas", "darwinbox", "honeywell", "ibm", "natwest", "perfios",
-     "servicenow", "sonatasoftware", "techmahindra", "uber", "virtusa"}
+    {"bnpparibas", "darwinbox", "honeywell", "ibm", "indigo", "natwest",
+     "perfios", "servicenow", "sonatasoftware", "techmahindra", "uber",
+     "virtusa"}
 )
 
 
