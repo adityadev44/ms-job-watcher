@@ -3744,6 +3744,18 @@ icicibank_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+airindia_search:
+  max_listings: 500
+  inter_page_delay: 0.15
+  # SAP SuccessFactors J2W tile theme at careers.airindia.com. Cache the
+  # full board once; keyword queries are noisy and locationsearch=India
+  # incorrectly returns zero. startrow pagination uses 25 listings/page.
+  # Only known Indian city names receive an India suffix; ambiguous HO
+  # and unfamiliar locations are left for the shared location filter.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

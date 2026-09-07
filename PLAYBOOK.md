@@ -6,7 +6,7 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Monitors 120 company career sites every 30 minutes via GitHub Actions. Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 221 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
 ---
 
@@ -20,23 +20,27 @@ Monitors 120 company career sites every 30 minutes via GitHub Actions. Filters f
 
 **Layer 2 — Title**
 - Title must match the software engineer family (`matching.title_family` in config)
-- Title must not match `matching.exclude_terms` (no interns, managers, hardware, etc.)
+- Title must not match `matching.exclude_terms` (no interns, managers, hardware, etc.). Exclusions use whole-word/phrase matching; title-family and skill checks use normalized substrings.
+- The September 5 precision pass broadened engineering title coverage and removed `principal`, `director`, `vice president`, `VP`, and `data scientist` from exclusions. Manager titles remain excluded; a title still needs a title-family match and a qualifying description.
 
 **Layer 3 — Skills**
 - Description must contain at least one **primary** skill from EITHER named group in `matching.primary_skills` (config.yaml) — a job qualifies via one track, not both:
-  - **`.NET / C#`**: `.NET`, `C#`, `ASP.NET`, `Web API`, `SQL Server`, `T-SQL`, `Entity Framework`, `dotnet`
+  - **`.NET / C#`**: `.NET`, `.NET Core`, `.NET Framework`, `dotnet`, `C#`, `ASP.NET`, `Entity Framework`
   - **`AI / ML / Python`**: `LangChain`, `LangGraph`, `RAGAS`, `Langfuse`, `LangSmith`, `CrewAI`, `vector database`, `ChromaDB`, `Pinecone`, `generative ai`, `large language model`, `retrieval augmented generation`
-  - Broad-only terms in `matching.skills` (Azure/Angular/TypeScript/React/Python/machine learning/Golang/etc.) never pass alone — they're too common in unrelated postings.
+  - Broad-only terms in `matching.skills` (SQL Server/T-SQL/Web API/Azure/Angular/TypeScript/React/Python/machine learning/Golang/etc.) never pass alone — they're too common in unrelated postings.
+  - Every primary-skill term must also appear in `matching.skills`: the broad and primary checks are independent gates.
   - This same grouping is the source of the `[.NET / C#]` / `[AI / ML / Python]` tag attached to every alert (`src/matcher.py::_derive_tags`) — a job mentioning terms from both groups gets both tags.
   - **Never add bare `AI`, `ML`, `RAG`, `LLM`, `GPT`, or `Go` to either group** — matcher.py's substring check isn't word-boundary aware, and those short tokens are substrings of ordinary words ("RAG" ⊂ "storage"/"average"/"garage", "Go" ⊂ "going"/"ongoing"/"algorithm", "ML" ⊂ "HTML"). Use the full distinctive term instead (`Golang`, `generative ai`, `large language model`, ...) — same signal, no false positives.
 
-**Layer 4 — Tech in description (Wells Fargo, Accenture, Infosys, Cognizant, Capgemini, TCS, Wipro, HCLTech, DXC, Citi, State Street, First American, Adobe, Sabre, Autodesk, Micron, eBay, Oracle, Lowe's, Bank of America, LTIMindtree, Persistent Systems, Genpact, IBM, Tech Mahindra, Virtusa, Hexaware, Societe Generale, Charles Schwab — opt-in, do not add to new companies by default)**
-- Description must explicitly contain a **narrow** term from either track (`require_tech_in_description` in config): `.NET`/`C#`/`ASP.NET` for the .NET track, or the same hard AI list as Layer 3's `AI / ML / Python` group — narrower than Layer 3's broader `.NET / C#` group, which also passes on SQL Server/EF/Web API alone
+**Layer 4 — Tech in description (opt-in; enabled companies are defined by the registry and their `require_tech_in_description` config, not an independently maintained list here)**
+- Description must explicitly contain a **narrow** term from either track (`require_tech_in_description` in config): `.NET`/`C#`/`ASP.NET` for the .NET track, or the same hard AI list as Layer 3's `AI / ML / Python` group — narrower than Layer 3's `.NET / C#` group, which still accepts Entity Framework alone. SQL Server, T-SQL, and Web API no longer pass Layer 3 alone
 - Originally added for IT-services shops whose generic titles ("Senior Software Engineer", "Software Engineer L3") give no reliable tech signal, where Layer 3's broader skill list was letting non-.NET roles through (e.g. HCLTech: Cisco Unified Comms, ServiceNow, GCP, Azure-monitoring roles that happened to mention SQL Server/EF); since extended to direct employers (Citi, State Street, First American, Adobe, Sabre, Autodesk, Micron, eBay, Oracle, Lowe's, Bank of America, LTIMindtree, Persistent Systems, Genpact, IBM, Tech Mahindra, Virtusa, Hexaware, Societe Generale, Charles Schwab) as a general precision tightener wherever the broader skill list alone risks false positives
 - Activated by the company's registry metadata and applied centrally by `run_company.py` after the shared matcher.
 - **Retired: title-based matching (`require_tech_in_title`).** Every company that used it now uses description matching instead — title text turned out to be too sparse a signal at IT-services shops (many real .NET roles carry a generic level-banded title with the tech named only in the JD body)
 
-Deduplication: jobs already in `seen_jobs_<company>.json` are never re-alerted (all companies).
+**Unavailable descriptions:** if both detail attempts fail or the body is empty, the shared matcher keeps an otherwise eligible job with an `Unverified` tag, bypassing the skill gates. An enabled Layer 4 then rejects that empty description. This is an intentional fallback, not verified track membership.
+
+Deduplication: IDs in each company's seen file are skipped before detail fetching (`seen_jobs.json` for Microsoft; `seen_jobs_<company>.json` for others). When channels are configured, IDs advance only if at least one channel succeeds; with no channels configured, local runs still advance state. Preserve these files when testing.
 
 ---
 
@@ -47,15 +51,15 @@ config.yaml                    ← all config (search params + shared matching r
 src/
   company_registry.py          ← inventory + conservative fetch capabilities
   run_company.py               ← one generic pipeline implementation
-  run_all.py                   ← bounded launcher (10 at a time by default)
-  matcher.py                   ← shared filter engine (title family → exclude → skills)
+  run_all.py                   ← general worker pool + isolated browser subprocesses
+  matcher.py                   ← shared location → exclude → title family → skills filters
   notifier.py                  ← Telegram + email alerts
   <company>_fetcher.py         ← data source: fetch_jobs() + fetch_job_description()
 seen_jobs_<company>.json       ← deduplication state
 .github/workflows/watcher.yml  ← invokes the launcher and commits state
 ```
 
-**matcher.py expects every fetcher to export exactly three things:**
+**The generic runner requires these three fetcher exports (additional helpers are allowed):**
 ```python
 class RateLimitError(Exception): ...
 def fetch_jobs(keyword, location, *, num, start, sort_by, timeout) -> list[dict]: ...
@@ -76,7 +80,8 @@ fetch_jobs()
     └─ passes_title_family_check()     [title family] tag in near-miss log
         └─ known-ID check              skip detail call for alerted jobs
         └─ fetch_job_description()
-            └─ primary_skills check    [broad-only] / [react-only] / [skill] tags
+            └─ skills + primary_skills [broad-only] / [react-only] / [skill] tags
+            └─ unavailable description kept as [Unverified] before optional Layer 4
 ```
 
 **Layer 4 (opt-in, never added by default):**
@@ -88,6 +93,8 @@ Implemented once in `run_company.py`; registry metadata enables it for companies
 ---
 
 ## Current Companies
+
+The table below is a partial, historical integration reference. `src/company_registry.py` is the complete current inventory; later dated wave entries document additions beyond this table. Dated investigations describe observations at that time, not current live-board health.
 
 | Company | ATS | Fetch method | Registry slug | Notes |
 |---|---|---|---|---|
@@ -234,7 +241,7 @@ Implemented once in `run_company.py`; registry metadata enables it for companies
 
 ## How to Add a New Company
 
-> **Every company is different.** The steps below capture what worked across 6 past integrations. They are a starting point, not a checklist. Each new ATS will have its own quirks — different API shapes, bot protection, date formats, title conventions, or pagination schemes. Read what the new system actually does before reaching for a copy-paste from an existing fetcher. The goal is always accurate job alerts; the playbook is there to save time, not to constrain good judgment.
+> **Every company is different.** The steps below capture patterns from prior integrations. They are a starting point, not a checklist. Each new ATS will have its own quirks — different API shapes, bot protection, date formats, title conventions, or pagination schemes. Read what the new system actually does before reaching for a copy-paste from an existing fetcher. The goal is always accurate job alerts; the playbook is there to save time, not to constrain good judgment.
 
 > **Read "Filter Layers", "Scope Expansion: AI/ML/Python Track Added (2026-08-30)", and "Company Coverage Audit (2026-08-30)" below before starting.** Three things that changed and matter for every new company you add:
 > 1. **This watcher targets TWO tracks, not one.** `matching.title_family`/`skills`/`primary_skills`/`exclude_terms` in `config.yaml` are GLOBAL — shared by every company — so you do not add per-company title/skill lists. The only per-company decision is whether to enable Layer 4 (`require_tech_in_description`), and if you do, its term list must offer both the `.NET`/`C#`/`ASP.NET` terms AND the AI/ML hard terms (copy the list straight from any existing company's `require_tech_in_description` block, e.g. `wellsfargo_search` — do not just add the `.NET` terms because that's what you see most often in the file).
@@ -257,7 +264,7 @@ Common ATS vendors and what to expect:
 |---|---|---|
 | **Workday** | URL contains `wd1.myworkdayjobs.com` or apply button links there | `POST /wday/cxs/{code}/{tenant}/jobs` with JSON body; India WID from facets |
 | **Phenom People** | URL contains `/en/sites/{Company}/jobs` | `POST /widgets` with `refNum` extracted from page HTML |
-| **Oracle HCM CE** | URL contains `fa.ocs.oraclecloud.com` or `oraclecloud.com` | Playwright/Firefox — JS SPA, API blocked server-side |
+| **Oracle HCM CE** | URL contains `fa.ocs.oraclecloud.com` or `oraclecloud.com` | Test the public REST API first; many tenants work with plain HTTP. Use Playwright when the actual tenant requires a browser (e.g. Honeywell). |
 | **iCIMS** | URL contains `icims.com` | REST API or HTML scraping |
 | **Greenhouse** | URL contains `greenhouse.io` | Public REST API, well-documented |
 | **Lever** | URL contains `lever.co` | Public REST API |
@@ -309,8 +316,9 @@ Add one `CompanyPipeline` row to `src/company_registry.py` through `_PIPELINE_DA
 
 Also classify only capabilities you verified:
 
-- Add the slug to `_IGNORES_KEYWORDS` when the API returns the same pool for every query. This makes the generic runner issue one query pass instead of six identical passes.
+- Add the slug to `_IGNORES_KEYWORDS` when the API returns the same pool for every query. This makes the generic runner issue one query pass instead of repeating the configured keyword list.
 - Add it to `_SUPPORTS_LOCATION`, `_INLINE_DESCRIPTIONS`, or `_NEWEST_FIRST` only after observing that behavior.
+- Add every browser-backed fetcher to `_USES_PLAYWRIGHT`; the launcher then runs it in an isolated subprocess. Follow the existing startup cleanup pattern so a failed browser launch stops the partially started Playwright instance before retrying.
 - Conservative defaults are intentional. Never use alerted-job IDs as a pagination watermark: they do not include filtered-out listings, and config changes can make old jobs newly eligible.
 
 ### Step 5 — Add to `config.yaml`
@@ -330,7 +338,7 @@ Check if the company's ATS uses server-side keyword filtering (Workday does) or 
 
 ### Step 6 — Leave the workflow alone
 
-The workflow calls `run_all.py`, which discovers the registry, and stages tracked `seen_jobs*.json` files with a pathspec. Adding a registry entry and state file is enough. If the company needs Playwright, Firefox is already installed and cached.
+The workflow calls `run_all.py`, which discovers the registry, and stages tracked `seen_jobs*.json` files with a pathspec. Adding a registry entry and state file is enough. Firefox and Chromium are already installed, cached, and launch-checked; select the browser verified for that tenant and register `_USES_PLAYWRIGHT`.
 
 ### Step 7 — Create `seen_jobs_<company>.json`
 
@@ -340,20 +348,21 @@ The workflow calls `run_all.py`, which discovers the registry, and stages tracke
 
 Commit this file alongside everything else.
 
-### Step 8 — Test locally, then push
+### Step 8 — Validate wiring and live behavior
 
 ```bash
-py src/run_all.py --validate --companies <company>
-py src/run_company.py <company>
+python src/run_all.py --validate --companies <company>
+# For live verification, call the fetcher/matcher directly without notifications.
+# A full run_company invocation can send real alerts and advance seen state.
 ```
 
 Verify:
 - Non-zero jobs fetched with India locations
 - Near-miss log shows `[title family]`, `[skill]`, `[broad-only]` tags firing correctly — no obvious false positives
 - Matches are genuinely .NET/C# OR genuinely AI/ML/Python (see "Scope Expansion" below — Python/LangChain/RAG jobs are legitimate matches now, not false positives; a bare "Java" or "cloud-native" role with no hard signal from *either* named `primary_skills` group is what should NOT slip through)
-- Every matched job's `tags` field is non-empty and correct (`[.NET / C#]`, `[AI / ML / Python]`, or both) — sanity-check a few real matches through `format_message`
+- For jobs with verified descriptions, confirm the `tags` field is non-empty and correct (`[.NET / C#]`, `[AI / ML / Python]`, or both); review any `Unverified` fallback separately. Sanity-check a few real matches through `format_message`
 - Pune/Kochi/Chandigarh/Chennai/Tamil Nadu not in any matched result's location
-- Alert fires (or "not sent (no new matches)" if all already seen)
+- Verify alert formatting and delivery/state behavior with an injected notifier and temporary seen path. Send real alerts or push changes only when included in the requested scope.
 
 ---
 
@@ -474,9 +483,9 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- `run_all.py` runs all 74 registry entries with **bounded concurrency** (10 workers by default; configurable with `--workers` or `JOB_WATCHER_WORKERS`)
-- One company failure does not cancel peers, but the launcher exits non-zero after all work finishes so the workflow is visibly failed
-- Firefox Playwright is **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`
+- `run_all.py` discovers all registry entries. The workflow sets **20 general workers**; the local CLI default is 10 (`--workers` / `JOB_WATCHER_WORKERS`). Each of the 11 browser-backed pipelines runs concurrently in its own subprocess; these are additional to the general worker limit.
+- An uncaught pipeline error or failure of all configured delivery channels produces a failed company status; peers continue and the launcher exits non-zero after they finish. Search errors caught inside `matcher.py` only log warnings and stop that query's pagination: even an all-empty failed fetch can therefore report `ok`. Check real run logs, warnings, and fetched counts before declaring coverage healthy.
+- Playwright is pinned to `1.62.0`. Firefox and Chromium are **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`; the workflow launch-checks both and reinstalls on failure.
 - Tracked `seen_jobs*.json` and `pipeline_failures.json` changes are committed after each run with `[skip ci]`, including failed runs
 - The workflow runs every 30 minutes and also supports manual `workflow_dispatch`
 - Queued runs fast-forward before scanning; state pushes retain the union merge driver and three-attempt rebase/push loop
@@ -484,6 +493,8 @@ matching:                         # shared across ALL companies
 ---
 
 ## Optimization Learnings (2026-07-04)
+
+Historical baseline: the company counts and concurrency design in this dated section have since changed; use the GitHub Actions section above and current code for operational settings.
 
 - **Filter known IDs before detail fetches.** The alert ledger already guarantees these jobs cannot notify again, so re-downloading their descriptions was pure cost. Keep the check after cheap location/title filters for useful diagnostics, but before detail HTTP.
 - **Do not stop pagination using alert IDs.** Seen files contain only alerted matches, not every processed listing. They are not scan watermarks, and older filtered jobs may become eligible after rule changes.
@@ -1010,3 +1021,14 @@ Closes out Wave 15. Both companies below hit real, non-trivial obstacles that a 
 - Test count: 218 → 220; README: 218 → 220 companies
 
 All 171 tests pass; `run_all.py --validate` confirms clean wiring for all 220 companies. This closes out Wave 15 in full — the FAANG gap is closed (Apple, Netflix, plus Amazon/Google/Meta/Microsoft already present), India's major private banks now have a foothold (HDFC, Axis, Kotak, ICICI), and a batch of dev-tool/cloud unicorns (Stripe, Snowflake, Databricks, MongoDB, Cloudflare, GitLab, Rippling, Uber, Canva, Workday) rounds out the wave.
+
+
+## Air India integration completed (2026-09-07)
+
+Completed the previously untracked Air India adapter and empty seen file, adding `airindia` to the registry and `_IGNORES_KEYWORDS`, an `airindia_search` config section, and regression coverage. The local registry now contains **221 pipelines**. This entry records local integration and verification; deployment requires these changes to be committed and pushed.
+
+**Data source and safeguards:** `careers.airindia.com/search/` uses SAP SuccessFactors J2W tile HTML, fetched with plain HTTP. Cache the full board once: keyword queries are noisy and `locationsearch=India` incorrectly returns zero. Live pagination returned **25 + 4 + 0** postings at `startrow=0/25/50`. Use the tablet location field because responsive variants differ; append India only for recognized Indian cities. Of 29 current postings, 28 have recognized Indian city locations and one says only `HO`; that ambiguous posting remains unlabelled and fails the shared India check. Missing result containers and request failures raise `RateLimitError`, retained for subsequent cache calls instead of silently becoming an empty success. The shared matcher's warning-only handling of search failures still applies.
+
+**Live matching:** 29 fetched, **1 qualifying match**: `59182644`, “Senior Staff Engineer,” Gurugram, posted 2026-08-25, tagged `AI / ML / Python` via “generative ai” in its 4,141-character JD. The previously investigated “Engineer - Backend” (`59188944`) has a real 3,298-character Java/Spring Boot JD and no qualifying primary skill; SQL Server alone correctly does not qualify. “Agentic AI Architect” (`55349644`) has a substantive AI JD naming LangGraph/CrewAI but fails the existing shared title-family gate. That title-policy gap is documented, not changed as part of this company integration.
+
+**Verification:** all **182 tests pass** and registry/config/fetcher validation succeeds for **221/221 pipelines**. Live checks used direct fetcher/matcher calls without notifications or production seen-state writes; `seen_jobs_airindia.json` remains empty so a later deployed run can alert eligible jobs. No browser or additional dependency is needed.
