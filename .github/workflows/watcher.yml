@@ -1,19 +1,19 @@
 name: Job Watcher
 
 on:
-  # Self-chaining: immediately re-queue the next run when the current one
-  # completes. This is the primary cadence driver — it removes dependence on
-  # GitHub's cron scheduler, which routinely delays or drops events by 1-4 h
-  # (confirmed by analysing 50 runs: median gap was 104 min on a */30 schedule;
-  # 55% of gaps exceeded 90 min). With workflow_run, the next run queues in
-  # seconds rather than waiting for the next cron tick.
+  # Primary cadence: the Heartbeat workflow (*/10 cron) completes in ~10 s,
+  # and its completion fires this workflow_run trigger. Cross-workflow
+  # workflow_run works reliably; self-referential (same workflow) does not —
+  # GitHub blocks it entirely (empirically confirmed 2026-09-07).
+  # Net effect: a new watcher run queues within ~10 min of the previous one
+  # finishing, with no external service dependency.
   workflow_run:
-    workflows: ["Job Watcher"]
+    workflows: ["Heartbeat"]
     types: [completed]
 
   # Backup schedule: fires every 7 minutes at :07/:14/… (off the :00/:30
-  # peaks GitHub flags as high-load). If workflow_run is delayed or a manual
-  # run was the last run, this ensures a new run queues within ≤7 minutes.
+  # peaks GitHub flags as high-load). Guards against GitHub cron delays on
+  # the Heartbeat workflow itself.
   schedule:
     - cron: '7/7 * * * *'
 
