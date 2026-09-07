@@ -3702,6 +3702,48 @@ workday_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+uber_search:
+  max_listings: 60
+  inter_page_delay: 0.3
+  # Custom Next.js site (jobs.uber.com), Playwright required end-to-end
+  # (CSRF-protected search API + Cloudflare-challenged detail pages). No
+  # server-side country facet exists reachable without a live browser, so
+  # the fetcher drives the page's own location combobox for a fixed list
+  # of major India hub cities at max radius (1000mi), unioning results by
+  # data-id. Live-tested and fixed in this session -- three real bugs
+  # found (cookie-banner overlay blocking the input, a missing "Search"
+  # button click needed to actually apply the filter, and an unreliable
+  # URL-based success check) -- see uber_fetcher.py docstring and
+  # PLAYBOOK.md. Keywords ignored -- full per-city pool cached once.
+  # A city search that doesn't provably return India-located results is
+  # skipped rather than trusted (recall-oriented best-effort, not a
+  # guaranteed-complete pool -- Bengaluru's own radius alone already
+  # covers most of India, so a flaky city is not fatal to coverage).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+icicibank_search:
+  max_listings: 30
+  inter_page_delay: 0.3
+  # ICICI Bank's own in-house-built React SPA (careers.icici.bank.in),
+  # NOT a third-party ATS -- every request/response body on this API is
+  # AES-128-CBC encrypted (key recovered from the SPA's own webpack
+  # bundle; see icicibank_fetcher.py docstring). Keyword IS genuinely
+  # enforced server-side (confirmed: "manager" -> 19/24 matches; every
+  # standard tech keyword -> a genuine 0, identical in shape to a
+  # nonsense token). isAllIndia=3 (a union of two internal buckets) used
+  # unconditionally to avoid under-counting; maingroup category filter
+  # left blank (scoping it to "Digital & Technology" returns 0 rows even
+  # though keyword filtering genuinely works otherwise). Small board
+  # (~24 total postings bank-wide) -- currently 100% retail-banking/ops/
+  # credit-risk/RM/CA/Probationary-Officer roles, zero tech postings
+  # routed through this public portal yet. Fetcher is fully functional
+  # and will pick up tech roles the moment ICICI routes any through here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

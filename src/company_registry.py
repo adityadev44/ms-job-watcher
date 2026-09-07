@@ -132,6 +132,7 @@ _PIPELINE_DATA = (
     ("ibm", "IBM", True),
     ("ice", "ICE", False),
     ("icertis", "Icertis", False),
+    ("icicibank", "ICICI Bank", False),
     ("infosys", "Infosys", True),
     ("ing", "ING", False),
     ("innovaccer", "Innovaccer", False),
@@ -232,6 +233,7 @@ _PIPELINE_DATA = (
     ("techmahindra", "Tech Mahindra", True),
     ("thomsonreuters", "Thomson Reuters", False),
     ("thoughtworks", "ThoughtWorks", False),
+    ("uber", "Uber", False),
     ("ubs", "UBS", False),
     ("uipath", "UiPath", False),
     ("unitedairlines", "United Airlines", False),
@@ -323,7 +325,7 @@ _NEWEST_FIRST = frozenset({"amazon", "amdocs", "natwest", "optum", "virtusa"})
 # sharing the general pool, so no OS thread ever runs two of them.
 _USES_PLAYWRIGHT = frozenset(
     {"bnpparibas", "darwinbox", "honeywell", "ibm", "natwest", "perfios",
-     "servicenow", "sonatasoftware", "techmahindra", "virtusa"}
+     "servicenow", "sonatasoftware", "techmahindra", "uber", "virtusa"}
 )
 
 
