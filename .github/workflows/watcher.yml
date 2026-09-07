@@ -27,6 +27,7 @@ concurrency:
 
 permissions:
   contents: write              # needed so the job can commit seen state back
+  actions: write               # needed for the self-dispatch step below
 
 jobs:
   watch:
@@ -101,6 +102,17 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
         run: python -u src/run_all.py --workers 20
+
+      - name: Queue next run
+        # Self-dispatch: queue the next watcher run before this one finishes
+        # so it's pending and starts immediately when this run completes.
+        # Uses GITHUB_TOKEN (actions: write permission above). Runs even on
+        # failure so the chain is never broken by a single bad run; the
+        # concurrency group ensures at most one pending run at a time.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run watcher.yml --ref master
 
       - name: Save updated watcher state
         if: always()
