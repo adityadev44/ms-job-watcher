@@ -4091,6 +4091,48 @@ sprinklr_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+fidelityinternational_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Fidelity International (FIL) — distinct legal entity from Fidelity
+  # Investments (tracked separately as `fidelity`). Workday tenant `fil`,
+  # site `001`. India filtered server-side via the standard cross-tenant
+  # locationCountry WID; searchText genuinely narrows results server-side.
+  # bulletFields[0] (primary office) is checked against a known-India-city
+  # allowlist in the fetcher because this tenant's India facet also
+  # matches jobs whose primary office is elsewhere (India only listed as
+  # a secondary location) — see fetcher docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+deshaw_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # D. E. Shaw India — distinct from Arcesium (tracked separately as
+  # `arcesium`, an independent D. E. Shaw spinoff since 2015). Runs its own
+  # India-specific domain, deshawindia.com (deshaw.com/careers itself has
+  # zero India postings despite listing "India" as a location facet).
+  # Static Next.js SSR page, no query-param search API — every job on this
+  # domain is already India (Hyderabad/Bengaluru/Gurugram), so keyword and
+  # location filtering happen entirely client-side in matcher.py.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+evernorth_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Evernorth (Cigna's health services arm) — posted through Cigna Group's
+  # shared Workday tenant (cigna.wd5.myworkdayjobs.com/cignacareers), not a
+  # separate tenant. India presence is the Hyderabad Innovation Hub (HIH,
+  # opened 2024). Fetcher pins searchText to "Evernorth" to scope the
+  # shared tenant to this one brand and caches the full ~65-job pool
+  # (offset pagination wraps around on this tenant past the true total).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
