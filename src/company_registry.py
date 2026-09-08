@@ -100,6 +100,7 @@ _PIPELINE_DATA = (
     ("disney", "Disney", False),
     ("dover", "Dover", False),
     ("dtcc", "DTCC", False),
+    ("duckcreek", "Duck Creek Technologies", False),
     ("dxc", "DXC Technology", True),
     ("ebay", "eBay", True),
     ("eclerx", "eClerx", True),
@@ -228,6 +229,7 @@ _PIPELINE_DATA = (
     ("sabre", "Sabre", True),
     ("salesforce", "Salesforce", False),
     ("saplabs", "SAP Labs", True),
+    ("sapiens", "Sapiens International", False),
     ("saxobank", "Saxo Bank", False),
     ("schneiderelectric", "Schneider Electric", False),
     ("schwab", "Charles Schwab", True),
@@ -308,7 +310,7 @@ _IGNORES_KEYWORDS = frozenset(
         "nykaa", "omnissa", "payoneer", "paytm", "perfios",
         "persistent", "policybazaar", "postman", "publicissapient",
         "qualcomm", "razorpay", "reliance", "resideo", "rippling",
-        "salesforce", "saxobank",
+        "salesforce", "sapiens", "saxobank",
         "schwab",
         "servicenow", "snowflake", "stripe",
         "sharechat", "signzy", "simcorp", "sita",
@@ -321,7 +323,7 @@ _IGNORES_KEYWORDS = frozenset(
 _SUPPORTS_LOCATION = frozenset(
     {"amdocs", "aon", "apple", "gallagher", "google", "hsbc", "luxoft",
      "morganstanley", "netflix", "pepsico", "publicissapient", "qualcomm",
-     "schneiderelectric", "servicenow", "siemens", "spglobal_careers",
+     "sapiens", "schneiderelectric", "servicenow", "siemens", "spglobal_careers",
      "visa", "zurich"}
 )
 _INLINE_DESCRIPTIONS = frozenset(
