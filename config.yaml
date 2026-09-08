@@ -4091,6 +4091,41 @@ sprinklr_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+duckcreek_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday, tenant duckcreek, site duckcreekcareers, hosted at
+  # duckcreek.wd1.myworkdayjobs.com. Tiny tenant (~23 total live reqs) with
+  # no locationCountry facet -- the fetcher fetches the full pool per
+  # keyword and scopes to India from each job's own detail payload
+  # (searchText genuinely narrows server-side: "engineer" cut 23 -> 13).
+  # All live India postings are Mumbai (some dual-posted with Bengaluru);
+  # no Chennai/Pune/Tamil Nadu/Chandigarh/Kochi postings currently exist
+  # on this tenant. Confirmed live 2026-09-08: 10 India jobs, 0 leakage.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sapiens_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Classic (non-Unify) SAP SuccessFactors J2W tenant at
+  # careers.sapiens.com -- server-rendered `<tr class="data-row">` HTML,
+  # no JS/session/CSRF token needed. `locationsearch` genuinely narrows
+  # server-side and is used for India scoping. `title` also narrows
+  # server-side but does a literal-substring match, not OR-token, so a
+  # multi-word configured keyword like "software engineer" silently
+  # returns zero rows against real titles like "Senior AI Engineer" --
+  # registered in `_IGNORES_KEYWORDS`; the fetcher always leaves `title`
+  # blank and fetches the whole India pool once, letting matcher.py's own
+  # title-family/skill filters do the real work. All live India postings
+  # are Bangalore; no Chennai/Pune/Tamil Nadu/Chandigarh/Kochi postings
+  # currently exist on this tenant. Confirmed live 2026-09-08: 22 India
+  # jobs (of 78 global), 0 leakage.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
