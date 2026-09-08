@@ -6,7 +6,16 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Runs 221 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 274 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+
+### Current integration status (2026-09-08)
+
+`src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
+
+- **274 active pipelines.** The latest 20 are Apex Group, AQR, Bosch, Citco, Dun & Bradstreet, Emerson, Equifax, Murex, Nielsen, Nucleus Software, Observe.AI, Progress Software, Prudential, Quest Software, Sarvam AI, SMBC, Sun Life, Tower Research Capital, Wolters Kluwer, and WorldQuant.
+- **Previously present but formerly missing from the dated playbook narrative:** Fractal Analytics, Quantiphi, Tredence, Franklin Templeton, and SS&C Technologies. They are registered, configured, tested pipelines; their source-specific behavior remains documented in their fetcher modules and config comments.
+- **Verified current skips from this candidate pass:** Manulife (complete official Workday country facet has no India), Mizuho (official India operation is Pune-only, an excluded location), Mu Sigma (official careers page accepts email applications and points to LinkedIn rather than exposing an automatable employer job board), Nintex (complete official jobs dataset has no India roles), and Ivanti (current official Greenhouse board has two global roles and no India roles).
+- **Still unresolved, not skips:** Schroders, abrdn, Elevance Health, Principal Financial, Milliman, Avaloq, Experian, LatentView Analytics, Course5i/C5i, Krutrim, Gupshup, Motilal Oswal, Slice, ABB, Philips, and Tesco. Oracle FSS currently appears inside the existing Oracle hiring pipeline; do not add a duplicate until a separate official OFSS board is proven. Experian, ABB, and Philips visibly have India hiring, but their reproducible official API/tenant details still need capture. Tesco's discovered portal was UK-scoped. LatentView's official Darwinbox board needs browser-backed capture.
 
 ---
 
@@ -1083,7 +1092,7 @@ Four companies dispatched in parallel (each an independent agent, briefed to rea
 
 All 380 tests pass; `run_all.py --validate --companies clearwater fico guidewire verisk` confirms clean wiring. Every new fetcher's actual `fetch_jobs()`/`fetch_job_description()` output was independently live-verified against real network calls before merging.
 
-## Wave 16 (2026-09-08): Eightfold.ai and Sprinklr
+## Supplemental batch (2026-09-08): Eightfold.ai and Sprinklr
 
 **Eightfold.ai** (the AI talent-platform vendor's own hiring pipeline, not one of the many other companies in this repo that merely *use* Eightfold as their ATS vendor) — runs on its own Eightfold Talent Platform tenant, `app.eightfold.ai/careers` (`domain=eightfold.ai`). Uses the same public PCSX search API as Microsoft/Morgan Stanley (`src/fetcher.py`) — this tenant does **not** have PCSX disabled the way HSBC's does, so no "related jobs" widget workaround was needed. Keyword search is a server-side no-op (a nonsense query token returned the exact same date-sorted position list, byte-for-byte, as a real one) — added to `_IGNORES_KEYWORDS`. Confirmed live: 21 unique India postings (Bengaluru/Bangalore, Karnataka and Noida, Uttar Pradesh), 3 genuine `[AI / ML / Python]` matches (Staff Engineer, Lead Engineer, Staff Machine Learning Engineer) with real descriptions and apply links.
 
@@ -1188,7 +1197,46 @@ Three companies dispatched with a live-verify-before-reporting brief. All three 
 - `_INLINE_DESCRIPTIONS`: added `newgen` (full description text already present in the search-result HTML, no separate detail fetch)
 - `config.yaml`: added `finastra_search`, `newgen_search`, `transunioncibil_search`
 - `seen_jobs_finastra.json`, `seen_jobs_newgen.json`, `seen_jobs_transunioncibil.json` created as `[]`
-- Test count: 244 → 247 (registry count-guard bumped); README: 244 → 247 companies
+- Test count: 251 → 254 (registry count-guard bumped); README: 251 → 254 companies
 - 3 new `tests/test_<slug>_fetcher.py` files (mocked, no live network calls)
 
 All 436 tests pass; `python src/run_all.py --validate --companies finastra newgen transunioncibil` confirms clean wiring. Every new fetcher's actual `fetch_jobs()`/`fetch_job_description()` output was independently live-verified against real network calls, and the full `matcher.py` filter pipeline (title family → exclude → skills → tags) was exercised end-to-end per company with a temporary seen-state file and a stubbed notifier — no real alerts sent, no tracked seen-state files advanced.
+
+## Wave 22 (2026-09-08): 20 verified additions across BFSI, insurance, AI, enterprise software, and GCCs
+
+Every agent reread this playbook before source discovery. A company was added only after its official employer source returned real India jobs and its list, pagination, location, description, date, URL, and matcher behavior were exercised. This wave takes the registry from 254 to 274.
+
+**Greenhouse/Ashby/Lever full-board sources:**
+- **AQR** — dedicated official Greenhouse board `india`; 6 India jobs live.
+- **WorldQuant** — Greenhouse board `worldquant`; 5 India jobs out of 101 global.
+- **Tower Research Capital** — official careers page embeds Greenhouse board `towerresearchcapital`; 13 India jobs out of 85 global. Its nonstandard `?gh_jid=` links require extracting the job ID rather than assuming the usual path form.
+- **Observe.AI** — official Greenhouse board `observeai`; 9 Bengaluru jobs in the final live check.
+- **Sarvam AI** — official Ashby posting API; 63 India jobs and one current strict match, `Backend Engineer, Chanakya`.
+- **Dun & Bradstreet** — official Lever board `dnb`; full descriptions are inline. These six boards are cached and filtered locally, so their registry metadata deliberately marks keyword search ignored and descriptions inline where applicable.
+
+**Workday and Oracle HCM sources:**
+- **Apex Group** — Workday `theapexgroup.wd3` / `apexgroupcareers`; the standard India country WID returns 365 India jobs. Resolve `N Locations` through detail data so an excluded Pune primary location cannot leak through.
+- **Prudential** — official Workday; live `engineer` search returned 9 India jobs and complete detail records.
+- **Sun Life** — Workday `sunlife.wd3` / `Experienced`; standard India country WID returned 3 jobs.
+- **Equifax** — Workday `equifax.wd5` / `External`; country facet reported 7 but only 5 were India-primary after rejecting additional-location leakage.
+- **Murex** — Workday `murex.wd3` / `MurexCareerPage1`; tenant-specific Mumbai location WID returned 3 India jobs out of 60 global.
+- **Wolters Kluwer** — Workday `wk.wd3` / `External`; no reliable country facet, so each search result is gated by its `IND` location code before normalization.
+- **Emerson** — Oracle HCM CE site `CX_1` at `hdjq.fa.us2.oraclecloud.com`; India facet ID `300000000228786` returned 152 jobs out of 1,019 global.
+
+**Other official sources:**
+- **Citco** — Oracle HCM CE `CX_1`; India facet ID `300000000431886` returned 98 India jobs, and `software engineer` returned one current listing with a complete description.
+- **SMBC** — SAP SuccessFactors J2W at `careerasia.smbc.co.jp/SMBC`; both keyword and `locationsearch` are genuine. Resolve `customfield1` from detail because the list says only `India`, preserving Chennai exclusion.
+- **Nucleus Software** — official Zoho Recruit feed; 26 published India jobs from 37 records, descriptions inline, and one current strict match: `AI/ML Engineer` in Noida.
+- **Progress Software** — official server-rendered careers board; 7 India jobs. Query parameters do not constrain its rows, so cache the small board and filter locally.
+- **Quest Software** — official `careers-quest` iCIMS tenant; 2 India jobs from roughly 40 global. The iframe view exposes the complete SSR rows; preserve `APJ-IN` codes and normalize them to India.
+- **Bosch** — official SmartRecruiters tenant `BoschGroup`; structured `country=in` returned 561 jobs and keyword filtering genuinely narrows.
+- **Nielsen** — official SmartRecruiters tenant `TheNielsenCompany`; 61 India roles across Bengaluru, Hyderabad, and Mumbai. This is Nielsen, not NielsenIQ.
+
+**Reusable lessons:**
+- A country facet can include jobs where India is only an additional location. Treat the detail record's primary location as authoritative when the list says `N Locations` or the facet count exceeds India-primary results.
+- Two-letter `IN` is ambiguous. Accept it only inside a source-specific country or region code such as `APJ-IN`; never treat arbitrary `IN` text as India because US portals use it for Indiana.
+- An official careers page may expose a complete embedded dataset even when its visible filter UI is misleading. Cache the verified small board, then let the shared matcher perform title and skill filtering.
+- Opaque Greenhouse tokens can replace old branded tokens after a migration. Verify the current public board API; stale indexed `gh_jid` pages are not evidence of a live India pipeline.
+- Keep distinct corporate identities distinct: Nielsen vs NielsenIQ, Quest Software vs Quest Diagnostics/Quest Global, and TransUnion CIBIL vs a future global TransUnion integration.
+
+**Validation and state safety:** 20 company-owned fetchers, 20 empty seen-state files, and focused source/contract tests were added. Shared registry/config wiring was validated without notifications; live checks used direct fetcher and matcher paths, never the tracked state files.

@@ -4220,6 +4220,37 @@ uniphore_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+apexgroup_search: &new_company_search
+  max_listings: 200
+  inter_page_delay: 0.1
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+aqr_search: *new_company_search
+bosch_search: *new_company_search
+citco_search: *new_company_search
+dunbradstreet_search: *new_company_search
+emerson_search: *new_company_search
+equifax_search: *new_company_search
+murex_search: *new_company_search
+nielsen_search: *new_company_search
+nucleussoftware_search: *new_company_search
+observeai_search: *new_company_search
+progresssoftware_search: *new_company_search
+prudential_search: *new_company_search
+questsoftware_search: *new_company_search
+sarvam_search: *new_company_search
+smbc_search:
+  <<: *new_company_search
+  inter_page_delay: 0.2
+sunlife_search: *new_company_search
+towerresearch_search: *new_company_search
+wolterskluwer_search:
+  <<: *new_company_search
+  inter_page_delay: 0.2
+worldquant_search: *new_company_search
+
 transunioncibil_search:
   max_listings: 200
   inter_page_delay: 0.2
