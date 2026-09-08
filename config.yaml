@@ -3943,6 +3943,41 @@ vedanta_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+fractal_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Workday tenant fractal.wd1.myworkdayjobs.com/Careers. No country facet
+  # -- India detected via 8 explicit city WIDs (locations) including
+  # Chennai/Coimbatore/Pune, which exclude_locations filters out downstream.
+  # searchText genuinely narrows server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+quantiphi_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Workday tenant quantiphi.wd1.myworkdayjobs.com/Careers_at_Quantiphi. No
+  # country facet -- India detected via 3 explicit city WIDs (Bengaluru,
+  # Trivandrum, Mumbai Eureka); Trivandrum (Kerala) filtered out downstream
+  # by exclude_locations. searchText genuinely narrows server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+tredence_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # RippleHire tenant tredence.ripplehire.com (same ATS family as
+  # CitiusTech/LTIMindtree/Mphasis). Not India-only -- mixes in US "San
+  # Jose (TR/HE)" and Toronto postings, filtered client-side via a city
+  # token whitelist; Pune and Kolkata are real, active Tredence locations
+  # observed live and are excluded downstream by exclude_locations. `search`
+  # keyword genuinely narrows server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
