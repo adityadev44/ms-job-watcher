@@ -3975,6 +3975,62 @@ ssc_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+clearwater_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # Workday, tenant clearwateranalytics, site Clearwater_Analytics_Careers.
+  # No country-level facet on this tenant -- India scoped via 3 hardcoded
+  # office WIDs (Bengaluru/Mumbai/Noida). searchText genuinely narrows
+  # server-side but is deliberately ignored -- the full India-office pool
+  # is small (~51 jobs) so the whole thing is fetched every pass and
+  # matcher.py's own keyword/skill filters do the real work. limit caps at
+  # 20 (>20 -> HTTP 400). No Chennai/Pune/Tamil Nadu office exists on this
+  # tenant.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+fico_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday, tenant fico, site External. locationCountry facet (even the
+  # standard cross-tenant India WID) is broken/ignored on this tenant --
+  # same failure class as Micron/Verizon/Lowe's. India scoped via 3
+  # city-level location WIDs (Bangalore/Mumbai/Work from Home India)
+  # instead, cross-verified against a raw searchText="India" probe
+  # (identical 16-job set). searchText genuinely narrows server-side.
+  # limit caps at 20 (>20 -> HTTP 400).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+guidewire_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # Workday, tenant guidewire, site External, hosted at
+  # guidewire.wd5.myworkdayjobs.com. India scoped via the standard
+  # cross-tenant locationCountry WID (c4f78be1a8f14da0ab49ce1162348a5e).
+  # searchText genuinely narrows server-side. limit caps at 20 (>20 ->
+  # HTTP 400); total reports 0 on offset>0 pages -- empty jobPostings is
+  # the real pagination-termination signal. All live India postings are
+  # in Bangalore.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+verisk_search:
+  max_listings: 100
+  inter_page_delay: 0.3
+  # Oracle HCM CE, tenant fa-ewmy-saasfaprod1.fa.ocs.oraclecloud.com, site
+  # CX_1 -- same platform family as Chubb/Amex/BNY Mellon, different
+  # tenant/site/facet. India location facet ID 300000000455977. Blank
+  # keyword + India facet returns 0 total (Wells Fargo limit=0-style bug),
+  # so a blank keyword falls back to "engineer" inside the fetcher.
+  # Genuine server-side keyword narrowing confirmed.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
