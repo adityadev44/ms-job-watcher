@@ -4091,6 +4091,31 @@ sprinklr_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+navi_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Navi's own site (navi.com/careers/jobs) proxies a TurboHire tenant via
+  # a first-party API (navi.com/api/careers/jobs). Keyword search is
+  # ignored server-side (whole ~36-job board returned regardless) — the
+  # shared matcher does the real title/skill filtering.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+uniphore_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Uniphore's ATS is Workday, tenant "uniphore", hosted at
+  # uniphore.wd503.myworkdayjobs.com (NOT wd1, which 422s for every
+  # site/tenant combo tried). The standard cross-tenant locationCountry
+  # India WID is broken on this tenant (returns the full global pool);
+  # India is scoped via the city-level "locations" facet instead
+  # (Bangalore + Chennai WIDs) inside the fetcher. searchText genuinely
+  # narrows results server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
