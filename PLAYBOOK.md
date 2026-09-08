@@ -1062,3 +1062,22 @@ User-prompted: "why don't we add companies such as Air India, etc." plus major I
 - 12 new `tests/test_<slug>_fetcher.py` files (mocked, no live network calls) covering pagination/dedup/location-normalization/failure-handling
 
 All tests pass (327 total); `run_all.py --validate` confirms clean wiring for all 233 companies. Every new fetcher's actual `fetch_jobs()`/`fetch_job_description()` output was independently live-verified by the coordinator against real network calls before merging — not just import-checked — continuing the discipline established after Wave 15's Uber incident.
+
+## Wave 16 (2026-09-08): Eightfold.ai and Sprinklr
+
+**Eightfold.ai** (the AI talent-platform vendor's own hiring pipeline, not one of the many other companies in this repo that merely *use* Eightfold as their ATS vendor) — runs on its own Eightfold Talent Platform tenant, `app.eightfold.ai/careers` (`domain=eightfold.ai`). Uses the same public PCSX search API as Microsoft/Morgan Stanley (`src/fetcher.py`) — this tenant does **not** have PCSX disabled the way HSBC's does, so no "related jobs" widget workaround was needed. Keyword search is a server-side no-op (a nonsense query token returned the exact same date-sorted position list, byte-for-byte, as a real one) — added to `_IGNORES_KEYWORDS`. Confirmed live: 21 unique India postings (Bengaluru/Bangalore, Karnataka and Noida, Uttar Pradesh), 3 genuine `[AI / ML / Python]` matches (Staff Engineer, Lead Engineer, Staff Machine Learning Engineer) with real descriptions and apply links.
+
+**Sprinklr** — Workday, tenant `sprinklr.wd1.myworkdayjobs.com`, site code `careers` (found via the public careers page's own outbound `myworkdayjobs.com` links, not guessed). India scoped server-side via the same cross-tenant `locationCountry` WID (`c4f78be1a8f14da0ab49ce1162348a5e`) already used by Wells Fargo/Citi. Two load-bearing findings during live verification:
+- **`limit` over 20 returns a plain HTTP 400** (not a silent no-op like Shell) — clamped defensively in the fetcher, same discipline as every other Workday tenant here.
+- **Pagination wraps around once `offset` reaches the true total** (confirmed live: `offset=32` on a 32-job India pool returns page 1 again instead of an empty list — same wraparound family as UBS/Nvidia/Walmart) — fixed with a module-level `_seen_job_ids` set so a wrapped page comes back fully empty and `matcher.py`'s `if not page: break` terminates pagination cleanly, rather than looping to `max_listings`.
+
+32 confirmed live India postings (Gurgaon, Haryana and Bangalore, Karnataka — Sprinklr's real India hiring hubs). 0 matches against current listings — legitimate result, not a bug: the current India-facing openings are Java/NodeJS/Scala backend, implementation/managed-services, and design roles with no `.NET`/C#/hard-AI signal in their descriptions today; the near-miss log shows correct `[title family]`/`[exclude]`/`[broad-only]`/`[skill]` reasons for every filtered-out posting, no obvious false negatives.
+
+**Registry/config changes:**
+- `_PIPELINE_DATA`: added `eightfold`, `sprinklr`
+- `_IGNORES_KEYWORDS`: added `eightfold` (kept off `sprinklr` — genuinely filters server-side, confirmed "engineer" narrowed the India pool from 32 to 21)
+- `config.yaml`: added `eightfold_search`, `sprinklr_search`
+- `seen_jobs_eightfold.json`, `seen_jobs_sprinklr.json` created as `[]`
+- Test count: 233 → 235 (registry count-guard bumped); README: 233 → 235 companies
+
+All 328 tests pass; `python src/run_all.py --validate --companies eightfold,sprinklr` confirms clean wiring. Both fetchers' `fetch_jobs()`/`fetch_job_description()` were independently live-verified against real network calls (not just import-checked), and the full `matcher.py`/`notifier.format_message` path was exercised end-to-end with a temporary seen-state file and a stubbed notifier — no real alerts sent, no seen-state files advanced.
