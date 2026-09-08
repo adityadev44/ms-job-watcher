@@ -4106,6 +4106,19 @@ fidelityinternational_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+finastra_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Finastra's ATS is Workday (finastra.wd3.myworkdayjobs.com, tenant
+  # "finastra", site "FINC"). This tenant has no locationCountry facet at
+  # all (probing the standard cross-tenant India WID returns HTTP 400) and
+  # locationsText omits the country ("Pune", "Bengaluru") -- India detected
+  # client-side via city/state tokens in the fetcher, same shape as
+  # Invesco. Keyword search genuinely narrows results server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 navi_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -4113,6 +4126,20 @@ navi_search:
   # a first-party API (navi.com/api/careers/jobs). Keyword search is
   # ignored server-side (whole ~36-job board returned regardless) — the
   # shared matcher does the real title/skill filtering.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+newgen_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Newgen Software's own in-house "OmniRecruit" ASP.NET Web Forms career
+  # portal (omnirecruit.newgen.co.in) -- not a third-party ATS. Small,
+  # stable board (~22 total India postings as of 2026-09-08); the fetcher
+  # caches the full pool once per process rather than querying per keyword
+  # (registered in _IGNORES_KEYWORDS -- see newgen_fetcher.py docstring for
+  # why per-keyword server-side search was unreliable to rely on for full
+  # coverage). Descriptions are already inline in the search response.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -4189,6 +4216,20 @@ uniphore_search:
   # India is scoped via the city-level "locations" facet instead
   # (Bangalore + Chennai WIDs) inside the fetcher. searchText genuinely
   # narrows results server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+transunioncibil_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TransUnion CIBIL (the India credit-bureau joint venture) shares its
+  # parent's Workday tenant (transunion.wd5.myworkdayjobs.com, site
+  # "TransUnion") -- transunioncibil.com's own site is bot-protected
+  # (HTTP 403 to plain requests), and probing found the shared tenant
+  # instead. Scoped to India only via the standard cross-tenant
+  # locationCountry WID also used by Wells Fargo/Citi/Sprinklr. Keyword
+  # search genuinely narrows results server-side.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
