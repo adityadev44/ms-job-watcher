@@ -3975,6 +3975,20 @@ ssc_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+eightfold_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Eightfold.ai's own hiring pipeline, on its own Eightfold Talent Platform
+  # tenant (app.eightfold.ai/careers, domain=eightfold.ai) -- the same PCSX
+  # search API used by Microsoft/Morgan Stanley, not the PCSX-disabled
+  # "related jobs" widget workaround needed for HSBC's tenant. Keyword search
+  # is a server-side no-op here (a nonsense query returned the identical
+  # date-sorted position list as "engineer") -- registered in
+  # _IGNORES_KEYWORDS so the runner issues a single query pass.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 clearwater_search:
   max_listings: 100
   inter_page_delay: 0.1
@@ -4062,6 +4076,17 @@ tredence_search:
   # token whitelist; Pune and Kolkata are real, active Tredence locations
   # observed live and are excluded downstream by exclude_locations. `search`
   # keyword genuinely narrows server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sprinklr_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Sprinklr's ATS is Workday (sprinklr.wd1.myworkdayjobs.com, site code
+  # "careers"). India filtered server-side via the standard cross-tenant
+  # locationCountry WID also used by Wells Fargo/Citi. Keyword search
+  # genuinely narrows results server-side.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
