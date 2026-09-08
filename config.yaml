@@ -1932,6 +1932,21 @@ flipkart_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+franklintempleton_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant franklintempleton.wd5.myworkdayjobs.com, site
+  # "Primary-External-1". India filtered server-side via the shared
+  # cross-tenant "locationCountry" facet (WID
+  # c4f78be1a8f14da0ab49ce1162348a5e). 67 India jobs confirmed live
+  # (Hyderabad/Mumbai/New Delhi) -- real tech roles like Associate
+  # Software Engineer, Data Engineer, Senior Software Engineer
+  # (Java & React), Sr AI/ML Engineer - GenAI & Agentic AI. Keyword
+  # search is genuinely server-side. Tenant caps `limit` at 20.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 google_search:
   max_listings: 300
   inter_page_delay: 0.2
@@ -3939,6 +3954,23 @@ vedanta_search:
   # pool cached once (mix of India and a few South Africa mining-ops
   # postings; matcher.py's own India filter handles the split). Descriptions
   # via a separate detail call.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ssc_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SS&C Technologies is Workday, tenant ssctech.wd1.myworkdayjobs.com,
+  # site "SSCTechnologies". India filtered server-side via the shared
+  # cross-tenant "locationCountry" facet (WID
+  # c4f78be1a8f14da0ab49ce1162348a5e). 65 India jobs confirmed live,
+  # spanning Mumbai/Navi Mumbai/Pune/Hyderabad/Gurgaon -- Pune is already
+  # covered by the shared exclude_locations list below, no company-specific
+  # exclusion needed. Real tech roles confirmed in Hyderabad/Gurgaon
+  # (Principal Software Engineer - Full stack Lead, Lead Software Engineer
+  # (Chorus Dev), Lead Auto QA Engineer). Keyword search is genuinely
+  # server-side. Tenant caps `limit` at 20.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
