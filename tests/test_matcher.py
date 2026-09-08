@@ -562,6 +562,32 @@ def test_find_matching_jobs_keeps_job_when_description_empty(monkeypatch):
     )
 
 
+def test_find_matching_jobs_retries_after_empty_description(monkeypatch):
+    """A transient empty-but-200 response (e.g. a bot-check page swapped in for
+    the real one) must be retried, not accepted as final on the first attempt.
+
+    Regression guard: the fetch loop used to `break` out of its retry loop on
+    any call that didn't raise, even if the returned description was empty --
+    so one bad response silently produced an [Unverified] alert instead of a
+    real skill match. See PLAYBOOK.md's Disney [Unverified] investigation.
+    """
+    calls = {"n": 0}
+
+    def _empty_then_good(*a, **kw):
+        calls["n"] += 1
+        return "" if calls["n"] == 1 else GOOD_DESCRIPTION
+
+    monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
+    monkeypatch.setattr("matcher.fetch_job_description", _empty_then_good)
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next(j for j in matched if j["id"] == GOOD_JOB["id"])
+    assert calls["n"] == 2, "An empty first attempt must trigger a retry"
+    assert job["tags"] == [".NET / C#"], (
+        "The retry's real description must be used instead of falling back to Unverified"
+    )
+
+
 # ---------------------------------------------------------------------------
 # _derive_tags — unit tests
 # ---------------------------------------------------------------------------

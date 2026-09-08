@@ -348,11 +348,22 @@ def find_matching_jobs(
                 _fetch_result = _fetch_desc(
                     job["application_url"], timeout=_TIMEOUT
                 )
-                break
+                last_exc = None
             except Exception as exc:
                 last_exc = exc
-                if attempt < _RETRIES:
-                    time.sleep(_RETRY_DELAY)
+                _fetch_result = None
+
+            # A 200 response with no extractable description (e.g. a transient
+            # bot-check/CDN page swapped in for the real one) is retried just
+            # like an exception — otherwise a single bad response silently
+            # becomes an [Unverified] alert instead of a real skill match.
+            _desc_so_far = (
+                _fetch_result[0] if isinstance(_fetch_result, tuple) else _fetch_result
+            )
+            if _desc_so_far:
+                break
+            if attempt < _RETRIES:
+                time.sleep(_RETRY_DELAY)
 
         if isinstance(_fetch_result, tuple):
             description, fetched_date = _fetch_result
