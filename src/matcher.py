@@ -68,6 +68,44 @@ def _normalize_text(text: str) -> str:
     return t
 
 
+_OPTIONAL_SECTION_MARKERS = (
+    "nice to have",
+    "nice-to-have",
+    "good to have",
+    "good-to-have",
+    "bonus points",
+    "bonus if",
+    "would be a plus",
+    "a plus if",
+    "optional skills",
+)
+
+
+def _strip_optional_sections(text: str) -> str:
+    """Truncate *text* at the first unambiguous "not required" section heading.
+
+    Real production false positive (Citi, 2026-09-09): a Core Java/Spring Boot
+    role got tagged [AI / ML / Python] purely because its "Nice to Have"
+    section named "RAG (Retrieval-Augmented Generation)" as optional tooling
+    exposure, not an actual job requirement. Used only for primary_skills /
+    require_tech_in_description matching -- the broad `skills` gate still
+    reads the full text.
+
+    Deliberately narrow: only headings that unambiguously mean "not required"
+    are cut. "Preferred Qualifications" is intentionally NOT in this list --
+    several real AI/.NET roles genuinely gate their core stack behind that
+    heading (see PLAYBOOK.md), so cutting there would trade this false
+    positive for new false negatives.
+    """
+    lowered = text.lower()
+    cut_at = len(text)
+    for marker in _OPTIONAL_SECTION_MARKERS:
+        idx = lowered.find(marker)
+        if idx != -1:
+            cut_at = min(cut_at, idx)
+    return text[:cut_at]
+
+
 def _contains_any(text: str, terms: list[str]) -> bool:
     """Normalised substring check: does *text* contain at least one item from *terms*?"""
     normed = _normalize_text(text)
@@ -384,14 +422,15 @@ def find_matching_jobs(
             continue
 
         normed_desc = _normalize_text(description)
+        required_normed_desc = _normalize_text(_strip_optional_sections(description))
         found = [s for s in skills if _normalize_text(s) in normed_desc]
         non_react = [s for s in found if _normalize_text(s) != "react"]
         primary_found = (
-            [s for s in primary_skills if _normalize_text(s) in normed_desc]
+            [s for s in primary_skills if _normalize_text(s) in required_normed_desc]
             if primary_skills else non_react  # empty primary_skills → no extra check
         )
         if non_react and primary_found:
-            tags = _derive_tags(normed_desc, primary_skill_groups)
+            tags = _derive_tags(required_normed_desc, primary_skill_groups)
             matched.append({**job, "description": description, "tags": tags})
         elif non_react:  # broad skills only (Azure/Angular/TypeScript etc.)
             filtered_out.append(

@@ -31,6 +31,7 @@ from matcher import (
     _derive_tags,
     _normalize_text,
     _strip_html,
+    _strip_optional_sections,
 )
 
 # ---------------------------------------------------------------------------
@@ -155,6 +156,25 @@ AI_ONLY_DESCRIPTION = (
     "ChromaDB vector database."
 )
 
+# Real production false positive (Citi, 2026-09-09): a Core Java/Spring Boot
+# role got tagged [AI / ML / Python] purely because its "Nice to Have" section
+# named "RAG (Retrieval-Augmented Generation)" as optional tooling exposure,
+# not an actual job requirement. Regression guard for _strip_optional_sections.
+JAVA_JOB_WITH_OPTIONAL_RAG_MENTION = {
+    "id":               "200099008",
+    "title":            "Senior Java Backend Developer- Assistant Vice President",
+    "location":         "India, Maharashtra, Pune",
+    "posting_date":     "2026-09-09",
+    "application_url":  "https://apply.careers.microsoft.com/careers/job/1970393556999008?domain=microsoft.com",
+}
+JAVA_JOB_WITH_OPTIONAL_RAG_MENTION_DESCRIPTION = (
+    "Design, develop, and maintain scalable applications using Core Java, "
+    "Spring Boot, REST APIs, and Microservices. Required Qualifications: "
+    "Strong hands-on experience in Core Java, Spring Boot, REST APIs, SQL. "
+    "Nice to Have: Exposure to GenAI applications, LLM-powered solutions, "
+    "RAG (Retrieval-Augmented Generation), and AI platform integrations."
+)
+
 # A job that genuinely spans both tracks and should carry both tags
 HYBRID_JOB = {
     "id":               "200099005",
@@ -185,6 +205,36 @@ def test_strip_html_decodes_entities():
     result = _strip_html("C&#35; &amp; ASP.NET")
     assert "&amp;" not in result
     assert "ASP.NET" in result
+
+
+# ---------------------------------------------------------------------------
+# _strip_optional_sections
+# ---------------------------------------------------------------------------
+
+def test_strip_optional_sections_cuts_at_nice_to_have():
+    text = "Required: Core Java. Nice to Have: RAG, LangChain."
+    result = _strip_optional_sections(text)
+    assert "RAG" not in result
+    assert "Core Java" in result
+
+
+def test_strip_optional_sections_case_insensitive_heading():
+    text = "Required: Core Java. NICE TO HAVE: RAG, LangChain."
+    result = _strip_optional_sections(text)
+    assert "RAG" not in result
+
+
+def test_strip_optional_sections_leaves_preferred_qualifications_intact():
+    """Deliberately narrow: 'Preferred Qualifications' is not treated as
+    optional -- several real AI/.NET roles gate their core stack behind it."""
+    text = "Required: SQL. Preferred Qualifications: LangChain, RAG."
+    result = _strip_optional_sections(text)
+    assert "LangChain" in result
+
+
+def test_strip_optional_sections_no_marker_returns_full_text():
+    text = "Required: Core Java, Spring Boot, REST APIs."
+    assert _strip_optional_sections(text) == text
 
 
 # ---------------------------------------------------------------------------
@@ -669,6 +719,29 @@ def test_find_matching_jobs_keeps_ai_role_with_no_soft_skill_overlap(monkeypatch
         "A role naming only hard AI tools (no soft-skill/.NET overlap) must still match"
     )
     assert job["tags"] == ["AI / ML / Python"]
+
+
+def test_find_matching_jobs_ignores_ai_term_in_nice_to_have_section(monkeypatch):
+    """Regression guard for the real Citi false positive (2026-09-09): a Java/
+    Spring Boot role whose ONLY AI/ML mention ("RAG") sits under a "Nice to
+    Have" heading must not match at all -- it has no .NET term and no
+    genuine primary AI/ML skill, only optional tooling exposure."""
+    monkeypatch.setattr(
+        "matcher.fetch_jobs", _make_fake_fetch_jobs(JAVA_JOB_WITH_OPTIONAL_RAG_MENTION)
+    )
+    monkeypatch.setattr(
+        "matcher.fetch_job_description",
+        lambda *a, **kw: JAVA_JOB_WITH_OPTIONAL_RAG_MENTION_DESCRIPTION,
+    )
+
+    _, matched = find_matching_jobs(CONFIG_PATH)
+    job = next(
+        (j for j in matched if j["id"] == JAVA_JOB_WITH_OPTIONAL_RAG_MENTION["id"]), None
+    )
+    assert job is None, (
+        "A Java role naming RAG only under 'Nice to Have' must not match the "
+        "AI / ML / Python track"
+    )
 
 
 def test_find_matching_jobs_tags_hybrid_role_with_both_tags(monkeypatch):

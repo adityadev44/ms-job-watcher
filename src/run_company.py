@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from company_registry import COMPANY_REGISTRY, CompanyPipeline, get_company
 from main import load_seen_ids, save_seen_ids
-from matcher import _normalize_text, find_matching_jobs, load_config
+from matcher import _normalize_text, _strip_optional_sections, find_matching_jobs, load_config
 from notifier import notify, notify_pipeline_error, reset_failure_count
 
 _ROOT = Path(__file__).parent.parent
@@ -94,7 +94,9 @@ def _apply_description_filter(
     passed = []
     dropped = []
     for job in jobs:
-        description = _normalize_text(job.get("description", ""))
+        description = _normalize_text(
+            _strip_optional_sections(job.get("description", ""))
+        )
         if any(term in description for term in normalized_terms):
             passed.append(job)
         else:

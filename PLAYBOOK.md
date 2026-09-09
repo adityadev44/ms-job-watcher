@@ -1240,3 +1240,15 @@ Every agent reread this playbook before source discovery. A company was added on
 - Keep distinct corporate identities distinct: Nielsen vs NielsenIQ, Quest Software vs Quest Diagnostics/Quest Global, and TransUnion CIBIL vs a future global TransUnion integration.
 
 **Validation and state safety:** 20 company-owned fetchers, 20 empty seen-state files, and focused source/contract tests were added. Shared registry/config wiring was validated without notifications; live checks used direct fetcher and matcher paths, never the tracked state files.
+
+---
+
+## False-positive fix: "Nice to Have" AI/ML terms no longer count as a match (2026-09-09)
+
+**User-reported.** Citi sent two alerts (job IDs 26990861, 26990878 — same JD, two real Workday requisitions, correctly not a dedup bug) for "Senior Java Backend Developer- Assistant Vice President", tagged `[AI / ML / Python]`. Fetched the live description directly: the role is Core Java/Spring Boot/Microservices with zero .NET, and its only AI/ML mention was under an explicit **"Nice to Have"** heading — "Exposure to GenAI applications, LLM-powered solutions, RAG (Retrieval-Augmented Generation), MCP...". That phrase matched `primary_skills["AI / ML / Python"]` → `"retrieval augmented generation"`, and both Layer 3 (`matcher.py`) and Citi's Layer 4 `require_tech_in_description` were plain substring checks over the *entire* description — no distinction between a required skill and an explicitly-optional one.
+
+**Fix:** added `matcher._strip_optional_sections()` — truncates the description at the first occurrence of an unambiguous "not required" heading (`nice to have`, `good to have`, `bonus points`/`bonus if`, `would be a plus`, `a plus if`, `optional skills`) before primary_skills/`require_tech_in_description` matching. Applied in `find_matching_jobs` (primary_skills + tag derivation) and in `run_company.py`'s Layer 4 filter. The broad `skills` gate still reads the full, untruncated description — this only tightens the *narrow*, track-defining checks.
+
+**Deliberately not touched: "Preferred Qualifications."** Several real AI/.NET roles across this repo genuinely gate their core stack behind a "Preferred Qualifications" heading rather than "Required" — cutting there would trade this false positive for new false negatives on those companies. Only headings that are unambiguous ("nice to have", "bonus", etc.) are treated as optional.
+
+Regression guards: `test_strip_optional_sections_*` (unit tests for the helper, including a case proving "Preferred Qualifications" content is preserved) and `test_find_matching_jobs_ignores_ai_term_in_nice_to_have_section` (a Citi-shaped fixture — Java/Spring Boot title, RAG mentioned only under "Nice to Have" — asserting it produces no match at all) in `tests/test_matcher.py`. Full suite (507 tests) passes after the change. This is a shared-matcher fix, so it applies to all 274 companies, not just Citi.
