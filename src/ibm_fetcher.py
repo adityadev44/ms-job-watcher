@@ -66,13 +66,20 @@ def _ensure_browser() -> None:
     if not _PLAYWRIGHT_AVAILABLE:
         raise RateLimitError(
             "playwright not installed — run: pip install playwright && "
-            "playwright install firefox"
+            "playwright install chromium"
         )
     if _browser is None:
         with STARTUP_LOCK:
             _pw = sync_playwright().start()
             try:
-                _browser = _pw.firefox.launch(headless=True)
+                # Chromium with AutomationControlled disabled bypasses IBM's
+                # AWS WAF more reliably than Firefox (which previously worked
+                # but now consistently returns empty page bodies — same pattern
+                # as NatWest/Cloudflare where Chromium was also required).
+                _browser = _pw.chromium.launch(
+                    headless=True,
+                    args=["--disable-blink-features=AutomationControlled"],
+                )
             except Exception:
                 # A failed launch (e.g. a stale/wrong-build cached browser)
                 # must not leave `_pw` pointing at a live, never-stopped
@@ -205,11 +212,19 @@ def fetch_job_description(
             page.wait_for_timeout(4000)
 
         body = page.inner_text("body")
+        if len(body) < 200:
+            # Too short to be a real JD — WAF challenge page or failed load.
+            raise RateLimitError(
+                f"IBM description fetch: page body too short ({len(body)} chars) "
+                "— WAF challenge or failed page load"
+            )
         # Trim the header/nav boilerplate before "Apply now"; keep everything
         # after it (JD body + the structured Job Title/City/Country fields).
         idx = body.find("Apply now")
         text = body[idx:] if idx != -1 else body
         return " ".join(text.split()), ""
+    except RateLimitError:
+        raise
     except Exception as exc:
         raise RateLimitError(f"IBM description fetch failed: {exc}") from exc
     finally:

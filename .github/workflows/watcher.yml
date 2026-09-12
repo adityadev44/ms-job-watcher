@@ -61,9 +61,9 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        # firefox: every Playwright-based fetcher except natwest. chromium:
-        # natwest specifically -- its Cloudflare challenge blocks Firefox
-        # indefinitely but passes cleanly under Chromium (see natwest_fetcher.py).
+        # firefox: most Playwright-based fetchers. chromium: natwest (Cloudflare
+        # challenge blocks Firefox) and ibm (AWS WAF now returns empty bodies
+        # under Firefox; Chromium with AutomationControlled disabled bypasses it).
         run: playwright install firefox chromium
 
       - name: Verify Playwright browsers (repair corrupted or stale-version cache)
