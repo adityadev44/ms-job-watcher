@@ -106,6 +106,29 @@ def _strip_optional_sections(text: str) -> str:
     return text[:cut_at]
 
 
+# Matches the minimum years of experience stated in a JD, e.g. "10+ years of
+# experience", "minimum 12 years", "8-12 years of relevant experience".
+# Captures the lower bound so a range like "5-10" yields 5, not 10.
+_YOE_RE = re.compile(
+    r"(?:minimum\s+(?:of\s+)?|at\s+least\s+)?"
+    r"(\d{1,2})\s*(?:\+|or\s+more|\s*[-–]\s*\d{1,2})?\s*"
+    r"(?:years?|yrs?)\s+(?:of\s+)?"
+    r"(?:relevant\s+|total\s+|professional\s+|work\s+)?"
+    r"experience\b",
+    re.IGNORECASE,
+)
+_MAX_EXPERIENCE_YEARS = 10  # reject jobs whose minimum required YOE reaches this
+
+
+def _requires_excessive_experience(description: str) -> bool:
+    """True if the required section of the JD unambiguously demands 10+ years."""
+    required_section = _strip_optional_sections(description)
+    return any(
+        int(m.group(1)) >= _MAX_EXPERIENCE_YEARS
+        for m in _YOE_RE.finditer(required_section)
+    )
+
+
 def _contains_any(text: str, terms: list[str]) -> bool:
     """Normalised substring check: does *text* contain at least one item from *terms*?"""
     normed = _normalize_text(text)
@@ -411,18 +434,24 @@ def find_matching_jobs(
             description = _fetch_result
 
         if not description:
-            # Fetch failed or returned empty — keep the job rather than risk
-            # silently dropping a real role we can't verify.
             reason = f": {last_exc}" if last_exc else " (API returned empty body)"
             print(
                 f"  [warn] description unavailable for '{job['title']}'"
-                f"{reason} — keeping"
+                f"{reason} — skipping"
             )
-            matched.append({**job, "description": "", "tags": ["Unverified"]})
+            filtered_out.append(
+                _near_miss_line("unverified", job, source_label=source_label)
+            )
             continue
 
         normed_desc = _normalize_text(description)
         required_normed_desc = _normalize_text(_strip_optional_sections(description))
+
+        if _requires_excessive_experience(description):
+            filtered_out.append(
+                _near_miss_line("10+ yoe", job, source_label=source_label)
+            )
+            continue
         found = [s for s in skills if _normalize_text(s) in normed_desc]
         non_react = [s for s in found if _normalize_text(s) != "react"]
         primary_found = (

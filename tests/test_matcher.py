@@ -579,10 +579,11 @@ def test_find_matching_jobs_survives_non_rate_limit_fetch_error(monkeypatch, cap
     assert "search fetch failed" in capsys.readouterr().out
 
 
-def test_find_matching_jobs_keeps_job_when_description_fetch_fails(monkeypatch):
-    """If all fetch attempts for a description fail, the job must still be in results.
+def test_find_matching_jobs_drops_job_when_description_fetch_fails(monkeypatch):
+    """If all fetch attempts for a description fail, the job is skipped.
 
-    Missing a real role is worse than an extra alert, so we keep unverifiable jobs.
+    Unverifiable jobs were previously kept to avoid missing real roles, but they
+    produce noisy [Unverified] alerts that are not actionable.
     """
     def _always_raise(*a, **kw):
         raise RuntimeError("simulated network error")
@@ -591,8 +592,8 @@ def test_find_matching_jobs_keeps_job_when_description_fetch_fails(monkeypatch):
     monkeypatch.setattr("matcher.fetch_job_description", _always_raise)
 
     _, matched = find_matching_jobs(CONFIG_PATH)
-    assert any(j["id"] == GOOD_JOB["id"] for j in matched), (
-        "A job whose description could not be fetched must still appear in results"
+    assert not any(j["id"] == GOOD_JOB["id"] for j in matched), (
+        "A job whose description could not be fetched must be dropped"
     )
 
 
@@ -601,14 +602,14 @@ def test_matches_skills_csharp_literal(monkeypatch):
     assert matches_skills("Strong C# and ASP.NET experience required.", SKILLS) is True
 
 
-def test_find_matching_jobs_keeps_job_when_description_empty(monkeypatch):
-    """An empty description (API body had no text) must not cause the job to be dropped."""
+def test_find_matching_jobs_drops_job_when_description_empty(monkeypatch):
+    """An empty description (API body had no text) causes the job to be dropped."""
     monkeypatch.setattr("matcher.fetch_jobs", _make_fake_fetch_jobs(GOOD_JOB))
     monkeypatch.setattr("matcher.fetch_job_description", lambda *a, **kw: "")
 
     _, matched = find_matching_jobs(CONFIG_PATH)
-    assert any(j["id"] == GOOD_JOB["id"] for j in matched), (
-        "A job with an empty description must still appear in results"
+    assert not any(j["id"] == GOOD_JOB["id"] for j in matched), (
+        "A job with an empty description must be dropped"
     )
 
 
@@ -754,9 +755,8 @@ def test_find_matching_jobs_tags_hybrid_role_with_both_tags(monkeypatch):
     assert job["tags"] == [".NET / C#", "AI / ML / Python"]
 
 
-def test_find_matching_jobs_tags_unverified_when_description_fetch_fails(monkeypatch):
-    """A job kept via the fail-open path (no skill check ran) must be tagged
-    'Unverified' rather than silently implying a confirmed .NET match."""
+def test_find_matching_jobs_drops_unverified_when_description_fetch_fails(monkeypatch):
+    """A job whose description fetch always fails must be dropped (not sent as Unverified)."""
     def _always_raise(*a, **kw):
         raise RuntimeError("simulated network error")
 
@@ -764,5 +764,4 @@ def test_find_matching_jobs_tags_unverified_when_description_fetch_fails(monkeyp
     monkeypatch.setattr("matcher.fetch_job_description", _always_raise)
 
     _, matched = find_matching_jobs(CONFIG_PATH)
-    job = next(j for j in matched if j["id"] == GOOD_JOB["id"])
-    assert job["tags"] == ["Unverified"]
+    assert not any(j["id"] == GOOD_JOB["id"] for j in matched)

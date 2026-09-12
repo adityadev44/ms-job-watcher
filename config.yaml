@@ -31,6 +31,7 @@ _defaults:
     - "Madurai"
     - "Kolkata"
     - "Indore"
+    - "Vadodara"
 
 search:
   max_listings: 350
@@ -817,6 +818,7 @@ statestreet_search:
     - "Madurai"
     - "Kolkata"
     - "Indore"
+    - "Vadodara"
   require_tech_in_description:
     - ".NET"
     - "C#"
@@ -880,6 +882,7 @@ dxc_search:
     - "Madurai"
     - "Kolkata"
     - "Indore"
+    - "Vadodara"
   require_tech_in_description:
     - ".NET"
     - "C#"
