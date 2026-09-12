@@ -106,8 +106,7 @@ def _strip_optional_sections(text: str) -> str:
     return text[:cut_at]
 
 
-# Matches the minimum years of experience stated in a JD, e.g. "10+ years of
-# experience", "minimum 12 years", "8-12 years of relevant experience".
+# Matches any years-of-experience mention in a JD (required OR preferred sections).
 # Captures the lower bound so a range like "5-10" yields 5, not 10.
 _YOE_RE = re.compile(
     r"(?:minimum\s+(?:of\s+)?|at\s+least\s+)?"
@@ -121,11 +120,10 @@ _MAX_EXPERIENCE_YEARS = 10  # reject jobs whose minimum required YOE reaches thi
 
 
 def _requires_excessive_experience(description: str) -> bool:
-    """True if the required section of the JD unambiguously demands 10+ years."""
-    required_section = _strip_optional_sections(description)
+    """True if the JD mentions 10+ years anywhere, including preferred/nice-to-have."""
     return any(
         int(m.group(1)) >= _MAX_EXPERIENCE_YEARS
-        for m in _YOE_RE.finditer(required_section)
+        for m in _YOE_RE.finditer(description)
     )
 
 
