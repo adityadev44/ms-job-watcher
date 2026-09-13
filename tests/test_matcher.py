@@ -30,6 +30,7 @@ from matcher import (
     passes_title_family_check,
     _derive_tags,
     _normalize_text,
+    _requires_excessive_experience,
     _strip_html,
     _strip_optional_sections,
 )
@@ -235,6 +236,51 @@ def test_strip_optional_sections_leaves_preferred_qualifications_intact():
 def test_strip_optional_sections_no_marker_returns_full_text():
     text = "Required: Core Java, Spring Boot, REST APIs."
     assert _strip_optional_sections(text) == text
+
+
+# ---------------------------------------------------------------------------
+# _requires_excessive_experience (10+ YOE filter)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        # Regression case: Booking.com "Senior Full Stack Application
+        # Developer" JD. The qualifier ("professional") and the literal word
+        # "experience" have "software development" inserted between them --
+        # the original regex required the qualifier to sit immediately
+        # before "experience" and missed this.
+        "Required Technical Skills: 12+ years of professional software "
+        "development experience building large-scale systems.",
+        "Minimum 10 years of professional IT experience required.",
+        "At least 10 years of relevant industry experience.",
+        "10+ years of experience with distributed systems.",
+        "minimum of 10 years of relevant experience in software engineering.",
+    ],
+)
+def test_requires_excessive_experience_matches_10_plus_yoe(description):
+    assert _requires_excessive_experience(description) is True
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        # Below the 10-year threshold -- must not be dropped, even with a
+        # qualifier immediately before "experience".
+        "5 years of professional experience with unrelated technologies.",
+        "3-5 years experience in Python.",
+        "5+ years experience with C# and ASP.NET.",
+        "2 years of customer service experience.",
+        # "10 years" appears, but not as a YOE requirement -- unrelated use
+        # of "years" and "experience" in the same sentence must not trip
+        # the filter now that the qualifier gap is wider.
+        "We have been in business for 10 years and have great experience "
+        "serving customers across many industries with a passion for "
+        "excellence.",
+    ],
+)
+def test_requires_excessive_experience_does_not_match_below_threshold(description):
+    assert _requires_excessive_experience(description) is False
 
 
 # ---------------------------------------------------------------------------

@@ -112,7 +112,13 @@ _YOE_RE = re.compile(
     r"(?:minimum\s+(?:of\s+)?|at\s+least\s+)?"
     r"(\d{1,2})\s*(?:\+|or\s+more|\s*[-–]\s*\d{1,2})?\s*"
     r"(?:years?|yrs?)\s+(?:of\s+)?"
-    r"(?:relevant\s+|total\s+|professional\s+|work\s+)?"
+    # Qualifier words that can precede "experience", e.g. "10+ years of
+    # professional software development experience" or "relevant industry
+    # experience". Kept as a whitelist (not a generic "any word(s)"
+    # wildcard) so the filter stays tight and doesn't start matching
+    # unrelated "N years ... <two random words> ... experience" phrasing.
+    r"(?:(?:relevant|total|professional|work|industry|software|development|"
+    r"technical|engineering|coding|programming|hands-on|it)\s+){0,3}"
     r"experience\b",
     re.IGNORECASE,
 )

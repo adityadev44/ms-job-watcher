@@ -142,6 +142,8 @@ matching:
     - "member of technical staff"
     - "member technical staff"
     - "conversational developer"
+    - "engineer, it software"
+    - "engineer, software"
 
   # Keep a job only if its description mentions at least one of these skills.
   # A job must match BOTH this list AND primary_skills (below) — they are
@@ -1133,6 +1135,20 @@ micron_search:
     - "generative ai"
     - "large language model"
     - "retrieval augmented generation"
+
+amadeus_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday tenant amadeus.wd502.myworkdayjobs.com, site "jobs" (verified
+  # from the page's own window.workday bootstrap script -- the obvious
+  # branded-name guesses all 404). Travel-technology (GDS) vendor, same
+  # competitive category as Sabre, with Bengaluru + Pune engineering
+  # centres. Small India pool (7 jobs at onboarding) -- DO NOT add
+  # require_tech_in_description, too little volume to justify it (same
+  # call made for Airbnb/Agoda/DoorDash).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
 
 sabre_search:
   max_listings: 200
@@ -4349,6 +4365,222 @@ grab_search:
   # narrow server-side (verified live). Tiny India pool (~7 total live
   # reqs, all Bangalore). DO NOT add require_tech_in_description -- not
   # enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+jnj_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (jj.wd5.myworkdayjobs.com, tenant "jj", site "JJ"). This tenant
+  # has no country-level location facet -- appliedFacets.locations is a
+  # hardcoded list of 17 genuine India city/state WIDs (verified live,
+  # excludes "Indiana"/"Indianapolis" US false positives). searchText
+  # genuinely narrows server-side. Real Hyderabad software/platform
+  # engineering GCC presence confirmed live. DO NOT add
+  # require_tech_in_description -- not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+roche_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (roche.wd3.myworkdayjobs.com, tenant "roche", site
+  # "roche-ext"). No country-level facet on this tenant either --
+  # appliedFacets.locations uses 6 hardcoded India location WIDs (verified
+  # live, excludes "Indianapolis"). searchText narrows server-side (fuzzy
+  # relevance ranking, not strict). Real Hyderabad "Applied & Agentic AI
+  # Systems" engineering roles confirmed live. DO NOT add
+  # require_tech_in_description -- not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sanofi_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (sanofi.wd3.myworkdayjobs.com, tenant "sanofi", site
+  # "SanofiCareers"). Standard nested locationCountry facet with the usual
+  # cross-tenant India WID. Pagination wraps around past the true total
+  # (guarded in the fetcher via a page1-first-ID memo). Current India pool
+  # skews heavily non-engineering (scientific writing/analytics/regulatory)
+  # -- 0-1 current title/skill matches is a true reflection of this
+  # snapshot, not a fetcher defect. DO NOT add require_tech_in_description
+  # -- not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+godrej_search:
+  max_listings: 400
+  inter_page_delay: 0.15
+  # Phenom People CareerConnect (careers.godrejindustries.com) for the
+  # Godrej Industries Group entity -- covers GCPL/Godrej Consumer
+  # Products, Godrej Properties, Godrej Capital, Godrej Agrovet/Chemicals,
+  # Godrej Ventures under one shared tenant. The tenant's real search
+  # widget requires a browser session (returns {"status":"failure"} to
+  # plain requests, same as Morningstar's Phenom tenant) -- fetcher walks
+  # the tenant's own sitemap.xml (404 job URLs, verified live) and reads
+  # each job page's embedded JSON-LD JobPosting block instead. Keywords
+  # are ignored server-side (cache-once). Real current SDE-track India
+  # roles confirmed live: Full Stack Developer, Java+Angular/React
+  # Fullstack Developer, Senior DevOps Engineer, DevOps/MLOps Engineer
+  # (genuine GenAI/LLMOps/RAG-pipeline JD), Senior Executive - Data
+  # Engineer, Assistant Manager - Data Scientist, "SDE II" -- all Mumbai/
+  # Bengaluru/Ambernath, none in excluded cities at investigation time.
+  # DO NOT add require_tech_in_description -- not enabled per playbook
+  # default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bajaj_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # PeopleStrong "Candidate Portal" (bflcareers.peoplestrong.com) for
+  # Bajaj Finance Limited -- same ATS vendor as larsentoubro_search/
+  # adityabirla_search, a different tenant. Chosen over Bajaj Auto (no
+  # comparable software-engineering hiring surface found) and over Bajaj
+  # Finserv's own branded Zoho Recruit board (bajajfinserv.zohorecruit.in,
+  # confirmed live to have exactly one stale 2023 posting) -- Bajaj
+  # Finance's PeopleStrong portal is the real, actively used pipeline
+  # (9,220 total postings live at investigation time). searchString
+  # genuinely narrows server-side (literal title substring, same
+  # non-tokenized behavior as L&T's tenant on this vendor): "software
+  # engineer"=74, "data engineer"=18, "AI engineer"=2, "developer"=7,
+  # "java"/"python"/".NET developer"=0 right now. Most current SDE-titled
+  # postings are in Pune (this repo's own exclude_locations entry); a
+  # handful of genuine Bengaluru "Senior Software Engineer"/"Senior Data
+  # Engineer" postings were live and verified at investigation time. DO
+  # NOT add require_tech_in_description -- not enabled per playbook
+  # default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+qatarairways_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Avature (careers.qatarairways.com). The search wizard UI looked like it
+  # would need Playwright/a session dance, but the "Next Page" link's own
+  # target (/global/SearchJobs/?jobRecordsPerPage=6&jobOffset=N) is plain,
+  # unauthenticated, server-rendered HTML -- confirmed live, no browser
+  # needed. jobRecordsPerPage is accepted but ignored (fixed at 6/page);
+  # no keyword/location query params exist on this endpoint at all, so the
+  # whole ~189-job global board is cached once and India (~13 jobs, all
+  # Ahmedabad -- a real IT development centre, confirmed via live postings
+  # like "Software Engineer - Java" and "Data Engineer - Power BI
+  # Developer") is filtered client-side. DO NOT add
+  # require_tech_in_description -- not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+americanairlines_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Talent500-hosted "AA Tech Hub India" board (prod-warmachine.talent500.co
+  # API), NOT American's own jobs.aa.com ATS -- that direct SAP
+  # SuccessFactors J2W Unify tenant has only 99 jobs worldwide and zero in
+  # India. The Talent500 board is 100% Hyderabad, ~65 open jobs at
+  # onboarding time, real software engineering demand (Java/Spring,
+  # Angular/React/.Net, Machine Learning, Python/PySpark). The v3 search API
+  # genuinely narrows by search_term server-side, but the fetcher caches the
+  # full small pool once and ignores keyword/location -- see
+  # americanairlines_fetcher.py docstring. DO NOT add
+  # require_tech_in_description -- titles are specific IT/engineering roles,
+  # not generic level-banded titles needing a description tech gate.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+merck_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # MSD (Merck & Co.) -- NOT Merck KGaA (careers.merckgroup.com), a
+  # separate German company that also answers to "Merck" outside the
+  # US/Canada. Workday (msd.wd5.myworkdayjobs.com, tenant "msd", site
+  # "SearchJobs" -- the more guessable "MSD"/"MSDCareers"/"MSDJobs" site
+  # codes all 404). Public frontend (jobs.msd.com) is a Phenom People
+  # skin, but the real search/apply backend is this Workday tenant. No
+  # flat country facet -- appliedFacets.locations uses 10 hardcoded India
+  # office WIDs (Hyderabad HITEC City Raidurg is the primary GCC tech
+  # campus). searchText genuinely narrows server-side (full-text match
+  # against JD body, not just title). Real, current Hyderabad AI/software
+  # engineering GCC hiring confirmed live: "Specialist, AI Engineering"
+  # (explicit GenAI/prompt engineering/RAG pipelines/LLM JD),
+  # "Specialist Software Engineering, Full-Stack", "Senior Specialist,
+  # Senior Azure Full-Stack Developer". DO NOT add
+  # require_tech_in_description -- titles are genuine engineering titles,
+  # Layer 3 alone is the right precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+abbott_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (abbott.wd5.myworkdayjobs.com, tenant "abbott", site
+  # "abbottcareers"). Standard flat capitalised `Location_Country` facet
+  # with the usual cross-tenant India WID (168 India jobs of a 2000-job
+  # global cap). Pagination wraps around past the true total (guarded via
+  # a page1-first-ID memo). searchText is a loose/noisy full-text
+  # OR-of-words match, not narrowed on here. Real current India software
+  # presence confirmed live (Mumbai BKC + Hyderabad): "Cloud Software
+  # Engineer II", "DevOps Engineer – III", "Staff Platform Engineer"
+  # (Abbott's "Lingo" biowearable division) -- none currently name a
+  # primary .NET/C#/AI/ML/Python skill in the JD body (0 current matches
+  # is a real fact about this snapshot, most India postings are pharma/
+  # nutrition field-sales roles). DO NOT add require_tech_in_description
+  # -- titles are the limiting factor here, not an overly-broad skill list.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+gsk_search:
+  max_listings: 400
+  inter_page_delay: 0.15
+  # Phenom People CareerConnect (jobs.gsk.com). The tenant's own /widgets
+  # search API requires a browser session (returns {"status":"failure"}
+  # to plain requests, same as Morningstar/Godrej's Phenom tenants) --
+  # fetcher walks the sitemap index (jobs.gsk.com/sitemap.xml -> two child
+  # sitemaps, ~688 live job URLs) and reads each job page's embedded
+  # JSON-LD JobPosting block instead. Keywords are ignored server-side
+  # (cache-once, full board scanned in one pass). GSK genuinely operates a
+  # Bengaluru Global Capability Centre with a real software-engineering
+  # hiring history (an "Apprentice — Software Engineer (AI)" and a "Tech
+  # Innovation Engineer" posting were both found via web search), but both
+  # had already closed by investigation time (2026-09-13) -- a live crawl
+  # of the full current board found only 10 India postings, all
+  # non-technical (Medical Writer/Quality/Sales/Site Engineering). 0
+  # current SDE/AI title-family matches is a real, current fact about this
+  # snapshot (GSK's tech pipeline appears to churn in bursts), not a
+  # fetcher defect. DO NOT add require_tech_in_description -- there's no
+  # title-family match to even reach that layer yet.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+medtronic_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (medtronic.wd1.myworkdayjobs.com, tenant "medtronic", site
+  # "medtroniccareers") -- jobs.medtronic.com redirects straight here, no
+  # frontend skin. No country-level facet on this tenant -- fetches
+  # globally per keyword and filters India client-side via locationsText
+  # (which reliably says "India" already, e.g. "Nanakramguda, Hyderabad,
+  # India" -- no client-side append needed). searchText genuinely narrows
+  # server-side (full-text, not ignored). Pagination wraps around past the
+  # true total per keyword (guarded via a page1-first-ID memo, tracked per
+  # keyword). Real, current Hyderabad (Nanakramguda) software-engineering
+  # GCC hiring confirmed live: "Director, Software Engineering & AI",
+  # "Senior Principal Software Engineer", "Lead Enterprise Software
+  # Engineer", "Senior Principal Enterprise Software Engineer" (JD
+  # explicitly names both C# and Python -- a genuine .NET/C#-track
+  # primary-skill match). DO NOT add require_tech_in_description --
+  # titles are genuine engineering titles, Layer 3 alone is the right
+  # precision level.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
