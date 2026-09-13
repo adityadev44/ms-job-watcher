@@ -3541,6 +3541,25 @@ allianztech_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+allstate_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (allstate.wd5.myworkdayjobs.com/allstate_careers), same shape as
+  # Wells Fargo/Marsh McLennan/Mastercard. Plain requests.post, no Playwright.
+  # India Country facet WID confirmed (7 India jobs total as of 2026-09-13);
+  # keywords= genuinely narrows server-side. Allstate India (est. 2012) is a
+  # genuine two-city GCC -- verified Bengaluru AND Pune postings both present
+  # ("Ind - Blr Sez 1/2 ...", "Ind - Pune Sez 1 ...", bare "Pune"), so this is
+  # NOT a Pune-only structural zero. Current pool is tiny and skews non-tech
+  # (Customer Service, Reconciliations, SAP GRC security); the one "Software
+  # Engineer Consultant II" (Pune, Java-only stack) and one "Data Scientist
+  # Sr Consultant II" (Bengaluru, generic "Big Data" stack, no named
+  # Python/ML framework) currently show zero .NET/C#/AI-ML primary_skills
+  # matches -- same "genuine 0, not a bug" class as AIG/Swiss Re/ANZ.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 apple_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -4581,6 +4600,339 @@ medtronic_search:
   # primary-skill match). DO NOT add require_tech_in_description --
   # titles are genuine engineering titles, Layer 3 alone is the right
   # precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ferguson_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Ferguson's own Workday tenant (ferguson.wd1.myworkdayjobs.com/
+  # Ferguson_Experienced) is US-only -- zero genuine India jobs. The real
+  # India presence is Ferguson's Bengaluru GCC (launched June 2025 in
+  # partnership with ANSR), which posts on Talent500
+  # (prod-warmachine.talent500.co API, company_slug "ferguson") -- same
+  # vendor already integrated for American Airlines' "AA Tech Hub India".
+  # Small but real and current board: 13 open jobs at onboarding time, all
+  # Bengaluru, India, spanning genuine software engineering roles (Lead
+  # Cloud Engineer - Azure, Senior QA Engineer, etc.). Fetcher caches the
+  # whole small pool once and ignores keyword/location -- see
+  # ferguson_fetcher.py docstring. DO NOT add require_tech_in_description --
+  # titles are specific IT/engineering roles, not generic level bands.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mks_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # MKS Instruments -- Workday (mksinst.wd1.myworkdayjobs.com, tenant
+  # "mksinst", site "MKSCareersEMEA"), found via the India-specific landing
+  # page mks-india-careers.webflow.io (NOT the branded mks.com/careers,
+  # which is an unrelated SAP Commerce shell). India footprint spans
+  # engineering/IT in Bengaluru, digital in Gurugram, and R&D in Manesar --
+  # confirmed 25 real India jobs with the locationCountry facet applied,
+  # including genuine software roles ("Senior Software Engineer I",
+  # "Technical Lead - AI/ML"). This tenant's pagination is unusually
+  # unreliable (offset ignored for single-page keyword results, total
+  # resets to 0 on page 2, offset past the true total wraps back to page 1)
+  # -- the fetcher caches the small pool once via its own repeat-ID
+  # detection and ignores keyword/location entirely; see mks_fetcher.py
+  # docstring. DO NOT add require_tech_in_description -- titles are genuine
+  # engineering titles, Layer 3 alone is the right precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+warnerbros_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (warnerbros.wd5.myworkdayjobs.com, tenant "warnerbros", site
+  # "global") -- discovered behind careers.wbd.com's Phenom People front
+  # end (every job's applyUrl points at this Workday tenant). Cross-tenant
+  # India locationCountry WID c4f78be1a8f14da0ab49ce1162348a5e confirmed
+  # live: 34 India jobs, cross-checked against the Phenom page's own
+  # independent "India": 34 facet count. searchText genuinely narrows
+  # server-side. All current India postings are Hyderabad or
+  # Bangalore/Bengaluru (Embassy Tech Village / Phoenix Equinox Tower) --
+  # no Chennai/Pune/Tamil Nadu observed. Genuine engineering titles present
+  # today (Senior Machine Learning Engineer, Senior Staff Software Engineer
+  # - Golang, Senior Software Engineer - FullStack). DO NOT add
+  # require_tech_in_description -- direct employer with specific
+  # engineering titles, Layer 3 alone is the right precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+comcast_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TalentBrew (jobs.comcast.com, org 45483) -- same vendor as
+  # Disney/Boeing/AstraZeneca. keyword/location query params are ignored
+  # server-side even on the India location-facet URL; fetcher caches the
+  # whole India pool (currently 14 jobs) once per process. IMPORTANT: 13 of
+  # the 14 current India postings are "Chennai, Tamil Nadu" (Comcast's
+  # India Engineering Center) -- an excluded location -- so this pipeline
+  # is expected to alert rarely; only 1 current posting is in a
+  # non-excluded location (Karnataka/Remote, and even that title doesn't
+  # match title_family today). Kept in the registry anyway since the ATS
+  # is real, genuinely India-scoped, and non-Chennai postings do appear on
+  # this tenant (same precedent as disney_search, added despite 0 live
+  # matches at integration time).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+pg_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Phenom People (pgcareers.com, company code PGBPGNGLOBAL) -- same
+  # platform/limitation as GSK/Godrej/Morningstar: the /widgets and
+  # /api/apply/v2/jobs search endpoints reject plain unauthenticated
+  # requests, so the fetcher walks pgcareers.com's own sitemap
+  # (~140 job postings globally) and reads each job page's JobPosting
+  # JSON-LD block directly. Confirmed 28 India jobs (Mumbai/Bangalore GCC)
+  # out of ~140 global, including genuine software-engineering titles
+  # (Senior Data Engineer x2, DevOps Engineer, Information Security
+  # Engineer, Smart Automations Platform Engineer,
+  # Director-IT-Solution-Architecture, Data Scientist). Fetcher ignores
+  # keyword/location server-side (cache-once, same as GSK). Sequential
+  # (not parallel) job-detail fetches with a small inter-request delay --
+  # this tenant's CloudFront WAF temporarily blanket-blocks the /job/ path
+  # after a parallel burst (see pg_fetcher.py docstring). DO NOT add
+  # require_tech_in_description -- titles are specific engineering titles,
+  # Layer 3 alone is the right precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+crowdstrike_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday (crowdstrike.wd5.myworkdayjobs.com, tenant "crowdstrike", site
+  # "crowdstrikecareers"). Standard CXS POST, India locationCountry WID is
+  # the shared cross-tenant GUID (c4f78be1a8f14da0ab49ce1162348a5e). Tenant
+  # returns HTTP 400 above limit=20 -- fetcher clamps defensively. 50 India
+  # postings (of ~394 global), heavy Bangalore/Pune, genuine engineering
+  # signal (Engineer II/III, Backend Engineer, Sr. ML Platform Engineer,
+  # AI Engineer, DevOps). searchText genuinely narrows server-side.
+  # DO NOT add require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+fortinet_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM Cloud CE (edel.fa.us2.oraclecloud.com, site CX_2001), found
+  # via the fortinet.com/corporate/careers page's own outbound request, not
+  # guessed. No usable India location facet (India's share is too small to
+  # surface in the top-10-by-volume facet list) -- fetcher caches the full
+  # ~930-job global pool once and filters by the per-requisition
+  # PrimaryLocationCountry=="IN" ISO code (sidesteps the classic
+  # "Indianapolis"/free-text-substring leakage trap entirely, unlike
+  # WTW/Genpact which only have PrimaryLocation to filter on). 34 India
+  # postings, mostly sales/pre-sales/professional-services with a handful
+  # of genuine engineering roles (Staff Software Development Engineer,
+  # Staff Devops Engineer, Cyber Threat Researcher). DO NOT add
+  # require_tech_in_description -- titles are specific, Layer 3 is enough.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+okta_search:
+  max_listings: 450
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/okta/jobs?content=true).
+  # No server-side keyword/location filter -- full ~324-job global pool
+  # cached once, same family as MongoDB/Zscaler. Location is already a
+  # clean "Bengaluru, India" string (no bare-city/country-code
+  # normalization needed here). 108 India postings -- Okta's India
+  # Innovation Centre -- with very strong genuine engineering signal
+  # (Principal/Staff/Senior Software Engineer, Site Reliability Engineer,
+  # Data Engineer, DevSecOps Engineer). Descriptions inline (content=true).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+paloaltonetworks_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Own branded career site (jobs.paloaltonetworks.com) -- NOT a third-party
+  # ATS subdomain. Fully server-rendered HTML (Radancy/TalentBrew, same
+  # vendor family as Boeing/Disney/Unilever, "section29"/"section30" theme),
+  # no JS/XHR needed. Real ATS behind "Apply" is Workday, but the public
+  # listing/search surface
+  # never touches that API. India location listing
+  # (/en/location/india-jobs/47263/1269750/2/{page}) is cached once (~130
+  # jobs across ~9 pages); the site's separate keyword-search path returns
+  # the GLOBAL pool (not India-scoped), so it isn't used. Detail pages embed
+  # a full schema.org JobPosting JSON-LD block -- no separate API call
+  # needed. Strong genuine engineering signal (Staff/Senior Staff/Principal
+  # Software Engineer, Staff Machine Learning Engineer, DevOps Engineer).
+  # DO NOT add require_tech_in_description -- titles carry real signal.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zscaler_search:
+  max_listings: 450
+  inter_page_delay: 0.2
+  # Greenhouse (boards-api.greenhouse.io/v1/boards/zscaler/jobs?content=true).
+  # No server-side keyword/location filter -- full ~371-job global pool
+  # cached once. Location quirk: location.name uses the bare 3-letter
+  # ISO country code "IND" (e.g. "Bangalore, IND"), not the word "India" --
+  # a new shape not previously seen in this repo. Normalized via a
+  # word-boundary regex on the standalone "IND" token (never matches inside
+  # "Indiana"/"Indianapolis", avoiding that classic substring trap). 76
+  # genuine India postings once normalized, heavily Bangalore-based with
+  # very strong engineering signal (Principal Software Development Engineer
+  # - Rust, Senior Machine Learning Engineer (Agentic AI), Staff Software
+  # Development Engineer - DevOps, Sr. Staff SDE - Golang + Control Plane).
+  # Descriptions inline (content=true).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+amd_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # careers.amd.com/api/jobs (iCIMS "Jibe" REST API). Keyword ignored (full
+  # ~192-job India pool, all Hyderabad, cached once). Semiconductor/chip
+  # design GCC -- most roles are RTL/verification/physical-design hardware,
+  # not .NET/AI, but a real software/ML track exists alongside it (e.g. a
+  # "Lead Machine Learning Engineer" posting explicitly names "large
+  # language model"). Low match volume expected, same class as Micron/Nvidia.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+intel_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday tenant intel.wd1.myworkdayjobs.com, site "External". Bangalore
+  # GCC, ~52 India jobs -- overwhelmingly ASIC/circuit-design/verification
+  # hardware roles. A thin software track exists ("Senior Development Tools
+  # Software Engineer", "Software/Enterprise Application Development
+  # Engineer") but none currently name a hard .NET/C#/AI primary skill --
+  # 0 current matches expected, same class as Micron/TI/Genpact.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+broadcom_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday tenant broadcom.wd1.myworkdayjobs.com, site "External_Career".
+  # Bangalore + Hyderabad GCC (spans both the legacy chip-design business and
+  # VMware by Broadcom's cloud/enterprise-software business, acquired 2023,
+  # sharing this tenant), ~60 India jobs. Real confirmed match: "Principal
+  # Member of Technical Staff - AI Platform & ValueOps Financial Intelligence
+  # Solution" (Bangalore, explicitly names generative AI).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ti_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # Oracle HCM CE tenant edbz.fa.us2.oraclecloud.com, site "CX". Bengaluru
+  # GCC, ~104 India jobs -- overwhelmingly analog/IC design/verification/
+  # layout hardware roles. A handful of software-adjacent titles exist
+  # ("Application Developer", "Public Cloud Engineer", "Solutions
+  # Architect") but none currently name a hard .NET/C#/AI primary skill --
+  # 0 current matches expected, same class as Micron/Intel/Genpact.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+arm_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # careers.arm.com (TalentBrew), org 33099. Bengaluru GCC, ~101 India jobs.
+  # Majority ASIC/RTL/SoC-verification hardware, but a genuinely large real
+  # software/cloud/platform-engineering track exists alongside it (Staff
+  # Software Engineer - Linux Kernel, Staff DevOps Engineer, Staff Private
+  # Cloud Engineer, Senior Software Engineer - Networking for AI). 0 current
+  # hard-skill matches confirmed live, but a strong pool for future matches.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+continental_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Custom TYPO3 + Angular "jobportal" REST API (jobs.continental.com), not
+  # a third-party ATS -- see continental_fetcher.py module docstring. Caches
+  # the whole small global pool (~674 jobs) once per process and filters to
+  # India client-side (countryLabel == "India"). Real India footprint spans
+  # Bengaluru (IT/software: Software Engineer - Data Platform, IT engineer
+  # Data Lakehouse) plus ContiTech manufacturing sites (Satara/Kalyani/
+  # Shirwal/Kesurdi) -- NOT Pune-only.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zf_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (jobs.zf.com), same theme family as
+  # Nomura/Capgemini. `?startrow=N` query-string pagination; the `q=`
+  # keyword param genuinely narrows results server-side on this tenant
+  # (confirmed live). Real India R&D/software footprint spans Hyderabad,
+  # Bangalore, and Pune -- NOT Pune-only. Live-verified matches include
+  # "Technical Lead - .NET Core Full stack Developer" (Hyderabad/Bangalore)
+  # and "AI/ML Specialist - Agentic AI & Generative AI" (Bangalore).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mbrdi_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Mercedes-Benz Group's "milch & zucker Global Jobboard" API
+  # (jobs.api.mercedes-benz.com), same product family as Deutsche Bank's
+  # Beesite and Lufthansa's Global Jobboard already in this repo -- see
+  # mbrdi_fetcher.py module docstring. Caches the whole global pool
+  # (~2,557 jobs) once per process and filters to India client-side
+  # (PositionLocation[0].CountryCode == "IN"), since server-side country
+  # filters are silently ignored on this tenant. Real India footprint
+  # (~221 postings at investigation time) is overwhelmingly Bengaluru
+  # (~206) with a Pune minority (~15) -- explicitly NOT the Pune-only case
+  # flagged for exclusion in an earlier onboarding wave. Live-verified
+  # description match: "CAD customization using .NET (C#), VB" names
+  # ".NET (C#)" directly in its JD body.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ford_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # TalentBrew (careers.ford.com / Ford Business Solutions India), same
+  # vendor as Boeing/Optum/Disney. Caches the single canonical India
+  # country-facet page once per process (whole India pool is currently
+  # just 9 postings, well under one page) -- see ford_fetcher.py module
+  # docstring. Real India presence spans Chennai/Coimbatore/remote, not
+  # Pune-only, but current postings skew SAP/finance/business-analyst;
+  # only one ("Senior Kubernetes/OpenShift Platform Engineer") is software-
+  # adjacent and it doesn't name a .NET/C#/AI/ML primary skill. Included
+  # for completeness (real, working, low-volume board), same precedent as
+  # General Motors/BNY Mellon/Icertis -- 0 current matches expected.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+stellantis_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # Workday (stellantis.wd3.myworkdayjobs.com, tenant "stellantis", site
+  # "External_Career_Site_ID01" -- found via careers.stellantis.com's
+  # outbound link, not guessed). Small global tenant (~26 total postings);
+  # India presence is Bengaluru (2x "Engineer", 1x "Application Software
+  # Specialist" -- an iOS/Swift role per its JD) plus one Chennai role
+  # (excluded). searchText genuinely narrows server-side ("" -> 26,
+  # "software engineer" -> 9), so keywords are NOT ignored.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
