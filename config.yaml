@@ -2509,6 +2509,21 @@ disney_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+doordash_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Official Greenhouse tenant `doordashindia` (careersatdoordash.com's
+  # global board `doordashusa` has zero genuine India locations -- only
+  # false-positive substring hits like "Indianapolis, IN"). doordashindia
+  # is a small, separate ~20-req board, all Hyderabad-based, found via a
+  # live careersatdoordash.com job URL rather than guessed. Wolt (acquired
+  # 2022) is Europe/APAC-focused, not relevant to India coverage. Keyword
+  # search is not supported by this API; whole small India pool cached
+  # once per process (content=true also gives inline descriptions).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 expedia_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -3762,6 +3777,20 @@ icicibank_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+airbnb_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # WordPress + FacetWP at careers.airbnb.com/positions/. The `where_you_work`
+  # facet option "india" is filtered server-side and cached once; India's
+  # pool is small (8 open roles at verification time) so keywords are ignored.
+  # No genuine posting-date field exists (detail-page JSON-LD datePublished
+  # is the crawl time, not the job's real post date) -- posting_date is "".
+  # DO NOT add require_tech_in_description -- not enough verified volume yet
+  # to justify a narrower gate.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 airindia_search:
   max_listings: 500
   inter_page_delay: 0.15
@@ -4264,6 +4293,62 @@ transunioncibil_search:
   # instead. Scoped to India only via the standard cross-tenant
   # locationCountry WID also used by Wells Fargo/Citi/Sprinklr. Keyword
   # search genuinely narrows results server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+agoda_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Greenhouse board token "agoda" (job-boards.greenhouse.io/agoda); ~290
+  # total jobs, keyword/location ignored server-side, full board cached
+  # in-module. Branded careersatagoda.com domain is Cloudflare-gated
+  # (HTTP 403 challenge) but the underlying Greenhouse board is fully
+  # open to plain HTTP. DO NOT add require_tech_in_description — not
+  # enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bookingcom_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # iCIMS (Jibe Careers Site Builder), jobs.booking.com -- GET /api/jobs
+  # (bare, NO /booking/ prefix even though the search UI itself lives at
+  # /booking/jobs). ats_code":"icims" confirmed in the response, apply_url
+  # points at *-workingatbooking.icims.com (405s -- links use the public
+  # jobs.booking.com/booking/jobs/{id} page instead). limit caps at 100
+  # (422 above), offset silently broken -- whole ~32-job India pool cached
+  # once, keywords ignored despite genuinely narrowing server-side. Titles
+  # are specific enough ("Senior Full Stack Application Developer",
+  # "Software Engineer 2"), so require_tech_in_description is NOT enabled.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+priceline_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Workday (priceline.wd1.myworkdayjobs.com, tenant "priceline", site
+  # "Priceline") -- found via the real "Apply Now" link destination on
+  # careers.priceline.com's own (WordPress) job-detail pages, not guessed
+  # from the domain. Small tenant (~65 total live reqs); no country facet
+  # is exposed, so the fetcher fetches the full per-keyword pool and
+  # filters India client-side via locationsText (only current India office
+  # is Mumbai). searchText genuinely narrows server-side. DO NOT add
+  # require_tech_in_description -- not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+grab_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Custom in-house server-rendered platform (grab.careers) -- not a
+  # third-party ATS. `country=India` and `search=<keyword>` both genuinely
+  # narrow server-side (verified live). Tiny India pool (~7 total live
+  # reqs, all Bangalore). DO NOT add require_tech_in_description -- not
+  # enabled per playbook default.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
