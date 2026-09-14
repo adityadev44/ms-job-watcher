@@ -2227,6 +2227,22 @@ alphasense_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+alstom_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # SAP SuccessFactors classic J2W at jobsearch.alstom.com (same shape as
+  # Capgemini/Nomura). Server-side keyword filtering is nearly a no-op (every
+  # default keyword returns 210-248 of the ~248-job India pool) -- registered
+  # in _IGNORES_KEYWORDS. locationsearch=India leaks non-India postings
+  # (confirmed live: a "Perth, IN"-tagged Finance role -- Perth, Australia);
+  # the fetcher only appends ", India" for recognized Indian cities, so any
+  # other leakage is safely dropped by matcher.py's is_india_job() instead of
+  # mislabeled. DO NOT add require_tech_in_description -- titles are
+  # specific engineering titles, not generic level bands.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 anz_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -4933,6 +4949,375 @@ stellantis_search:
   # Specialist" -- an iOS/Swift role per its JD) plus one Chennai role
   # (excluded). searchText genuinely narrows server-side ("" -> 26,
   # "software engineer" -> 9), so keywords are NOT ignored.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bmw_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # BMW TechWorks India (PeopleStrong "Candidate Portal",
+  # careers-bmwtechworks.peoplestrong.com) -- BMW's real India engineering
+  # GCC, distinct from the generic bmwgroup.jobs global careers site
+  # (no working REST endpoint found there). HQ'd in Pune, but genuinely
+  # NOT Pune-only: 74 of 92 India postings are Pune (excluded) but 16 are
+  # Bengaluru (real AI/ML and ADAS/C++ software roles). This tenant's
+  # searchString is a noisy OR-of-tokens match (also requires a non-empty
+  # value), so the fetcher caches the full India pool once via several
+  # broad queries and ignores the keyword argument -- see _IGNORES_KEYWORDS.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+airbus_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (ag.wd3.myworkdayjobs.com/Airbus), no frontend skin -- Airbus's
+  # own careers site links straight to this Workday tenant. No top-level
+  # country facet; India's WID (c4f78be1a8f14da0ab49ce1162348a5e, nested
+  # under locationMainGroup) is applied via appliedFacets.locationCountry
+  # the normal flat way. Real India pool: 224 jobs, mostly "Bangalore Area"
+  # with a few Gurugram/New Delhi/Hyderabad postings -- includes genuine
+  # software/AI titles (AI Engineer, FullStack Developer, Platform
+  # Engineer, Lead Software Engineer). searchText genuinely narrows
+  # server-side -- do NOT add to _IGNORES_KEYWORDS.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+safran_search:
+  max_listings: 200
+  inter_page_delay: 0.5
+  # In-house Drupal job board (www.safran-group.com/jobs), Cloudflare JS
+  # challenge-gated (plain requests/WebFetch get a clean 403) -- requires
+  # Playwright/Chromium (no special anti-detection flags needed). Country
+  # filter uses a taxonomy value (countries=1083-india), not the literal
+  # string "India". Real India pool: ~192 jobs across Bengaluru/Hyderabad/
+  # New Delhi (Safran Aircraft Engines, Safran Electrical & Power, Safran
+  # Engineering Services, Safran Electronics & Defense), including genuine
+  # software titles ("Software V&V Engineer", "Senior Engineer - Lead
+  # Engineer - Software Platform", "XATIS: Web Full-Stack Software
+  # Developer"). Fetcher caches the full India pool once (paginating the
+  # Drupal view) rather than repeating keyword searches through the slow
+  # Cloudflare-gated browser flow -- see _IGNORES_KEYWORDS.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+volvocars_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SAP SuccessFactors J2W classic (jobs.volvocars.com), same platform
+  # family as ZF/Nomura/Capgemini/Dover/YASH. Distinct company from Volvo
+  # Group/Volvo Trucks (handled separately). Small tenant: exactly ONE
+  # current India posting at onboarding time ("Sr Software Engineer -
+  # Tools & Insight", Bengaluru, IT/Digital) -- genuinely not Pune-only,
+  # there's simply very little India volume right now. `q=` genuinely
+  # narrows when it matches a real India posting, but a keyword with ZERO
+  # India matches falls back to an unfiltered global result page (seen
+  # live with a "Ridgeville, SC" row) -- the fetcher defends against this
+  # by re-checking each row's own location text for a ", IN," token
+  # client-side before keeping it.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+volvogroup_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Volvo Group (trucks/buses/construction equipment -- DISTINCT from Volvo
+  # Cars, already onboarded separately with its own ATS). SAP SuccessFactors
+  # J2W classic (jobs.volvogroup.com), same theme family as Nomura/Capgemini/
+  # ZF. `q=`/`locationsearch=India` genuinely narrow server-side (confirmed
+  # live); `startrow=N` pagination. Real India footprint (41 postings at
+  # investigation time) is Bangalore/Hosakote/Mumbai only -- NOT Pune/
+  # Chennai/excluded-city-only. Live-verified matching titles: "AI / ML
+  # Engineer", "Senior Software Engineer", "Software Engineer (HLS)".
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+daimlertruck_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Daimler Truck AG (spun off from Mercedes-Benz Group in 2021 -- DISTINCT
+  # from mbrdi_search, which is Mercedes-Benz Group/passenger-car R&D).
+  # Same "milch & zucker Global Jobboard"/Beesite product family as
+  # mbrdi/Deutsche Bank/Lufthansa, but this tenant's real backend host
+  # (global-jobboard-api-jobsearch.daimlertruck.com) and request shape (GET
+  # with the whole JSON body URL-encoded into a `data=` param, not a POST
+  # body) are both tenant-specific -- see daimlertruck_fetcher.py module
+  # docstring. Caches the whole global pool (~327 jobs) once per process
+  # and filters to India client-side. Real India footprint (~12 postings at
+  # investigation time) is a Chennai (Fuso Tech Center India, excluded) /
+  # Bangalore (DTICI, Daimler Truck Innovation Center India) mix -- NOT
+  # Chennai-only. Live-verified genuine DTICI title: "DTICI_Snowflake_Data_
+  # engineer_T8" (Bangalore).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zsassociates_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # iCIMS via Jibe Careers Site Builder (jobs.zs.com/api/jobs), same
+  # platform family as PepsiCo/Schneider Electric/HealthEdge/SITA.
+  # `country=India` genuinely filters server-side (47 of 257 global jobs);
+  # keywords are ignored -- fetcher caches the full India pool once.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+tigeranalytics_search:
+  max_listings: 150
+  inter_page_delay: 0.15
+  # Zwayam ATS (public.zwayam.com), same family as CRISIL/Persistent/eClerx
+  # -- careers.tigeranalytics.com is a white-label "openings.co" front-end
+  # over the same shared multi-tenant Zwayam endpoint (companyId 16201).
+  # Keywords ignored server-side; fetcher caches the full ~106-job India-
+  # only board once.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sigmoid_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Greenhouse board (boards-api.greenhouse.io/v1/boards/sigmoid/jobs),
+  # linked directly from www.sigmoid.com/careers/current-openings/.
+  # Query params are ignored server-side -- fetcher caches the full ~35-job
+  # board once. Most India postings are Bengaluru/Hyderabad; a few use a
+  # bare city name with no country word, normalised by the fetcher.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+affine_search:
+  max_listings: 100
+  inter_page_delay: 0.15
+  # SenseHQ (Skillate white-label) career site at affine.sensehq.com/careers
+  # -- linked from affine.ai/about-us/careers/'s "View on SenseHQ" button.
+  # Server-rendered Next.js __NEXT_DATA__ JSON embeds the entire small
+  # board (7 total, 4 India) directly in the initial HTML; no server-side
+  # keyword/location filtering exists, so the fetcher caches the whole
+  # board once per process.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+gramener_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Custom WordPress/Elementor careers site (gramener.com/careers/) -- no
+  # third-party ATS. Each posting is its own static page; the listing page
+  # is fully server-rendered with a data-location attribute per job card
+  # that is sometimes a comma-joined multi-city string including Chennai
+  # (excluded) alongside Bengaluru/Hyderabad (not excluded) for the same
+  # posting -- the fetcher picks a single non-excluded city per job rather
+  # than passing the whole joined string (see fetcher docstring; same fix
+  # shape as Energy Exemplar). No server-side keyword filtering; ~34-job
+  # board cached once per process.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+aryng_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Workable public widget API (apply.workable.com/api/v1/widget/accounts/aryng),
+  # same platform family as Innovaccer. Aryng's own marketing site
+  # (aryng.com/career) has an empty static "Current Openings" section with
+  # no backing API call; this separate, verified-real Workable tenant is
+  # the company's actual applicant board. Confirmed live: valid account,
+  # zero current openings (a genuine current-zero snapshot, not a fetch
+  # failure -- see fetcher docstring). Query params are ignored server-side.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+axtria_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Legacy SAP SuccessFactors "RCM" Career Site (career10.successfactors.com,
+  # company=axtriaindiP) -- NOT the newer Job2Web platform used elsewhere in
+  # this repo. The search step is DWR/JSF-session-bound and cannot be
+  # replicated with plain requests (confirmed live A/B test) -- fetcher
+  # drives headless Firefox through the "Search" button + pagination once
+  # per process and caches the ~127-job India-only board. Job-detail fetch
+  # IS a plain stateless HTTP GET (crb token embedded in the captured href
+  # works cold, no browser needed). See axtria_fetcher.py module docstring.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+indegene_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SAP SuccessFactors "Job2Web Unify" theme, careers.indegene.com (tenant
+  # code indegenepr). The tenant's own appParams template embeds
+  # categoryId as an empty string, which looked like the whole REST API
+  # was broken (POST to /services/recruiting/v1/jobs kept returning the
+  # SPA shell HTML instead of JSON) until a live Playwright network
+  # capture showed the real browser sends categoryId as the INTEGER 0 --
+  # that one type difference was the entire bug. Country facet key is
+  # `filter1` ("Job search country"), takes the literal string "India".
+  # Small ~23-job India pool, cached once per process; keyword ignored
+  # server-side. See indegene_fetcher.py module docstring.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+latentview_search:
+  max_listings: 100
+  inter_page_delay: 0.15
+  # Darwinbox tenant "latentview" (candidatev2 SPA), same product family
+  # and identical `POST /ms/candidateapi/job/alljobs?companyId=main`
+  # request shape as this repo's own `darwinbox` (tenant "dbx") pipeline.
+  # Cloudflare here is materially stricter than dbx's own tenant -- a
+  # plain `requests` call 403s even with a realistic browser User-Agent
+  # header (TLS-fingerprint/JS-challenge tier, not just a UA-string
+  # check) -- fetcher drives real headless Firefox via Playwright for
+  # every call, same convention as darwinbox/sonatasoftware/perfios.
+  # Global ~37-job board (India + US); job's own `country` field used for
+  # India filtering client-side. Keyword ignored server-side; description
+  # is inline in the list response, no separate detail fetch needed. See
+  # latentview_fetcher.py module docstring.
+  # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+toyota_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Toyota Connected India Pvt Ltd (Bengaluru/Chennai) -- Darwinbox
+  # candidatev2 candidate portal, Cloudflare-gated so Playwright/Firefox is
+  # required (plain requests get a Cloudflare challenge page). Whole
+  # company-wide pool (2 jobs at investigation time) cached once via a
+  # single page load; keyword/location ignored (no server-side filter
+  # exists on this bulk endpoint). NOT Pune-only -- confirmed via the
+  # tenant's own location facet (Chennai/Bangalore/Remote only, no Pune).
+  # Toyota Kirloskar Motor's own SuccessFactors board (careers.toyotabharat.com)
+  # was investigated and skipped: real live tenant, but company-wide total
+  # is 2 non-engineering "Senior Officer" postings at the Bidadi plant --
+  # see toyota_fetcher.py module docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+honda_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Honda Motorcycle & Scooter India (HMSI, Gurugram) -- TurboHire ATS,
+  # same vendor/backend as flipkart_fetcher.py (thapi.azurewebsites.net),
+  # different org id/tenant. Plain REST, no Playwright. Whole company-wide
+  # pool cached once; keyword/location ignored. Currently 0 open postings
+  # of any kind on this tenant (live-confirmed via the public career page
+  # itself) -- a real, working, feasible pipeline with a genuine
+  # current-zero snapshot, not a fetcher defect. Honda Cars India and
+  # Honda R&D India (HRID) were investigated and skipped: neither exposes
+  # an automatable job-search API (static branding pages / a single
+  # hardcoded job link) -- see honda_fetcher.py module docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+hyundai_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Hyundai Motor India Engineering (HMIE, Hyderabad -- NOT Pune) -- a
+  # hand-built legacy AngularJS in-house ATS at career.hmie.in. Plain REST
+  # (`/api/service/jobposting/find`), no Playwright. Whole company-wide
+  # pool cached once (currently ~2 jobs); keyword/location ignored.
+  # Confirmed NOT Pune-only -- every observed posting location is
+  # Hyderabad. See hyundai_fetcher.py module docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+volkswagen_search:
+  max_listings: 50
+  inter_page_delay: 0.2
+  # Volkswagen Group Digital/Technology Solutions India -- re-verified the
+  # earlier-wave "Pune-only" exclusion flag live and found it WRONG: the
+  # org's own current site states 4 offices (Pune, Bengaluru, Gurugram,
+  # Prague), i.e. NOT Pune-only. ATS is an older SAP SuccessFactors
+  # "Career Site" (DWR-based, a 4th distinct SF flavor for this repo,
+  # different from Job2Web classic/Unify or Career Site Builder) at
+  # career10.successfactors.com. Playwright/Chromium required for search
+  # (DWR session pairing can't be replicated by plain requests); job-detail
+  # pages ARE plain server-rendered HTML, no browser needed there. Whole
+  # tenant (~27 jobs) cached once. KNOWN GAP: no location/city field exists
+  # anywhere in this data source (search response or detail page) -- every
+  # job is treated as a bare "India" location (same accepted-gap class as
+  # deltatre_fetcher.py); a hypothetical Pune-specific posting on this
+  # tenant would not be caught by exclude_locations. See
+  # volkswagen_fetcher.py module docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+marutisuzuki_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Maruti Suzuki India Limited -- Param.ai career-page API, a new ATS
+  # vendor for this repo (maruti.app.param.ai). Plain REST
+  # (`/api/career/get_job/`), no Playwright. Whole company-wide pool
+  # (~900 jobs across ~32 departments) cached once; keyword/location
+  # ignored (no server-side filter exists). Real India IT/software
+  # presence concentrates in Gurugram/Gurgaon (corporate HQ) -- NOT Pune
+  # (19 of ~900 postings, all plant-manufacturing, not software). Live-
+  # verified real match: "Senior AI Engineer" (Gurgaon) names Generative
+  # AI/RAG/GraphRAG in its JD body. See marutisuzuki_fetcher.py module
+  # docstring.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ashokleyland_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Ashok Leyland (Chennai-headquartered Indian truck/bus manufacturer),
+  # its own Darwinbox tenant (ashokleyland.darwinbox.in, company id
+  # a61cb038c35a54). Cloudflare-gated stricter than darwinbox.com's own
+  # tenant -- Playwright/Firefox required (see ashokleyland_fetcher.py
+  # module docstring). Only 18 total open postings company-wide at
+  # investigation time, spanning Ennore/Chennai (Tamil Nadu, excluded),
+  # Pantnagar, Alwar, Gandhidham/Ahmedabad/Surat, Pune (excluded), Ranchi,
+  # Jabalpur/Bhopal/Katni, Jagdalpur -- explicitly NOT Chennai-only. 0
+  # current matches (Sales/Production/Legal/Safety roles only right now) --
+  # a genuine current-zero-match snapshot, not a structural zero: external
+  # listings confirm Ashok Leyland does post Embedded Software Engineer /
+  # ADAS System Integration Engineer roles from time to time on this same
+  # board.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cummins_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # Cummins Inc. (engine/powertrain manufacturer supplying Volvo Group/
+  # Scania/Daimler Truck/Ashok Leyland among many others). Real board is
+  # cummins.jobs (DirectEmployers "jobsyn.org" Solr API), reached via a
+  # Cloudflare-gated careers.cummins.com "EXPLORE OPPORTUNITIES" link --
+  # cummins.jobs itself is NOT gated, and its Solr API only needs a plain
+  # `x-origin: cummins.jobs` header, no Playwright. See cummins_fetcher.py
+  # module docstring. India pool (183 postings at investigation time) is
+  # Pune/Phaltan-heavy but explicitly NOT Pune-only -- real presence in
+  # Bengaluru, Ahmedabad, Gurugram, Navi Mumbai, Jaipur, Delhi, Hosur,
+  # Mysuru, Jamshedpur, Ranchi. Current on-target IT titles (Solution
+  # Architect, Data Engineer/Scientist, Software Engineer - Senior) are all
+  # in excluded Pune right now -- a genuine current-zero-match snapshot for
+  # non-excluded cities, not a fetcher bug.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
