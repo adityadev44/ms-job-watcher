@@ -144,6 +144,7 @@ matching:
     - "conversational developer"
     - "engineer, it software"
     - "engineer, software"
+    - "software technologist"
 
   # Keep a job only if its description mentions at least one of these skills.
   # A job must match BOTH this list AND primary_skills (below) — they are
@@ -1819,6 +1820,24 @@ phonepe_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+philips_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Workday (philips.wd3.myworkdayjobs.com, tenant "philips", site
+  # "jobs-and-careers"). The public careers.philips.com Phenom People
+  # frontend SSR-embeds each job's real applyUrl pointing at this Workday
+  # tenant -- same "Phenom skin over Workday" shape as GE Aerospace/GE
+  # HealthCare in this repo. Country facet is nested two levels deep
+  # (locationHierarchy1, same shape as Nvidia's tenant) with a
+  # tenant-specific India WID (6e1b2a934716103c2adde1d57e7700ea, not the
+  # shared cross-tenant GUID), ~63 India jobs at investigation time,
+  # including a genuine "Software Technologist - C# .NET Full Stack" role
+  # (Bangalore) confirmed live. DO NOT add require_tech_in_description --
+  # not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 atlassian_search:
   max_listings: 300
   inter_page_delay: 0.1
@@ -2599,6 +2618,22 @@ gehealthcare_search:
   # search frontend is Phenom People. DO NOT add
   # require_tech_in_description -- titles are genuine, not generic
   # IT-services banding; Layer 3 alone is the right precision level here.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+gevernova_search:
+  max_listings: 300
+  inter_page_delay: 0.2
+  # Workday (gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite). GE
+  # Vernova is the energy-focused company spun off from the original
+  # General Electric conglomerate in 2024 -- distinct entity/tenant from
+  # GE Aerospace and GE HealthCare, both already registered separately.
+  # No country-level facet on this tenant (same shape as GE Aerospace) --
+  # India scoped via 22 hardcoded city WIDs (Bengaluru/Chennai/Gurugram/
+  # Hyderabad/Mumbai/Noida/Pune/Vadodara). Current India pool ~303 jobs.
+  # DO NOT add require_tech_in_description -- titles are genuine engineering
+  # titles, not generic IT-services banding.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -4432,6 +4467,21 @@ roche_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+rockwell_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # Workday (rockwellautomation.wd1.myworkdayjobs.com, tenant
+  # "rockwellautomation", site "External_Rockwell_Automation"). This tenant
+  # DOES expose a normal locationCountry facet -- same cross-tenant "India"
+  # WID used by Adobe/Citi/Barclays (c4f78be1a8f14da0ab49ce1162348a5e).
+  # ~56 India jobs at investigation time, including genuine SDE-relevant
+  # titles (Data Engineer, Test Automation Engineer, Software Engineer -
+  # DevOps, IFS Cloud Developer). DO NOT add require_tech_in_description --
+  # not enabled per playbook default.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 sanofi_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -4549,6 +4599,25 @@ merck_search:
   # Senior Azure Full-Stack Developer". DO NOT add
   # require_tech_in_description -- titles are genuine engineering titles,
   # Layer 3 alone is the right precision level.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+abb_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # Workday (abb.wd3.myworkdayjobs.com, tenant "abb", site
+  # "External_Career_Page"). The public careers.abb Phenom People frontend's
+  # own /widgets search API returns {"status":"failure"} for a plain POST
+  # (same broken shape as Morningstar), but the search-results page's SSR
+  # phApp.ddo blob embeds real jobs with applyUrl pointing at this Workday
+  # tenant -- confirmed the real backend directly. Clean `locationCountry`
+  # facet with the standard cross-tenant India WID
+  # (c4f78be1a8f14da0ab49ce1162348a5e), ~217 India jobs at investigation
+  # time, many genuine Bangalore software-engineering titles (Software
+  # Engineer, Senior/Principal Software Engineer, R&D Software Engineer,
+  # Full Stack Developer, DevOps & QE). DO NOT add
+  # require_tech_in_description -- not enabled per playbook default.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -4871,6 +4940,49 @@ arm_search:
   # Software Engineer - Linux Kernel, Staff DevOps Engineer, Staff Private
   # Cloud Engineer, Senior Software Engineer - Networking for AI). 0 current
   # hard-skill matches confirmed live, but a strong pool for future matches.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cadence_search:
+  max_listings: 250
+  inter_page_delay: 0.2
+  # cadence.wd1.myworkdayjobs.com/External_Careers (Workday CXS). 188 India
+  # jobs (Noida/Bengaluru/Pune/Hyderabad -- not Pune-only). EDA software
+  # company -- India pool has a large genuine "Software Engineer II"/"Lead
+  # Software Engineer"/"Principal Software Engineer" population, much higher
+  # software-track density than the chip-design GCCs (AMD/Intel/Broadcom/TI/
+  # Arm) already tracked in this repo.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mentorgraphics_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Siemens EDA (formerly Mentor Graphics), under Siemens Digital Industries
+  # Software. jobs.sw.siemens.com (Nuxt SPA) calls prod-search-api.jobsyn.org
+  # -- a genuinely separate ATS/pipeline from jobs.siemens.com already
+  # covered by siemens_fetcher.py. 57 India jobs (Noida/Bengaluru/Pune/
+  # Hyderabad -- not Pune-only), majority genuine software engineering
+  # (Software Development Engineer, Senior Software Engineer, Software
+  # Engineer - C++ and Python, SRE Engineer).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+synopsys_search:
+  max_listings: 150
+  inter_page_delay: 0.2
+  # careers.synopsys.com (TalentBrew), org 44408. 117 India jobs (Bengaluru/
+  # Hyderabad/Pune/Noida -- not Pune-only). EDA software company -- majority
+  # ASIC/verification/analog-design hardware roles as expected, but a real
+  # software/AI track exists (Staff R&D Software Engineer, Site Reliability
+  # Staff/HPC Infrastructure Engineer, Principal Engineer - Agentic AI
+  # (CAD/EDA)). NOTE: Ansys (acquired by Synopsys, July 2025) is NOT a
+  # separate company in this repo -- ansys.com/careers redirects to the same
+  # TalentBrew org 44408 tenant this fetcher already covers (confirmed via
+  # Ansys product names like STK/ODTK appearing in this same India pool).
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -5318,6 +5430,259 @@ cummins_search:
   # Architect, Data Engineer/Scientist, Software Engineer - Senior) are all
   # in excluded Pune right now -- a genuine current-zero-match snapshot for
   # non-excluded cities, not a fetcher bug.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ericsson_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Eightfold (jobs.ericsson.com/api/pcsx/search) -- same platform family as
+  # Microsoft/Morgan Stanley/Amdocs/Qualcomm. `location=india` genuinely
+  # filters server-side (~99 of the global pool, confirmed no leakage).
+  # Large India R&D presence (Bengaluru/Chennai/Gurugram/Noida, 5G/telecom
+  # software) -- real software-engineering titles confirmed live ("Senior
+  # Software Engineer", "Grafana Developer", "Data Scientist", "Storage
+  # Engineer") alongside the expected majority of telecom-ops titles
+  # (RAN/OSS specialists) that won't match title_family. DO NOT add
+  # require_tech_in_description -- titles + Layer 3 skills give enough
+  # signal without it for now.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nokia_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Oracle HCM CE -- jobs.nokia.com/en/sites/CX_1 redirects (plain HTTP, no
+  # browser needed) to fa-evmr-saasfaprod1.fa.ocs.oraclecloud.com, site
+  # CX_1. India LOCATIONS facet (id 300000000471745) genuinely narrows
+  # server-side: 159 of ~598 global jobs. Large India R&D presence
+  # (Bengaluru/Chennai/Gurugram/Noida, 5G/telecom software) -- real
+  # software-engineering titles confirmed live ("Software Engineer",
+  # "Software Development Engineer", "Senior Software Development
+  # Engineer", "Staff SW Development Engineer", "Senior AI Engineer",
+  # "Software Architect - Platform") alongside the expected majority of
+  # telecom-ops titles (RAN/OSS/FM specialists, hardware/optical engineers)
+  # that won't match title_family. DO NOT add require_tech_in_description --
+  # titles + Layer 3 skills give enough signal without it for now.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ciena_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Workday (ciena.wd5.myworkdayjobs.com, site Careers). India via the
+  # capitalised `Location_Country` facet (Marsh McLennan/State Street
+  # convention, not lowercase locationCountry), cross-tenant India WID
+  # c4f78be1a8f14da0ab49ce1162348a5e -- confirmed no non-India leakage.
+  # Ciena is a smaller networking vendor and its India footprint is
+  # genuinely small right now: only 6 open India postings as of 2026-09-14
+  # (UX Designer, Kinaxis Analyst, Project Management, ASIC/FPGA Design
+  # Engineer, Product Security Lab Engineer, Technical Documentation
+  # Engineer), none currently matching title_family -- a genuine current-
+  # zero snapshot, not a fetcher defect (same disposition as GE
+  # Aerospace/Genpact/Icertis). Onboarded anyway since the integration
+  # works cleanly and India SDE/AI titles do appear here periodically. DO
+  # NOT add require_tech_in_description -- wouldn't change today's outcome.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+arista_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SmartRecruiters (api.smartrecruiters.com/v1/companies/AristaNetworks) --
+  # same platform family as Nagarro/NECSWS/PhonePe/Eurofins. `country=in`
+  # reliably filters server-side: 26 of the global pool, no leakage. Unlike
+  # some smaller US networking-vendor GCCs, Arista's Bengaluru/Chennai/Pune
+  # presence is genuinely substantial IC software engineering, not just
+  # sales/hardware -- confirmed live titles: "Software Engineer, Network
+  # Systems", "Software Engineer (Platform/EOS/Networking)", "Software
+  # Engineer- SONiC", "Diagnostics Software Engineer", "Software
+  # Developer(SRE) - CloudVision as a Service (CVaaS)", "Software Test
+  # Engineer (Wi-Fi/Cloud)", "Software Engineer (Routing Protocols)". DO NOT
+  # add require_tech_in_description -- titles + Layer 3 skills already give
+  # strong precision; this is a systems-software/embedded/SRE shop where
+  # AI/ML/Python and Golang/Python skills are expected to fire more often
+  # than .NET/C#.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+slice_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Kula ATS (careers.kula.ai/slice), new vendor for this repo. 38 total
+  # postings live, keyword ignored server-side, full board cached once via
+  # the unauthenticated first-party JSON API. Real engineering titles
+  # present: "SDE 2 - Backend", "SDE 2 - Data Platform", "Senior Staff
+  # Engineer - Infrastructure", "SRE 2/3", "Lead Platform Engineer",
+  # "Platform Engineer 2", "SDE 3 - Backend", "Engineering Manager -
+  # Backend/Infrastructure". All Bengaluru or "India (Remote)" -- no
+  # excluded cities observed. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cashfree_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Kula ATS (careers.kula.ai/cashfree), same vendor as slice_search. 31
+  # total postings live, keyword ignored server-side, full board cached
+  # once. Real engineering titles present: "Software Development Engineer
+  # 2/3", "Software Development Lead", "Data Scientist-3", "Principal
+  # Security Engineer", "Frontend Engineer 2", "Software Development
+  # Manager", "SDET - 1". All Bengaluru (Bellandur) or Gurgaon -- no
+  # excluded cities observed. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+unacademy_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Darwinbox candidatev2 tenant "unacademy" (Cloudflare-gated, Playwright/
+  # Firefox required -- same product as this repo's own darwinbox_fetcher.py
+  # "dbx" tenant). Keyword/location ignored server-side; full board (7 total
+  # postings, all Business/Growth/Sales -- zero engineering roles right now)
+  # cached once per process. Genuine zero-tech-match snapshot, not a fetcher
+  # bug -- same precedent as Darwinbox/Zomato-eternal/Perfios elsewhere in
+  # this repo. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+upgrad_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Darwinbox legacy "candidate" SPA tenant "upgrad" (Cloudflare-gated,
+  # Playwright/Firefox required -- same product tier as zomato_fetcher.py's
+  # "eternal" tenant). Keyword/location ignored server-side; the whole
+  # tenant genuinely has ZERO open postings right now across every
+  # department (recruitment_enabled=true but job/filters returns every
+  # facet empty) -- same "recruitment_enabled but zero postings on this
+  # legacy SPA tier" pattern documented for Zomato/Eternal and Ola Cabs.
+  # DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+threem_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # 3M Workday tenant (3m.wd1.myworkdayjobs.com, site "Search"). Searches
+  # genuinely narrow server-side via `searchText`. Registry slug is
+  # "threem" (module names can't start with a digit) -- display source
+  # stays "3M".
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+caterpillar_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Caterpillar Workday tenant (cat.wd5.myworkdayjobs.com, site
+  # "CaterpillarCareers") -- found via a real job's "Apply" link, not a
+  # tenant-name guess (the public careers.caterpillar.com frontend is
+  # Cloudflare-gated). Searches genuinely narrow server-side.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+whirlpool_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Whirlpool Eightfold tenant (whirlpool.eightfold.ai). `q=`/keyword is a
+  # no-op server-side (confirmed: every keyword returns the same 25-job
+  # India pool) -- registered in _IGNORES_KEYWORDS, fetcher caches the
+  # whole pool once. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+bigbasket_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # Darwinbox ATS, tenant "bigbasket" (bigbasket.darwinbox.in) -- same
+  # product as Zomato's "eternal" tenant, but Cloudflare Bot-Management
+  # gated at the candidateapi layer; fetcher warms up a real Playwright
+  # Chromium session for ~8s before issuing in-page fetch() calls (a cold
+  # call, or the same cookie replayed via plain requests, both 403). Board
+  # is small and genuinely non-engineering right now (5 total jobs, all
+  # ops/HR/recruiting) -- keyword/location ignored server-side, whole pool
+  # cached once. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ola_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # TurboHire ATS (same platform as Flipkart, different org/tenant) --
+  # olacareers.turbohire.co, orgId e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212
+  # (account name "ANI Technologies Pvt Ltd" / Ola Cabs, shared with Ola
+  # Electric branding on the career page itself). Every pageType (0-7)
+  # currently returns Total: 0 -- confirmed genuinely empty, not a fetcher
+  # bug, verified against the working sibling Flipkart org on the same
+  # API shape. Keyword ignored server-side (whole pool cached once, same
+  # as Flipkart). DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+urbancompany_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # First-party JSON API (no third-party ATS): POST
+  # https://www.urbanclap.com/api/v2/platform-gateway/getAllJobs
+  # (urbanclap.com is Urban Company's legacy pre-rebrand domain, still used
+  # for backend infra). No auth, no params, full HTML description embedded
+  # inline in the list response. Currently 11 total jobs company-wide, all
+  # Category/Training Manager roles -- zero engineering titles right now,
+  # but a real, working, distinct pipeline. Keyword/location ignored
+  # server-side, whole small pool cached once. DO NOT add
+  # require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ea_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Avature ATS (jobs.ea.com), same platform/endpoint shape as Macquarie
+  # (recruitment.macquarie.com) -- GET .../SearchJobs/{keyword}?jobOffset=N,
+  # server-side keyword filtering genuinely narrows results. EA's entire
+  # India presence is its Hyderabad studio (search=pune returns 0). DO NOT
+  # add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+ubisoft_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/Ubisoft2), same ATS/API
+  # shape as Nagarro/NECSWS/PhonePe. "country=in" reliable server-side
+  # filter. Current India footprint (2026-09-14) is 100% Pune (3 total
+  # postings) -- 0 matches expected today, same "feasible ATS, temporarily
+  # zero matches" shape as Icertis/BNY Mellon. DO NOT add
+  # require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zynga_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # Greenhouse board token "zyngacareers" (job-boards.greenhouse.io/zyngacareers),
+  # same ATS/shape as Groww/Razorpay. Keyword/location ignored server-side,
+  # full board cached in-module. Zynga's real India studio is Bengaluru;
+  # current India postings (2026-09-14) are all non-engineering (Game
+  # Designer/Producer/Data Analyst/PM/Animator) -- 0 matches expected today
+  # on a churning 43-job board, not a fetcher defect. DO NOT add
+  # require_tech_in_description.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
