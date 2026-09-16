@@ -1,0 +1,28 @@
+name: Send referral digest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore encrypted referral digest
+        env:
+          REFERRAL_DIGEST_HTML_GZ_B64: ${{ secrets.REFERRAL_DIGEST_HTML_GZ_B64 }}
+        run: |
+          printf '%s' "$REFERRAL_DIGEST_HTML_GZ_B64" | base64 --decode | gzip --decompress > /tmp/referral-digest.html
+      - name: Send formatted referral digest
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REFERRAL_DIGEST_RECIPIENT: ${{ secrets.REFERRAL_DIGEST_RECIPIENT }}
+        run: >
+          python src/send_referral_digest.py
+          --html /tmp/referral-digest.html
+          --subject "Today’s referral contacts and tailored LinkedIn messages | Final formatted table"
+          --recipient "$REFERRAL_DIGEST_RECIPIENT"
