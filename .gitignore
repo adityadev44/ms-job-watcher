@@ -23,3 +23,15 @@ audit_output/
 # Personal documents — this repo is public; never commit resumes or similar
 # files dropped into the project folder for reference.
 *.docx
+
+
+# Local primary-runner private data
+local/
+private/
+browser-profile/
+chrome-profile/
+cookies*
+*.sqlite
+*.sqlite3
+*.db
+*.pdf
