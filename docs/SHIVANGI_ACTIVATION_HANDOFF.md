@@ -7,7 +7,7 @@ Status checked on 2026-09-19.
 - Repository owner: adityadev44
 - Repository visibility: public
 - Shivangi GitHub username: Shikant
-- Shikant has been invited as a write collaborator. The invitation must be accepted from her GitHub account.
+- Repository access remains unchanged; ownership or collaborator changes are outside this cutover.
 - Local Windows runner support is already merged into master.
 - The existing GitHub watcher/heartbeat schedules remain active until the local machine is proven working.
 
@@ -26,9 +26,5 @@ Therefore the local referral-digest setup should start with no historical succes
 5. Run one controlled referral-digest smoke test and confirm the email appears in Sent.
 6. Enable the local Windows watcher schedule and the 2 PM / 7 PM Asia/Kolkata digest schedule.
 7. Only after steps 4-6 succeed, merge the prepared cloud-cutover PR that disables duplicate GitHub watcher schedules.
-
-## GitHub ownership note
-
-A personal-account repository has one owner and GitHub does not allow an outside collaborator to receive admin permission. Shikant therefore has the highest permission available here: write. True second owner/admin control requires moving the repository into a GitHub Organization and making both people Organization Owners.
 
 No credentials, browser cookies, resume contents, email addresses, or referral output should be committed to this repository.
