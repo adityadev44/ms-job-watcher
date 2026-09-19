@@ -17,6 +17,12 @@ Cutover review of the previous sender's Sent mail found no successfully sent ref
 
 Therefore the local referral-digest setup should start with no historical successful-digest checkpoint. Do not import ordinary forwarded job emails as completed referral digests.
 
+## Email configuration (updated 2026-09-19)
+
+- Sender: `adityadevbackup@gmail.com` (GMAIL_USER and GMAIL_APP_PASSWORD updated in GitHub secrets)
+- Alert recipient: `shivangikant31@gmail.com` (ALERT_RECIPIENT updated in GitHub secrets)
+- Local `.env` on the primary Windows machine must be updated to match.
+
 ## Safe activation sequence
 
 1. Pull latest master on the primary Windows machine.
