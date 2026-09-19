@@ -1,33 +1,17 @@
 name: Job Watcher
 
 on:
-  # Primary cadence: the Heartbeat workflow (*/10 cron) completes in ~10 s,
-  # and its completion fires this workflow_run trigger. Cross-workflow
-  # workflow_run works reliably; self-referential (same workflow) does not —
-  # GitHub blocks it entirely (empirically confirmed 2026-09-07).
-  # Net effect: a new watcher run queues within ~10 min of the previous one
-  # finishing, with no external service dependency.
-  workflow_run:
-    workflows: ["Heartbeat"]
-    types: [completed]
-
-  # Backup schedule: fires every 7 minutes at :07/:14/… (off the :00/:30
-  # peaks GitHub flags as high-load). Guards against GitHub cron delays on
-  # the Heartbeat workflow itself.
-  schedule:
-    - cron: '7/7 * * * *'
-
-  workflow_dispatch:           # manual trigger from the GitHub UI
+  # Local-primary cutover mode: no automatic GitHub schedule.
+  # Keep manual dispatch available as an emergency fallback.
+  workflow_dispatch:
 
 concurrency:
   group: job-watcher
-  # Do not cancel in-progress runs — a pending run will queue and start
-  # as soon as the current one finishes, keeping state writes serialised.
   cancel-in-progress: false
 
 permissions:
-  contents: write              # needed so the job can commit seen state back
-  actions: write               # needed for the self-dispatch step below
+  contents: write
+  actions: write
 
 jobs:
   watch:
@@ -38,9 +22,6 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Sync to latest master
-        # actions/checkout pins the SHA at run-creation time, not job-start time.
-        # Queued runs must fast-forward past state commits made while they waited,
-        # otherwise already-alerted jobs can be sent again.
         run: git pull --ff-only origin master
 
       - name: Set up Python
@@ -61,25 +42,10 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        # firefox: most Playwright-based fetchers. chromium: natwest (Cloudflare
-        # challenge blocks Firefox) and ibm (AWS WAF now returns empty bodies
-        # under Firefox; Chromium with AutomationControlled disabled bypasses it).
         run: playwright install firefox chromium
 
-      - name: Verify Playwright browsers (repair corrupted or stale-version cache)
+      - name: Verify Playwright browsers
         run: |
-          # A file existing under the cache path is not enough -- a stale
-          # cache (browser build left over from a previously-installed
-          # playwright version) can satisfy a naive existence check while
-          # still being the wrong build for the *currently installed*
-          # playwright package, which fails at launch with "Executable
-          # doesn't exist at <expected-build-path>". Actually launch both
-          # browsers to catch that case. Confirmed root cause of a real
-          # production incident (2026-09-01): this exact failure, retried
-          # 3x per company by several fetchers, went on to leak a partially
-          # -started Playwright instance into the retry, which then failed
-          # a *second*, unrelated-looking way ("Sync API inside the asyncio
-          # loop") that masked the true cause for hours of investigation.
           if ! python -c "
           from playwright.sync_api import sync_playwright
           with sync_playwright() as p:
@@ -103,25 +69,12 @@ jobs:
           ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
         run: python -u src/run_all.py --workers 20
 
-      - name: Queue next run
-        # Self-dispatch: queue the next watcher run before this one finishes
-        # so it's pending and starts immediately when this run completes.
-        # Uses GITHUB_TOKEN (actions: write permission above). Runs even on
-        # failure so the chain is never broken by a single bad run; the
-        # concurrency group ensures at most one pending run at a time.
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run watcher.yml --ref master
-
       - name: Save updated watcher state
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config merge.jsonunion.driver "python3 scripts/merge_seen_jobs_union.py %O %A %B"
-          # -u deliberately stages only already-tracked state files. The quoted
-          # pathspec covers Microsoft's seen_jobs.json and every company suffix.
           git add -u -- 'seen_jobs*.json' pipeline_failures.json
           if git diff --staged --quiet; then
             echo "No watcher state changes this run"
