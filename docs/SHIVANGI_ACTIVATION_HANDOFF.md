@@ -7,7 +7,7 @@ Status checked on 2026-09-19.
 - Repository owner: adityadev44
 - Repository visibility: public
 - Shivangi GitHub username: Shikant
-- Current Shikant repository permission: read
+- Shikant has been invited as a write collaborator. The invitation must be accepted from her GitHub account.
 - Local Windows runner support is already merged into master.
 - The existing GitHub watcher/heartbeat schedules remain active until the local machine is proven working.
 
@@ -29,6 +29,6 @@ Therefore the local referral-digest setup should start with no historical succes
 
 ## GitHub ownership note
 
-A personal-account repository has one owner. A collaborator can contribute code, but true second owner/admin control requires moving the repository into a GitHub Organization and making both people Organization Owners.
+A personal-account repository has one owner and GitHub does not allow an outside collaborator to receive admin permission. Shikant therefore has the highest permission available here: write. True second owner/admin control requires moving the repository into a GitHub Organization and making both people Organization Owners.
 
 No credentials, browser cookies, resume contents, email addresses, or referral output should be committed to this repository.
