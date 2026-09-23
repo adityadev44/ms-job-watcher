@@ -20,9 +20,9 @@ Therefore the local referral-digest setup should start with no historical succes
 ## Email configuration
 
 - Sender: `adityadevbackup@gmail.com` (GMAIL_USER and GMAIL_APP_PASSWORD updated in GitHub secrets)
-- The September 19 handoff temporarily changed the shared `ALERT_RECIPIENT` secret to `shivangikant31@gmail.com`. That also redirected every main .NET and AI job-watcher email, because the notifier has one recipient list for all companies and skill tracks.
-- On 2026-09-23 the GitHub Actions `ALERT_RECIPIENT` was corrected to `ambrishdev@rediffmail.com`, the intended recipient for the main job watcher.
-- Shivangi's referral-digest workflow must pass its own recipient explicitly and must not change the shared watcher secret.
+- This repository's GitHub Actions `ALERT_RECIPIENT` is `shivangikant31@gmail.com`; it sends Shivangi the MS/software-engineering alerts from `ms-job-watcher`.
+- Ambrish Dev's aviation/MRO alerts are produced by the separate `adityadev44/ai-job-watcher` repository, whose own `ALERT_RECIPIENT` is `ambrishdev@rediffmail.com`.
+- Never copy notification secrets between the two repositories. Shivangi's referral-digest workflow may also pass her recipient explicitly without changing either watcher's ownership.
 - A local `.env` on any active runner must use the intended recipient for that runner. Do not run cloud and local schedules concurrently.
 
 ## Safe activation sequence
