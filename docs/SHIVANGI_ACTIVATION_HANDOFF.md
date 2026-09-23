@@ -17,11 +17,13 @@ Cutover review of the previous sender's Sent mail found no successfully sent ref
 
 Therefore the local referral-digest setup should start with no historical successful-digest checkpoint. Do not import ordinary forwarded job emails as completed referral digests.
 
-## Email configuration (updated 2026-09-19)
+## Email configuration
 
 - Sender: `adityadevbackup@gmail.com` (GMAIL_USER and GMAIL_APP_PASSWORD updated in GitHub secrets)
-- Alert recipient: `shivangikant31@gmail.com` (ALERT_RECIPIENT updated in GitHub secrets)
-- Local `.env` on the primary Windows machine must be updated to match.
+- The September 19 handoff temporarily changed the shared `ALERT_RECIPIENT` secret to `shivangikant31@gmail.com`. That also redirected every main .NET and AI job-watcher email, because the notifier has one recipient list for all companies and skill tracks.
+- On 2026-09-23 the GitHub Actions `ALERT_RECIPIENT` was corrected to `ambrishdev@rediffmail.com`, the intended recipient for the main job watcher.
+- Shivangi's referral-digest workflow must pass its own recipient explicitly and must not change the shared watcher secret.
+- A local `.env` on any active runner must use the intended recipient for that runner. Do not run cloud and local schedules concurrently.
 
 ## Safe activation sequence
 

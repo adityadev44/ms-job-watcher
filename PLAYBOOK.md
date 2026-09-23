@@ -6,16 +6,15 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Runs 274 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 360 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
-### Current integration status (2026-09-08)
+### Current integration status (2026-09-23)
 
 `src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
 
-- **274 active pipelines.** The latest 20 are Apex Group, AQR, Bosch, Citco, Dun & Bradstreet, Emerson, Equifax, Murex, Nielsen, Nucleus Software, Observe.AI, Progress Software, Prudential, Quest Software, Sarvam AI, SMBC, Sun Life, Tower Research Capital, Wolters Kluwer, and WorldQuant.
-- **Previously present but formerly missing from the dated playbook narrative:** Fractal Analytics, Quantiphi, Tredence, Franklin Templeton, and SS&C Technologies. They are registered, configured, tested pipelines; their source-specific behavior remains documented in their fetcher modules and config comments.
-- **Verified current skips from this candidate pass:** Manulife (complete official Workday country facet has no India), Mizuho (official India operation is Pune-only, an excluded location), Mu Sigma (official careers page accepts email applications and points to LinkedIn rather than exposing an automatable employer job board), Nintex (complete official jobs dataset has no India roles), and Ivanti (current official Greenhouse board has two global roles and no India roles).
-- **Still unresolved, not skips:** Schroders, abrdn, Elevance Health, Principal Financial, Milliman, Avaloq, Experian, LatentView Analytics, Course5i/C5i, Krutrim, Gupshup, Motilal Oswal, Slice, ABB, Philips, and Tesco. Oracle FSS currently appears inside the existing Oracle hiring pipeline; do not add a duplicate until a separate official OFSS board is proven. Experian, ABB, and Philips visibly have India hiring, but their reproducible official API/tenant details still need capture. Tesco's discovered portal was UK-scoped. LatentView's official Darwinbox board needs browser-backed capture.
+- **360 active pipelines.** `src/company_registry.py`, the registry-count test, and README agree on this count. Later dated entries below document the additions after Wave 22, including Slice, ABB, Philips, LatentView Analytics, the automotive/GCC batches, and other September expansions.
+- **Email routing is operational configuration, not candidate ownership.** GitHub Actions reads the sole recipient list from the `ALERT_RECIPIENT` repository secret at job start; `src/notifier.py` sends every company and both skill tracks to that list. As of 2026-09-23 it is `ambrishdev@rediffmail.com`. Do not repoint it during a referral-digest or candidate handoff unless the user explicitly asks to move the main watcher alerts too. Cancel already-running watcher jobs before a recipient change because they retain the old secret value for their lifetime.
+- Historical “remaining,” “unresolved,” and skip lists below are snapshots from their dated investigation. Re-check the registry and later entries before acting on them; several September 8 items were subsequently resolved.
 
 ---
 
