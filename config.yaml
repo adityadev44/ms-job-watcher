@@ -5687,6 +5687,105 @@ zynga_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+ather_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/AtherEnergy) — same ATS pattern
+  # as Nagarro/PhonePe/NEC. Company identifier "AtherEnergy" verified live
+  # 2026-09-26 (api.smartrecruiters.com/v1/companies/AtherEnergy/postings returns
+  # HTTP 200 with valid pagination). Board has 0 open positions at check date —
+  # 0 matches is expected on this thin board, not a fetcher defect. Ather recently
+  # IPO'd; hiring patterns may shift. country=in is a reliable server-side filter;
+  # q keyword is a loose pre-filter only. India offices: Bengaluru (HQ), Chennai.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+byjus_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # BYJU's (Think & Learn Pvt Ltd) ATS is currently INACCESSIBLE (2026-09-26).
+  # Lever boards "byjus"/"thinkandlearn" both 404; Greenhouse "byjus" also 404;
+  # careers.byjus.com has a broken SSL certificate. BYJU's has had major
+  # financial difficulties in 2024-2025 (insolvency proceedings, mass layoffs).
+  # The fetcher returns empty results gracefully. Config retained for when/if
+  # they resume hiring on a discoverable public ATS.
+  # India offices (historical): Bengaluru (HQ), Hyderabad, Delhi.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+delhivery_search:
+  max_listings: 100
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/Delhivery) — same ATS pattern
+  # as Nagarro/PhonePe/NEC. Company identifier "Delhivery" verified live
+  # 2026-09-26 (api.smartrecruiters.com/v1/companies/Delhivery/postings returns
+  # HTTP 200 with valid pagination). Board has 0 open positions at check date —
+  # 0 matches is expected on this thin board, not a fetcher defect. country=in
+  # is a reliable server-side filter; q keyword is a loose pre-filter only.
+  # India offices: Gurugram (HQ), Bengaluru, Hyderabad.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dream11_search:
+  max_listings: 100
+  inter_page_delay: 0.1
+  # No confirmed public ATS found (2026-09-26). LinkedIn shows 0 open jobs.
+  # Lever/Greenhouse/SmartRecruiters/Keka/Darwinbox tokens all returned 404
+  # or redirected to generic pages. Fetcher returns [] gracefully so the
+  # pipeline runs without error. Re-investigate when Dream11 re-opens
+  # public hiring. DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dunzo_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Dunzo careers site is unreachable — company effectively wound down in 2024-2025
+  # (domain refuses TCP connections). This section exists so the registry entry is
+  # complete; the fetcher returns 0 jobs immediately without making any network call.
+  # Keywords are ignored server-side (stub always returns empty). India office was
+  # Bengaluru only.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+oyo_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SmartRecruiters (careers.smartrecruiters.com/OYO1). "q" keyword param is
+  # a loose server-side pre-filter; country=in is reliable. Board confirmed
+  # live 2026-09-26 with 0 open jobs (OYO has scaled back hiring; offices in
+  # Gurugram, Bengaluru, Hyderabad). DO NOT add require_tech_in_description.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+porter_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Darwinbox "candidate" SPA (porter.darwinbox.in/ms/candidate/careers).
+  # Keywords are ignored server-side — the whole board is cached once via
+  # Playwright/Firefox (required to clear Cloudflare bot management). India
+  # offices: Bengaluru (HQ), Mumbai, Delhi/NCR.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+rapido_search:
+  max_listings: 200
+  inter_page_delay: 0.1
+  # Darwinbox "candidate" SPA (rapido.darwinbox.in/ms/candidate/careers).
+  # Keywords are ignored server-side — the whole board is cached once via
+  # Playwright/Firefox (required to clear Cloudflare bot management). India
+  # offices: Bengaluru (HQ), Hyderabad.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

@@ -397,7 +397,7 @@ def main(argv: list[str] | None = None) -> int:
         "",
         "## What this audit does NOT cover",
         "",
-        "- **Roles at companies not yet onboarded.** This audit only sees roles from the 153 "
+        "- **Roles at companies not yet onboarded.** This audit only sees roles from the 360 "
         "companies already in the registry — it has no visibility into roles at any company "
         "without a fetcher. That is a separate workstream (company expansion), not something "
         "this log-based audit can measure.",

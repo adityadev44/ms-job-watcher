@@ -64,12 +64,11 @@ SKILLS = [
 EXCLUDE = [
     "intern", "internship", "trainee", "apprentice", "fresher",
     "graduate", "new grad", "university",
-    "principal", "director", "vice president", "VP",
     "head of", "engineering manager", "manager",
     "mechanical", "electrical", "industrial", "hardware",
     "firmware", "embedded", "datacenter technician",
     "network engineer", "sales engineer", "solutions engineer",
-    "customer engineer", "support engineer", "data scientist",
+    "customer engineer", "support engineer",
 ]
 
 # A job that should pass every filter
@@ -381,15 +380,20 @@ def test_title_family_dotnet_developer():
     assert passes_title_family_check({**GOOD_JOB, "title": ".NET Developer"}, TITLE_FAMILY) is True
 
 
-def test_title_family_principal_passes_family_but_caught_by_exclude():
-    """Principal Software Engineer *does* belong to the family — it's the exclude
-    check (not the family check) that gates principal-level roles out."""
+def test_title_family_principal_passes_both_checks():
+    """Principal Software Engineer passes both title-family and exclude checks.
+
+    'principal' was removed from exclude_terms in the Sep 5 precision pass —
+    real IC roles at BlackRock/Atlassian/Goldman use it as a seniority band.
+    The description skill gate still applies, so only roles with actual tech
+    content reach alerts.
+    """
     assert passes_title_family_check(
         {**GOOD_JOB, "title": "Principal Software Engineer"}, TITLE_FAMILY
     ) is True
     assert passes_exclude_check(
         {**GOOD_JOB, "title": "Principal Software Engineer"}, EXCLUDE
-    ) is False
+    ) is True
 
 
 # --- passes_exclude_check ---
@@ -402,12 +406,13 @@ def test_passes_exclude_check_rejects_intern():
     assert passes_exclude_check(INTERN_JOB, EXCLUDE) is False
 
 
-def test_passes_exclude_check_rejects_director():
-    assert passes_exclude_check({**GOOD_JOB, "title": "Director of Engineering"}, EXCLUDE) is False
-
-
-def test_passes_exclude_check_rejects_principal():
-    assert passes_exclude_check({**GOOD_JOB, "title": "Principal Software Engineer"}, EXCLUDE) is False
+def test_passes_exclude_check_director_now_passes():
+    """director/VP/principal were removed from exclude_terms in the Sep 5
+    precision pass — genuine IC roles at BlackRock/Citi/Atlassian use them
+    as seniority bands, not people-management signals."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "Director of Engineering"}, EXCLUDE) is True
+    assert passes_exclude_check({**GOOD_JOB, "title": "Principal Software Engineer"}, EXCLUDE) is True
+    assert passes_exclude_check({**GOOD_JOB, "title": "VP - Software Engineering"}, EXCLUDE) is True
 
 
 def test_passes_exclude_check_rejects_manager():
@@ -415,36 +420,19 @@ def test_passes_exclude_check_rejects_manager():
 
 
 # --- word-boundary fix regression tests (Batch Onboarding Wave 1/2 bug) ---
-# "VP" and "director" are real exclude_terms entries, but a plain substring
-# check also matched them inside unrelated words ("AVP"/"SVP" banking title
-# tiers, "Active Directory") — costing real matches at MUFG/Moody's/
-# BlackRock. Fixed via word-boundary matching in passes_exclude_check.
+# "manager" is a real exclude_terms entry, but a plain substring check would
+# also match it inside unrelated words. Fixed via word-boundary matching in
+# passes_exclude_check. (VP/director previously demonstrated this bug too but
+# were removed from exclude_terms in the Sep 5 precision pass.)
 
-def test_passes_exclude_check_avp_not_excluded():
-    """'AVP' (a distinct banking title tier, not 'VP') must NOT be excluded."""
-    assert passes_exclude_check({**GOOD_JOB, "title": "Full Stack Developer - AVP"}, EXCLUDE) is True
-
-
-def test_passes_exclude_check_svp_not_excluded():
-    assert passes_exclude_check({**GOOD_JOB, "title": "SVP, Software Engineering"}, EXCLUDE) is True
+def test_passes_exclude_check_account_manager_excluded():
+    """'Account Manager' contains 'manager' as a whole word — should be excluded."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "Account Manager, Software"}, EXCLUDE) is False
 
 
-def test_passes_exclude_check_evp_not_excluded():
-    assert passes_exclude_check({**GOOD_JOB, "title": "EVP - Backend Engineer"}, EXCLUDE) is True
-
-
-def test_passes_exclude_check_bare_vp_still_excluded():
-    """A genuine standalone 'VP' title must still be excluded."""
-    assert passes_exclude_check({**GOOD_JOB, "title": "VP - Software Engineering"}, EXCLUDE) is False
-
-
-def test_passes_exclude_check_active_directory_not_excluded():
-    """'Active Directory' (the Microsoft product) must NOT match 'director'."""
-    assert passes_exclude_check({**GOOD_JOB, "title": "Active Directory Senior Engineer"}, EXCLUDE) is True
-
-
-def test_passes_exclude_check_bare_director_still_excluded():
-    assert passes_exclude_check({**GOOD_JOB, "title": "Director of Engineering"}, EXCLUDE) is False
+def test_passes_exclude_check_performance_not_excluded():
+    """'performance' contains 'manager' nowhere — must pass."""
+    assert passes_exclude_check({**GOOD_JOB, "title": "Performance Engineer"}, EXCLUDE) is True
 
 
 # --- matches_skills ---

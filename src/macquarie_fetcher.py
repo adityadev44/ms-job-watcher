@@ -16,31 +16,28 @@ taken on faith without hitting it live first.
 
 ATS behavior (recruitment.macquarie.com, Avature):
 - Search: GET
-    https://recruitment.macquarie.com/en_US/careers/SearchJobs/{urlencoded keyword}
-        ?listFilterMode=1&jobRecordsPerPage=9&jobOffset={N}
+    https://recruitment.macquarie.com/en_US/careers/SearchJobs/
+        ?jobRecordsPerPage=9&jobOffset={N}
   Plain server-rendered HTML -- no JS/Playwright needed. `jobRecordsPerPage`
   is NOT honoured above the site's fixed page size of 9; pagination must
   walk `jobOffset` in steps of 9 regardless of the value requested.
-- Unlike most Workday tenants in this repo, the free-text `search` box DOES
-  filter server-side by keyword -- result totals differ meaningfully per
-  keyword ("software engineer" -> 74, "AI engineer" -> 71, "C# developer"
-  -> 2, ".NET developer" -> 0). `#` is safely URL-encoded by
-  `urllib.parse.quote` and does not break search the way it did for TCS's
-  iBegin portal -- no special-case workaround needed here.
+- **URL change (2026-09-26)**: The old keyword-in-path format
+  `SearchJobs/{urlencoded keyword}?listFilterMode=1&...` no longer works --
+  it redirects to an error page. The new format is `SearchJobs/` with no
+  keyword in the path. The `jobKeyword` query parameter also has no effect
+  (verified: same 580 results with or without it). Server-side keyword
+  filtering via URL is gone. All keyword matching is now handled client-side
+  by matcher.py after this fetcher returns its cached India jobs.
 - No location/country facet is usable: the site's "Countries"/"Cities"
   fields only populate via an opaque AJAX autocomplete (numeric IDs, not
-  discoverable from a plain GET). Appending "india" as a second search term
-  looked promising (`search="{keyword} india"` narrowed "software engineer"
-  74 -> 15) but is UNRELIABLE -- a side-by-side ID-set diff against the
-  keyword-only result set showed it silently dropped 5 genuine India
-  postings and pulled in 1 that wasn't India. Do not use that shortcut.
+  discoverable from a plain GET). Location text never contains the word
+  "India" itself, so ", India" is appended only after a city-name whitelist
+  match (Lowe's/Invesco pattern), not blindly -- most Macquarie postings are
+  Sydney/London/Singapore/etc.
 - Every India posting is one of exactly two offices -- "Gurugram Office" or
   "Hyderabad Office" -- verified by paging through several keywords' full
   unfiltered result sets and cross-checking against a `search=india` query,
-  which independently surfaced the same two office names only. Location
-  text never contains the word "India" itself, so ", India" is appended
-  only after a city-name whitelist match (Lowe's/Invesco pattern), not
-  blindly -- most Macquarie postings are Sydney/London/Singapore/etc.
+  which independently surfaced the same two office names only.
 - Posting dates are already absolute ("11 Feb 2026" in search results,
   "11-Feb-2026" on the detail page) -- no relative "Posted N Days Ago"
   parsing needed, unlike the Workday fetchers in this repo.
@@ -50,10 +47,11 @@ ATS behavior (recruitment.macquarie.com, Avature):
   same URL serves both the apply link and the description fetch; there is
   no separate JSON detail API.
 
-Because the search endpoint genuinely filters by keyword server-side, each
-keyword's full India-filtered result set is fetched once (paginating
-`jobOffset` in steps of 9) and cached in-module, then re-sliced by
-(start, num) for matcher.py's repeated per-keyword page calls.
+Because server-side keyword filtering is no longer available, the full
+India-filtered job set is fetched once per process (paginating `jobOffset`
+in steps of 9 through all ~580 global postings) and cached in-module, then
+re-sliced by (start, num) for matcher.py's repeated per-keyword page calls.
+matcher.py handles all keyword matching on titles client-side.
 """
 
 from __future__ import annotations
@@ -61,7 +59,6 @@ from __future__ import annotations
 import re
 import time
 from datetime import datetime
-from urllib.parse import quote
 
 import requests
 from bs4 import BeautifulSoup
@@ -70,7 +67,7 @@ _BASE = "https://recruitment.macquarie.com"
 _SEARCH_BASE = f"{_BASE}/en_US/careers/SearchJobs"
 
 _SITE_PAGE_SIZE = 9  # fixed by the site; jobRecordsPerPage is not honoured above this
-_MAX_PAGES_PER_KEYWORD = 60  # defensive cap (~540 raw jobs) against runaway pagination
+_MAX_PAGES = 70  # defensive cap (~630 raw jobs) -- global board is ~580 total
 
 # The only two India offices observed across every keyword tried, cross-checked
 # against an independent `search=india` query. Location text never says
@@ -92,9 +89,10 @@ class RateLimitError(Exception):
     """Raised on 429 / persistent connection failure from Macquarie's site."""
 
 
-# Module-level cache: filled once per keyword, reused across matcher.py's
-# repeated (start, num) page calls for that same keyword.
-_cache: dict[str, list[dict]] = {}
+# Module-level cache: filled once per process (no server-side keyword filter
+# available), reused across matcher.py's repeated per-keyword page calls.
+_all_india_jobs: list[dict] = []
+_cache_filled: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -197,19 +195,27 @@ def _parse_search_page(html: str) -> list[dict]:
     return jobs
 
 
-def _fill_cache_for_keyword(keyword: str, timeout: int) -> list[dict]:
-    key = keyword.strip().lower()
-    if key in _cache:
-        return _cache[key]
+def _fill_cache(timeout: int) -> None:
+    """Fetch all Macquarie jobs once, keep only India offices, cache globally.
+
+    Server-side keyword filtering is no longer available (the SearchJobs URL
+    no longer accepts a keyword path segment as of 2026-09-26). The full
+    global board (~580 jobs) is paginated once per process; matcher.py
+    handles keyword matching on titles client-side.
+    """
+    global _cache_filled, _all_india_jobs
+    if _cache_filled:
+        return
+    _cache_filled = True
 
     collected: list[dict] = []
     seen_ids: set[str] = set()
     offset = 0
 
-    for _ in range(_MAX_PAGES_PER_KEYWORD):
+    for _ in range(_MAX_PAGES):
         url = (
-            f"{_SEARCH_BASE}/{quote(keyword)}"
-            f"?listFilterMode=1&jobRecordsPerPage={_SITE_PAGE_SIZE}&jobOffset={offset}"
+            f"{_SEARCH_BASE}/"
+            f"?jobRecordsPerPage={_SITE_PAGE_SIZE}&jobOffset={offset}"
         )
         r = _get(url, timeout)
         page_jobs = _parse_search_page(r.text)
@@ -236,8 +242,7 @@ def _fill_cache_for_keyword(keyword: str, timeout: int) -> list[dict]:
         offset += _SITE_PAGE_SIZE
         time.sleep(0.15)
 
-    _cache[key] = collected
-    return collected
+    _all_india_jobs = collected
 
 
 # ---------------------------------------------------------------------------
@@ -253,8 +258,15 @@ def fetch_jobs(
     sort_by: str = "date",
     timeout: int = 20,
 ) -> list[dict]:
-    jobs = _fill_cache_for_keyword(keyword, timeout)
-    return jobs[start : start + num]
+    """Return a page of Macquarie India jobs from the cached board.
+
+    keyword/location are accepted for interface compatibility. Since
+    server-side keyword filtering is no longer available (Avature URL
+    structure changed 2026-09-26), the full India job set is fetched once
+    and cached; matcher.py handles keyword matching on titles client-side.
+    """
+    _fill_cache(timeout)
+    return _all_india_jobs[start : start + num]
 
 
 def fetch_job_description(
