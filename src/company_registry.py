@@ -86,6 +86,7 @@ _PIPELINE_DATA = (
     ("bigbasket", "BigBasket", False),
     ("birlasoft", "Birlasoft", False),
     ("blackrock", "BlackRock", False),
+    ("blackstone", "Blackstone", False),
     ("bloomberg", "Bloomberg", False),
     ("bmw", "BMW TechWorks India", False),
     ("bnpparibas", "BNP Paribas", False),

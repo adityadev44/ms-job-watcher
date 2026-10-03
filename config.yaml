@@ -2343,6 +2343,21 @@ blackrock_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+blackstone_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Workday CXS (blackstone.wd1.myworkdayjobs.com/Blackstone_Careers). All
+  # Blackstone corporate and BXTI (Blackstone Technology & Innovations) India
+  # roles post here. India offices: Bangalore (primary), Mumbai. No dedicated
+  # India location facet confirmed -- India scoping done client-side by
+  # filtering locationsText for known city substrings (same as browserstack).
+  # searchText narrows server-side. Limit hard-capped at 20 by Workday.
+  # BXTI India roles include Python/FastAPI/AWS data engineering, generative
+  # AI and LLM platform engineering (VP/associate level).
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 natwest_search:
   max_listings: 100
   inter_page_delay: 5.0
