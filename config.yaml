@@ -5044,6 +5044,23 @@ synopsys_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+costco_search:
+  max_listings: 100
+  inter_page_delay: 0.5
+  # Talent500 / ANSR managed GCC platform (prod-warmachine.talent500.co).
+  # Costco Wholesale IT opened Hyderabad GCC July 2025 (~1,000 planned hires).
+  # Public JSON API, no auth: api/v3/jobs/search/?company_slug=costco&size=200.
+  # 29 total jobs as of 2026-10-03; all Hyderabad. No server-side keyword
+  # filter (entire board fetched per run). Descriptions inline via
+  # primary_skills + secondary_skills skill lists. require_tech_in_description
+  # filters out non-tech roles (HR, Procurement, Payroll) on the same board.
+  # Confirmed tech roles: C#/.Net Core (x5), MLOps, Computer Vision AI,
+  # Data Scientist (Vertex AI), Data Engineer (BigQuery/Dataflows).
+  require_tech_in_description: true
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 continental_search:
   max_listings: 200
   inter_page_delay: 0.2
@@ -5234,6 +5251,24 @@ zsassociates_search:
   # `country=India` genuinely filters server-side (47 of 257 global jobs);
   # keywords are ignored -- fetcher caches the full India pool once.
   # DO NOT add require_tech_in_description unless explicitly asked
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+tmobile_search:
+  max_listings: 100
+  inter_page_delay: 0.5
+  # Talent500 / ANSR managed GCC platform (prod-warmachine.talent500.co).
+  # T-Mobile (TMUS Global Solutions) opened Hyderabad GCC June 2026 (~1,000
+  # planned hires, ~250,000 sq ft campus). Public JSON API, no auth:
+  # api/v3/jobs/search/?company_slug=t-mobile&size=200. 73 total jobs as of
+  # 2026-10-03; all Hyderabad. No server-side keyword filter (entire board
+  # fetched per run). Descriptions inline via primary_skills lists.
+  # require_tech_in_description filters out benefits/HR/SOX/payroll roles.
+  # Confirmed tech roles: Sr Engineer AI (MCP/LLM), Manager SE (Agentic AI/
+  # GenAI/LLM), Sr Engineer Python Backend (FastAPI/Redis/Kafka), Manager
+  # DevOps (AWS/Azure), Principal SRE, Sr Architect Data (Snowflake/DBT).
+  require_tech_in_description: true
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
