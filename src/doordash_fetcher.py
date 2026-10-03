@@ -3,10 +3,17 @@
 Note: DoorDash's global board (token `doordashusa`, 450+ reqs) has NO genuine
 India locations -- the only "india"-looking hits are false positives like
 "Indianapolis, IN". The real India hiring lives on a separate, smaller
-Greenhouse tenant discovered via web search of live `careersatdoordash.com`
-job URLs: token `doordashindia` (~20 reqs, all Hyderabad-based). DoorDash's
-2022 acquisition of Wolt is Europe/APAC-focused and not relevant to India
-coverage here.
+Greenhouse tenant: token `doordashindia`, found via web search of live
+`careersatdoordash.com` job URLs. DoorDash's 2022 Wolt acquisition is
+Europe/APAC-focused and not relevant to India coverage here.
+
+**GCC update (2026-09-30):** DoorDash opened a Global Capability Centre in
+Hyderabad on 30 September 2026, planning 3,000 India jobs over two years
+(initial ~500 in Customer Experience & Integrity + G&A). All GCC hiring
+posts to this same `doordashindia` board -- no new tenant or URL change.
+The pre-existing Pune tech office (software/data/analytics, acquired via
+Chowbotics 2021) also continues to post here. Board volume will grow
+materially from its former ~20-25 reqs as the GCC ramps.
 """
 from __future__ import annotations
 import html, re, time

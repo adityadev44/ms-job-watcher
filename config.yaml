@@ -2566,11 +2566,14 @@ doordash_search:
   # Official Greenhouse tenant `doordashindia` (careersatdoordash.com's
   # global board `doordashusa` has zero genuine India locations -- only
   # false-positive substring hits like "Indianapolis, IN"). doordashindia
-  # is a small, separate ~20-req board, all Hyderabad-based, found via a
-  # live careersatdoordash.com job URL rather than guessed. Wolt (acquired
+  # is a small, separate board, all Hyderabad-based, found via a live
+  # careersatdoordash.com job URL rather than guessed. Wolt (acquired
   # 2022) is Europe/APAC-focused, not relevant to India coverage. Keyword
-  # search is not supported by this API; whole small India pool cached
-  # once per process (content=true also gives inline descriptions).
+  # search is not supported by this API; whole India pool cached once per
+  # process (content=true also gives inline descriptions).
+  # GCC context (2026-09-30): DoorDash opened a Hyderabad GCC targeting
+  # 3,000 India jobs over two years. All GCC and Pune tech-office postings
+  # appear on this same doordashindia board -- no tenant change needed.
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -3328,6 +3331,18 @@ soprasteria_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+southwestairlines_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Phenom People (careers.southwestair.com/in/en/search-results) -- India-
+  # scoped landing page serving phApp.ddo SSR JSON, same pattern as Cisco
+  # and United Airlines. ~21 India jobs (Hyderabad GCC, announced Sept 2026).
+  # keywords= narrows server-side (confirmed: 21 → 9 for "python").
+  # sortBy=Most recent is a working param; pagination via from=<offset>.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 xoriant_search:
   max_listings: 30
   inter_page_delay: 0.2
@@ -4057,6 +4072,19 @@ reliance_search:
   # a bare GET with no query string, so keywords are ignored and the whole
   # tiny board is cached once. No Playwright needed. Descriptions via a
   # separate detail-page fetch.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+vanguard_search:
+  max_listings: 60
+  inter_page_delay: 0.2
+  # Workday CXS (vanguard.wd5.myworkdayjobs.com/IndiaCareers). India-scoped
+  # site; no location-country facet override needed (IndiaCareers site is
+  # India-only by design). searchText narrows server-side (standard Workday
+  # behavior). Limit hard-capped at 20 by Workday; pagination-wraparound
+  # guard via _FIRST_PAGE_IDS. locationsText normalised from "IND.<City>"
+  # format. postedOn is a relative string ("Posted N Days Ago").
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
