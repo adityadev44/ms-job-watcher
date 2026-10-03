@@ -2119,11 +2119,11 @@ Investigated 7 gaming companies (EA, Ubisoft, Zynga, Dream11, Mobile Premier Lea
 
 **Registry/config changes:** `_PIPELINE_DATA` gained all 8 alphabetically. `_IGNORES_KEYWORDS`: added `byjus`, `dunzo`, `porter`, `rapido`. `_USES_PLAYWRIGHT`: added `porter`, `rapido`. `config.yaml`: added `ather_search`, `byjus_search`, `delhivery_search`, `dream11_search`, `dunzo_search`, `oyo_search`, `porter_search`, `rapido_search` before `notifications:`. All 527 tests pass. `test_registry_flags_playwright_backed_fetchers` updated to include `porter`/`rapido`; count assertion updated to 368.
 
-## DoorDash GCC + new GCC wave (2026-10-03): 3 new companies; DoorDash GCC comment update; 368 → 371
+## DoorDash GCC + new GCC wave (2026-10-03): 4 new companies; DoorDash GCC comment update; 368 → 372
 
 **DoorDash GCC update (comment-only):** DoorDash opened a Global Capability Centre in Hyderabad on 30 September 2026, targeting ~3,000 India hires over two years (initial ~500 in Customer Experience & Integrity + G&A functions). No fetcher or ATS change needed — all GCC jobs post to the existing `doordashindia` Greenhouse tenant already in this repo. `doordash_fetcher.py` and `config.yaml` (`doordash_search`) updated with GCC context and projected volume growth.
 
-**New companies (368 → 371):**
+**New companies (368 → 372):**
 
 - **Southwest Airlines** (`southwestairlines`) — Phenom People (`careers.southwestair.com/in/en/search-results`). Southwest opened a Hyderabad GCC (announced Sept 2026). India-scoped landing page serves `phApp.ddo` SSR JSON, same pattern as `cisco_fetcher.py` and `unitedairlines_fetcher.py`. `keywords=` narrows server-side (21 total → 9 for "python" confirmed); `sortBy=Most recent` works; `from=<offset>` pagination works; `location` field already contains "India". No Playwright needed. `fetch_job_description` hits `/in/en/job/{reqId}/{slug}` and reads schema.org JobPosting JSON-LD; `datePosted` is unreliable (same class as Cisco/United Airlines) — returns `""` to preserve the search-response date.
 
@@ -2131,4 +2131,6 @@ Investigated 7 gaming companies (EA, Ubisoft, Zynga, Dream11, Mobile Premier Lea
 
 - **Blackstone / BXTI** (`blackstone`) — Workday CXS (`blackstone.wd1.myworkdayjobs.com/Blackstone_Careers`). BXTI (Blackstone Technology & Innovations) is Blackstone's in-house tech organisation; all India BXTI and corporate roles post to the single `Blackstone_Careers` tenant. India offices: Bangalore (primary), Mumbai. No dedicated India location facet confirmed — India scoping is client-side via `locationsText` city-substring filter (Bangalore/Bengaluru/Mumbai/Hyderabad etc.), same approach as `browserstack_fetcher.py`. BXTI India roles confirmed: Python/FastAPI, AWS data engineering, generative AI / LLM platform engineering (VP/associate level). Standard Workday CXS shape: `searchText` narrows server-side, 20-per-page cap, wraparound guard.
 
-**Registry/config changes:** `_PIPELINE_DATA` gained `southwestairlines` (after `soprasteria`), `vanguard` (before `vedanta`), and `blackstone` (after `blackrock`) alphabetically. `config.yaml`: added corresponding `*_search` sections. `seen_jobs_*.json` files created empty for all three. `test_company_registry_runner.py` count assertion updated to 371. All 20 registry tests pass.
+- **JLL** (`jll`) — Workday CXS (`jll.wd1.myworkdayjobs.com/jllcareers`). Fortune 500 commercial real estate and technology company. India tech hub in Bangalore (300+ roles) plus Hyderabad GCC opened Aug 2026 (~1,600 planned hires). India roles: C# backend, Python (Django/DRF/FastAPI), AI/LLM/RAG (Azure OpenAI, LangChain). India filtered server-side via the standard cross-tenant `Location_Country` facet WID `c4f78be1a8f14da0ab49ce1162348a5e` (confirmed from live job URL). Job IDs in `REQ######` format.
+
+**Registry/config changes:** `_PIPELINE_DATA` gained `southwestairlines` (after `soprasteria`), `vanguard` (before `vedanta`), `blackstone` (after `blackrock`), and `jll` (after `jioplatforms`) alphabetically. `config.yaml`: added corresponding `*_search` sections. `seen_jobs_*.json` files created empty for all four. `test_company_registry_runner.py` count assertion updated to 372. All 20 registry tests pass.

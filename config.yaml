@@ -4482,6 +4482,20 @@ grab_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+jll_search:
+  max_listings: 400
+  inter_page_delay: 0.2
+  # Workday CXS (jll.wd1.myworkdayjobs.com/jllcareers). India filtering via
+  # the standard cross-tenant Location_Country facet WID
+  # c4f78be1a8f14da0ab49ce1162348a5e (confirmed from live job URL). ~300+
+  # India jobs across Bangalore tech hub + Hyderabad GCC (opened Aug 2026,
+  # ~1,600 planned hires). India roles: C# backend, Python (Django/DRF/
+  # FastAPI), AI/LLM/RAG (Azure OpenAI, LangChain) -- direct match for both
+  # tracks. Job IDs in REQ###### format.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 jnj_search:
   max_listings: 200
   inter_page_delay: 0.2

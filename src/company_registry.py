@@ -214,6 +214,7 @@ _PIPELINE_DATA = (
     ("itc", "ITC Limited", False),
     ("ixigo", "ixigo", False),
     ("jioplatforms", "Jio Platforms", False),
+    ("jll", "JLL", False),
     ("jnj", "Johnson & Johnson", False),
     ("jpmorgan", "JPMorgan Chase", False),
     ("jsw", "JSW Group", False),
