@@ -5878,6 +5878,30 @@ rapido_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+zimmerbiomet_search:
+  max_listings: 200
+  inter_page_delay: 0.15
+  # Phenom People (careers.zimmerbiomet.com/us/en/search-results, phApp.ddo
+  # pattern). Backend is SAP SuccessFactors (career8.successfactors.com/careers
+  # ?company=zimmerin01), which requires login for full descriptions —
+  # descriptionTeaser (~200 chars) from the search response is used instead.
+  # India offices: Bengaluru (GCC). Keywords may narrow the pool server-side.
+  # Confirmed live 2026-10-05: 4 India jobs out of 10 on first page.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nable_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  # SmartRecruiters (api.smartrecruiters.com/v1/companies/N-able).
+  # N-able announced their Bengaluru GCC in the week of 2026-09-26 (100+
+  # engineers planned). 0 India jobs live as of 2026-10-05 recon; board is
+  # active and will pick up new postings automatically.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

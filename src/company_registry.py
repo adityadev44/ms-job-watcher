@@ -409,6 +409,8 @@ _PIPELINE_DATA = (
     ("threem", "3M", False),
     ("caterpillar", "Caterpillar Inc.", False),
     ("whirlpool", "Whirlpool Corporation", False),
+    ("zimmerbiomet", "Zimmer Biomet", False),
+    ("nable", "N-able", False),
 )
 
 _IGNORES_KEYWORDS = frozenset(
