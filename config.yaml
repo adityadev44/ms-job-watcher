@@ -6225,6 +6225,55 @@ citizensfinancial_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+arctera_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+rapid7_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+zendesk_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+litmos_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+kuehnenagel_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mythic_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+graphcore_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

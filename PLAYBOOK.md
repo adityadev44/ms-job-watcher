@@ -6,13 +6,13 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Runs 420 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 427 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
 ### Current integration status (2026-10-09)
 
 `src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
 
-- **420 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave added 42 sources to 376; the subsequent workaround pass added isolved and Citizens Financial. LiveRamp and Wayfair remain blocked; Truist has partial partner coverage through the existing Infosys pipeline, not a separate verified India feed.
+- **427 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave added 42 sources to 376; the workaround pass added isolved and Citizens Financial, then the lower-priority pass added seven more. LiveRamp and Wayfair remain blocked; Truist has partial partner coverage through the existing Infosys pipeline, not a separate verified India feed.
 - **This repository belongs to Shivangi's MS/software-engineering search.** GitHub Actions reads its recipient list from this repository's `ALERT_RECIPIENT` secret; as of 2026-09-23 it is `shivangikant31@gmail.com`. The separate `adityadev44/ai-job-watcher` repository belongs to Ambrish Dev's aviation/MRO search and uses its own `ALERT_RECIPIENT` secret (`ambrishdev@rediffmail.com`). Never copy notification secrets between these repositories. Cancel already-running jobs before a recipient change because they retain the old secret value for their lifetime.
 - Historical “remaining,” “unresolved,” and skip lists below are snapshots from their dated investigation. Re-check the registry and later entries before acting on them; several September 8 items were subsequently resolved.
 
@@ -2343,3 +2343,95 @@ defect: their description filters were boolean `true`, but the runner requires a
 list of terms. Replaced both with the established narrow .NET/AI term list (one
 shared YAML anchor), without disabling the opt-in filter or widening global
 matching. Two regressions verify both tracks pass and broad-only skills do not.
+
+## Lower-priority GCC onboarding (2026-10-09): all seven added, 420 → 427
+
+User requested onboarding Arctera, Rapid7, Zendesk, Litmos, Kuehne+Nagel,
+Mythic AI and Graphcore. Each has an employer-verified, live public inventory;
+no dummy fetchers or guessed company identities were registered. The operative
+playbook and shared two-track/location rules were read before implementation.
+Global matching, location exclusions, delivery credentials and schedules are
+unchanged. Registry discovery activates the seven sources in the existing watcher.
+
+| Employer | Verified hiring source | India jobs in live snapshot | Existing-policy matches |
+|---|---|---:|---:|
+| Arctera | Acquiring parent Cloud Software Group's Workday (`tibco.wd5`, `Cloud_Software_Group`); only roles explicitly identifying Arctera | 0 (53 parent-board roles checked) | 0 |
+| Rapid7 | Workday `mymoose.wd1`, site `careers`; real postings explicitly identify Rapid7 and match current branded-site requisitions | 3 | 0 |
+| Zendesk | Employer-linked Workday `zendesk.wd1`, site `zendesk`, nested `locationCountry` India facet | 14 | 0 |
+| Litmos | Employer-linked Greenhouse `litmos`, public boards API | 12 | 1 |
+| Kuehne+Nagel | Official Phenom `KUNAGLOBAL` widgets API with India country selection and full detail data | 37 | 0 |
+| Mythic AI | Official company page links Lever `mythic-ai.com` | 6 | 0 |
+| Graphcore | Official jobs page JS directly calls Greenhouse `graphcore` | 23 | 0 |
+
+These are changing snapshots, not promises of future alert volume. Litmos' real
+match is **Senior Fullstack Software Engineer**, ID **4982603101**, with explicit
+`.NET`, React, SQL Server and C# requirements, tagged `.NET / C#`. The board and
+this JD specify **India**, not a city: do not describe it as verified remote,
+Hyderabad, Bengaluru or Mumbai. Other Litmos JDs explicitly identify Pune; their
+location strings preserve that evidence and those jobs remain excluded.
+Rapid7's three current India roles are Pune-based. Most Zendesk engineering is
+also Pune-based; its other India roles are commercial and do not pass the title
+rules. Graphcore/Mythic openings predominantly concern silicon/hardware; named
+AI employers do not automatically make every opening an applied-AI match.
+Kuehne+Nagel's current India pool is mostly logistics, commercial and operations.
+
+### Source lessons and identity checks
+
+- Arctera's old `.io` homepage fails; current Arctera announcements establish
+  Cloud Software Group ownership. A current parent careers role explicitly names
+  Arctera and links `tibco.wd5.myworkdayjobs.com/Cloud_Software_Group` for applicants.
+  The new adapter scans the working parent inventory and retains Arctera identity
+  from company/role content, excluding generic portfolio mentions after `About Us:`.
+  A zero current India result is valid, but this is partial identity-based coverage
+  of a shared parent board, not a claim of a separate complete Arctera board.
+- Rapid7/Cloud branded listings initially render but can subsequently return AWS
+  HTTP 202 empty bodies, including normal headless Firefox. These must not be
+  mistaken for zero jobs. Workday gives stable real JSON without that frontend.
+  Rapid7's tenant is **mymoose**, not the plausible but invalid `rapid7` tenant.
+- Zendesk's working country facet is nested under a location group. Walk nested
+  facets, enumerate the complete India pool and use detail locations (including
+  additional locations), preserving Pune/Maharashtra rather than replacing
+  ambiguous multi-location results with a country-only label.
+- Litmos' employer careers link uses the EU-branded Greenhouse embed, while the
+  working public boards API exposes the current `litmos` inventory and canonical
+  posting URLs. Double-unescape HTML before parsing: otherwise encoded headings
+  and location evidence remain markup. Strip separate `content-intro` and
+  `content-conclusion` employer marketing before matching actual requirements.
+  Use `first_published`, not `updated_at`, as publication date.
+- Mythic is the analog-AI hardware company, **not Mythic Entertainment**. Lever
+  reports Bangalore without a country word: normalize the verified Indian city,
+  preserve all India locations, include description + lists + additional text,
+  and convert `createdAt` milliseconds in UTC. Never label US remote as India.
+- Graphcore's own embedded JS calls `boards-api.greenhouse.io` directly. Country
+  and city evidence identify its Bengaluru jobs. Do not infer software suitability
+  from the employer's AI positioning; shared title/skill/experience checks apply.
+- Kuehne+Nagel's landing page's “no active job openings” message is not its real
+  inventory. Public `/widgets` `refineSearch`, with `selected_fields.country=[India]`,
+  returns 37 jobs across four pages. Preserve `cityStateCountry`; use `postedDate`,
+  not `jobUpdatedDate`. Canonical detail routes use `jobSeqNo`; full descriptions
+  come from embedded `phApp.ddo.jobDetail.data.job.description`, not search teasers.
+
+### Verification and delivery safety
+
+**692 tests passed; all 427 pipelines validated.** Focused tests cover each
+adapter's exported contract, separate caches, original dates, complete descriptions,
+location boundaries, Pune preservation, employer marketing removal, nested facets,
+multilocation evidence, Arctera identity, full pagination, repeated/premature pages,
+sticky errors, country-filter leakage and bounded retries. Temporary-state runner
+tests inject failed delivery for all seven and confirm state does not advance.
+Litmos also passed a live generic-runner check with real fetched/matched data,
+actual alert formatting, an injected no-delivery notifier and a temporary ledger;
+the message retained the .NET tag and correct job link, with no state advancement.
+Live fetcher/matcher checks sent no alerts and left all seven new ledgers `[]`;
+production job history was not rewritten. The ordinary watcher will send real
+matching vacancies through its existing channels after deployment.
+
+Primary verification sources: [Arctera acquisition announcement](https://www.arctera.com/press-releases/cloud-software-group-to-acquire-arctera),
+[parent Arctera-identified role](https://careers.cloud.com/jobs/account-executive-remote-new-york-united-states-home-office-connecticut-florida-illinois-massachusetts-new-jersey-north-carolina-virginia),
+[Rapid7 branded requisition R12340](https://careers.rapid7.com/jobs/senior-software-engineer-devops-pune-india),
+[Rapid7 Workday employer posting](https://mymoose.wd1.myworkdayjobs.com/en-US/careers/job/Senior-Customer-Success-Manager_R11959),
+[Zendesk careers](https://www.zendesk.com/company/careers/),
+[Litmos careers](https://www.litmos.com/why-litmos/careers/),
+[Mythic company/careers link](https://www.mythic.ai/company),
+[Graphcore jobs](https://www.graphcore.ai/jobs),
+[Kuehne+Nagel India](https://jobs.kuehne-nagel.com/global/en/india).
