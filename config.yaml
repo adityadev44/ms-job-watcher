@@ -5056,7 +5056,22 @@ costco_search:
   # filters out non-tech roles (HR, Procurement, Payroll) on the same board.
   # Confirmed tech roles: C#/.Net Core (x5), MLOps, Computer Vision AI,
   # Data Scientist (Vertex AI), Data Engineer (BigQuery/Dataflows).
-  require_tech_in_description: true
+  require_tech_in_description: &talent500_description_terms
+    - ".NET"
+    - "C#"
+    - "ASP.NET"
+    - "LangChain"
+    - "LangGraph"
+    - "RAGAS"
+    - "Langfuse"
+    - "LangSmith"
+    - "CrewAI"
+    - "vector database"
+    - "ChromaDB"
+    - "Pinecone"
+    - "generative ai"
+    - "large language model"
+    - "retrieval augmented generation"
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -5268,7 +5283,7 @@ tmobile_search:
   # Confirmed tech roles: Sr Engineer AI (MCP/LLM), Manager SE (Agentic AI/
   # GenAI/LLM), Sr Engineer Python Backend (FastAPI/Redis/Kafka), Manager
   # DevOps (AWS/Azure), Principal SRE, Sr Architect Data (Snowflake/DBT).
-  require_tech_in_description: true
+  require_tech_in_description: *talent500_description_terms
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations
@@ -5898,6 +5913,300 @@ nable_search:
   # N-able announced their Bengaluru GCC in the week of 2026-09-26 (100+
   # engineers planned). 0 India jobs live as of 2026-10-05 recon; board is
   # active and will pick up new postings automatically.
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+abcfitness_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+acumatica_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+alkami_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+anaplan_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+billtrust_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+blackbaud_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+cognite_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+harvey_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+imaginelearning_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+invoicecloud_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+itineris_search:
+  max_listings: 200
+  inter_page_delay: 0.5
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+jaggaer_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+redwoodsoftware_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+starrez_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+truveta_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+workato_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+amtechsoftware_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+celonis_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+coupang_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+hyland_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+meltwater_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nemetschek_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+netsmart_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+reltio_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+serko_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+smartsheet_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+sonatype_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+toast_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+wex_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+wise_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+amgen_search:
+  max_listings: 1000
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+availity_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+coherehealth_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+deutscheboerse_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+hcahealthcare_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+lplfinancial_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+nationwide_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+providence_search:
+  max_listings: 500
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+voya_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+codec_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+fuelcycle_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+rakuten_search:
+  max_listings: 200
+  inter_page_delay: 0.2
   keywords: *default_keywords
   locations: *india_locations
   exclude_locations: *default_exclude_locations

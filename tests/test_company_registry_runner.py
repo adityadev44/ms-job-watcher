@@ -33,7 +33,7 @@ def test_registry_exactly_covers_fetchers_config_and_state() -> None:
     }
     fetcher_slugs.add("microsoft")  # Microsoft's adapter is fetcher.py.
     assert set(COMPANY_REGISTRY) == fetcher_slugs
-    assert len(COMPANY_REGISTRY) == 374
+    assert len(COMPANY_REGISTRY) == 418
 
     config = run_company.load_config(ROOT / "config.yaml")
     configured_slugs = {
@@ -59,6 +59,20 @@ def test_registry_does_not_import_fetchers_eagerly() -> None:
     assert after == before
 
 
+@pytest.mark.parametrize("slug", ["costco", "tmobile"])
+def test_talent500_description_filter_has_real_terms(slug) -> None:
+    config = run_company.load_config(ROOT / "config.yaml")
+    spec = COMPANY_REGISTRY[slug]
+    search = _pipeline_config(config, spec)["search"]
+    assert isinstance(search["require_tech_in_description"], list)
+    jobs = [
+        {"id": "dotnet", "description": "Build APIs with C# and ASP.NET"},
+        {"id": "ai", "description": "Build production agents with LangChain"},
+        {"id": "broad", "description": "Python, Azure, SQL Server"},
+    ]
+    assert [j["id"] for j in _apply_description_filter(jobs, search, spec)] == ["dotnet", "ai"]
+
+
 def test_registry_exposes_conservative_fetcher_capabilities() -> None:
     assert COMPANY_REGISTRY["bankofamerica"].supports_keyword_filter is False
     assert COMPANY_REGISTRY["hsbc"].supports_location_filter is True
@@ -68,12 +82,10 @@ def test_registry_exposes_conservative_fetcher_capabilities() -> None:
 
 
 def test_registry_flags_playwright_backed_fetchers() -> None:
-    # These fetchers drive headless Firefox via Playwright's sync API, which
-    # leaves an asyncio loop bound to whichever OS thread runs them for the
-    # rest of the process's life. run_all.py must give each one a dedicated
-    # thread (see run_companies()) instead of sharing the general pool, or a
-    # second Playwright-backed company reusing that thread fails outright.
+    # Browser-backed adapters use Playwright's sync API. The launcher isolates
+    # them in subprocesses, avoiding shared-thread event-loop conflicts.
     expected = {
+        "hcahealthcare",
         "ashokleyland", "axtria", "bigbasket", "bnpparibas", "darwinbox",
         "globallogic", "honeywell", "ibm", "indigo", "latentview", "natwest",
         "perfios", "porter", "rapido", "safran", "servicenow", "sonatasoftware", "techmahindra",

@@ -6,13 +6,13 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Runs 360 registered company pipelines on a 30-minute GitHub Actions schedule (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 418 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
-### Current integration status (2026-09-23)
+### Current integration status (2026-10-09)
 
 `src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
 
-- **360 active pipelines.** `src/company_registry.py`, the registry-count test, and README agree on this count. Later dated entries below document the additions after Wave 22, including Slice, ABB, Philips, LatentView Analytics, the automotive/GCC batches, and other September expansions.
+- **418 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave below adds 42 verified sources to the pre-wave inventory of 376; five investigated firms remain deferred with evidence.
 - **This repository belongs to Shivangi's MS/software-engineering search.** GitHub Actions reads its recipient list from this repository's `ALERT_RECIPIENT` secret; as of 2026-09-23 it is `shivangikant31@gmail.com`. The separate `adityadev44/ai-job-watcher` repository belongs to Ambrish Dev's aviation/MRO search and uses its own `ALERT_RECIPIENT` secret (`ambrishdev@rediffmail.com`). Never copy notification secrets between these repositories. Cancel already-running jobs before a recipient change because they retain the old secret value for their lifetime.
 - Historical “remaining,” “unresolved,” and skip lists below are snapshots from their dated investigation. Re-check the registry and later entries before acting on them; several September 8 items were subsequently resolved.
 
@@ -257,6 +257,29 @@ The table below is a partial, historical integration reference. `src/company_reg
 ---
 
 ## How to Add a New Company
+
+### Parallel onboarding discipline
+
+For a batch, every agent must first read the current onboarding, filter, and
+validation instructions, then investigate one assigned group of five similar
+employers. Agents own only their assigned fetchers, focused tests, and new empty
+seen-state files. The coordinator owns shared registry/config wiring, inventory
+counts, documentation, the complete test run, and the final commit/push. This
+prevents overlapping edits and incomplete registry/config/state combinations.
+
+Verify employer identity and current application destinations, not just a
+plausible ATS token. A working source with genuinely zero current India jobs
+can be monitored when its country/location contract is proven; a downtime page,
+dead tenant, or generic application form is not a working integration. Record
+blocked candidates with exact evidence instead of adding empty-return stubs.
+
+For cache-once sources, retain and re-raise the first persistent error on later
+calls in that scan. Do not retry the whole board for every keyword, and do not
+convert a failed first request into an apparently successful empty board. Use
+original publication dates where provided; an edit timestamp (`updated_at`) is
+not the original posting date. Preserve city/state evidence for the shared
+location exclusions. Strip clearly separate employer/portfolio marketing when
+it names AI technology unrelated to the role, then test the actual JD sections.
 
 > **Every company is different.** The steps below capture patterns from prior integrations. They are a starting point, not a checklist. Each new ATS will have its own quirks — different API shapes, bot protection, date formats, title conventions, or pagination schemes. Read what the new system actually does before reaching for a copy-paste from an existing fetcher. The goal is always accurate job alerts; the playbook is there to save time, not to constrain good judgment.
 
@@ -507,7 +530,7 @@ matching:                         # shared across ALL companies
 
 ## GitHub Actions
 
-- `run_all.py` discovers all registry entries. The workflow sets **20 general workers**; the local CLI default is 10 (`--workers` / `JOB_WATCHER_WORKERS`). Each of the 11 browser-backed pipelines runs concurrently in its own subprocess; these are additional to the general worker limit.
+- `run_all.py` discovers all registry entries. The workflow sets **20 general workers**; the local CLI default is 10 (`--workers` / `JOB_WATCHER_WORKERS`). Each browser-backed pipeline runs concurrently in its own subprocess; these are additional to the general worker limit.
 - An uncaught pipeline error or failure of all configured delivery channels produces a failed company status; peers continue and the launcher exits non-zero after they finish. Search errors caught inside `matcher.py` only log warnings and stop that query's pagination: even an all-empty failed fetch can therefore report `ok`. Check real run logs, warnings, and fetched counts before declaring coverage healthy.
 - Playwright is pinned to `1.62.0`. Firefox and Chromium are **cached** via `actions/cache@v4` on `~/.cache/ms-playwright`; the workflow launch-checks both and reinstalls on failure.
 - Tracked `seen_jobs*.json` and `pipeline_failures.json` changes are committed after each run with `[skip ci]`, including failed runs
@@ -2140,3 +2163,135 @@ Investigated 7 gaming companies (EA, Ubisoft, Zynga, Dream11, Mobile Premier Lea
 **Talent500 discovery note:** The Talent500 backend API was discovered by running Playwright on the public page and capturing network requests — the correct domain is `prod-warmachine.talent500.co` (not `.com`). No auth required; the API is entirely public. Descriptions are not available via a separate endpoint — `primary_skills + secondary_skills` serve as the inline description proxy for `require_any_configured_term` filtering.
 
 **Registry/config changes:** `_PIPELINE_DATA` gained `southwestairlines` (after `soprasteria`), `vanguard` (before `vedanta`), `blackstone` (after `blackrock`), `jll` (after `jioplatforms`), `costco` (after `continental`), and `tmobile` (after `tigeranalytics`) alphabetically. `costco` and `tmobile` added to both `_IGNORES_KEYWORDS` and `_INLINE_DESCRIPTIONS` frozensets. `config.yaml`: added corresponding `*_search` sections with `require_tech_in_description: true` for `costco` and `tmobile`. `seen_jobs_*.json` files created empty for all six. `test_company_registry_runner.py` count assertion updated to 374. All 20 registry tests pass.
+
+## GCC Index onboarding wave (2026-10-09): 47 reviewed, 42 added, 376 → 418
+
+The coordinator read the operative playbook and assigned parallel agents groups
+of five similar firms. Each agent read the playbook before its group. Agents
+owned fetchers/tests/new ledgers; shared wiring and final validation were
+centralized. All 47 candidates in the GCC Index relevance shortlist were
+investigated. Global title, skill, experience, and location policy was unchanged.
+
+### Verified additions and live snapshot
+
+Counts are verification snapshots, not a permanent inventory or a promise of
+new notifications. India counts include locations the shared matcher later
+excludes. Matches apply the existing .NET/C# or applied-AI rules and have verified
+descriptions. Cached full-board sources ignore keywords; Workday keyword-scoped
+production scans can fetch a different count from the broad verification scan.
+
+| Employer | Verified source | India jobs fetched | Matches |
+|---|---|---:|---:|
+| ABC Fitness | Workday | 10 | 0 |
+| Acumatica | SmartRecruiters | 3 | 0 |
+| Alkami | Workday | 3 | 1 |
+| Amgen | Workday | 770 | 33 |
+| Amtech Software | Greenhouse | 24 | 4 |
+| Anaplan | Greenhouse | 26 | 0 |
+| Availity | Workday India site | 19 | 0 |
+| Billtrust | Greenhouse | 8 | 2 |
+| Blackbaud | Workday | 52 | 0 |
+| Celonis | Greenhouse | 33 | 1 |
+| Codec | Pinpoint | 0 | 0 |
+| Cognite | Greenhouse | 13 | 1 |
+| Cohere Health | Greenhouse | 39 | 0 |
+| Coupang | Greenhouse | 41 | 2 |
+| Deutsche Börse | Job-shop / Typesense | 0 | 0 |
+| Fuel Cycle | Ashby | 0 | 0 |
+| Harvey | Ashby | 8 | 0 |
+| HCA Healthcare | Darwinbox / Firefox | 119 | 7 |
+| Hyland | iCIMS | 14 | 0 |
+| Imagine Learning | Jobvite | 6 | 0 |
+| InvoiceCloud | Greenhouse | 14 | 3 |
+| Itineris | Employer / HiBob | 16 | 1 |
+| JAGGAER | iCIMS | 13 | 0 |
+| LPL Financial | Workday India site | 57 | 10 |
+| Meltwater | Jobvite | 8 | 1 |
+| Nationwide | Workday India site | 25 | 1 |
+| Nemetschek | Employer / SuccessFactors | 0 | 0 |
+| Netsmart | Workday | 11 | 1 |
+| Providence | SuccessFactors | 81 | 7 |
+| Rakuten India | Zwayam | 7 | 1 |
+| Redwood Software | Greenhouse | 12 | 0 |
+| Reltio | Greenhouse | 10 | 0 |
+| Serko | Employer / Workable | 4 | 1 |
+| Smartsheet | Greenhouse | 22 | 1 |
+| Sonatype | Lever | 5 | 1 |
+| StarRez | Greenhouse | 2 | 0 |
+| Toast | Greenhouse | 15 | 0 |
+| Truveta | Greenhouse | 20 | 8 |
+| Voya India | Employer WordPress | 35 | 1 |
+| WEX | Workday | 17 | 6 |
+| Wise | SmartRecruiters | 29 | 0 |
+| Workato | Greenhouse | 5 | 0 |
+
+Codec (17 UK/Ireland jobs), Fuel Cycle (13 USA jobs), Deutsche Börse (195 global
+jobs), and Nemetschek currently expose no India vacancies on the verified source.
+These are functioning country-aware monitors, not empty-return placeholders.
+Codec's India build-operate-transfer footprint is confirmed by [Trigent's official
+announcement](https://trigent.com/news/trigent-and-codec-partner-to-launch-global-capability-centres/).
+Fuel Cycle's official careers page confirms its Navi Mumbai hub. No foreign or
+generic worldwide-remote job was relabelled as an India vacancy.
+
+### Deferred candidates, not silently added
+
+| Employer | Evidence and disposition |
+|---|---|
+| isolved | Official isolvedhire board reports HTTP 503 unexpected downtime in requests, Chromium, and Firefox. Recheck after recovery; no stub. |
+| LiveRamp | Employer-linked `liveramp.wd5.myworkdayjobs.com/LiveRampCareers` reports Workday service interruption; repeated CXS requests return HTTP 403/S22. Recheck after recovery. |
+| Wayfair | Official listings and details return HTTP 429 / PerimeterX human verification in requests and Chromium. Old Greenhouse board returns 404. No working alternative verified. |
+| Truist | Official Phenom country facet exposes USA only; Workday cities/states likewise have no India locations. No independent India hiring source found. |
+| Citizens Financial | Official countries currently expose United States and Remote only. Its India GCC is operated with Cognizant; generic partner roles were not duplicated or mislabelled as Citizens. |
+
+### Source-specific lessons
+
+- Billtrust's normal hosted job URLs redirect into branded HTTP 403 pages; its
+  verified Greenhouse application embed links work.
+- Codec's plain careers HTML hides the real Pinpoint board. Browser-rendered
+  employer links reveal the public, directly accessible `postings.json` API.
+- Rakuten's old `/careers` URL is obsolete. The current official homepage links
+  `rakuten.openings.co`, backed by Zwayam company 15124. Empty listing descriptions
+  require the separate full-detail endpoint, not acceptance of a blank JD.
+- Meltwater's gated Talemetry frontend sits over accessible Jobvite listings and
+  full details. Hyland's current global iCIMS board works; its old India hostname
+  redirects to a misleading test-only portal. Follow current employer links.
+- Amtech's portfolio marketing mentions Generative AI across unrelated jobs.
+  Removing that clearly separate introduction reduced nine misleading inclusive
+  matches to four genuine matches; role requirements remain intact.
+- HCA's actual Darwinbox candidatev2 POST was captured from its official India
+  portal. Same-origin Firefox replay works; plain HTTP is blocked. Register it as
+  browser-backed so the existing launcher isolates it in a subprocess.
+- Workday ambiguity is resolved using detail country/location evidence. Watermarks
+  are per keyword; `30+ days` is not treated as an exact posting date. Toast's
+  structured office data preserves Chennai/Tamil Nadu so matcher exclusions work.
+- Itineris intermittently rate-limits the old Chrome user agent; the verified
+  Safari user agent allowed a complete 16-job scan and real AI Engineer JD.
+- Deutsche Börse is distinct from Deutsche Bank. Its public, tenant-scoped search
+  key is read from current website configuration, not hardcoded private credentials.
+
+### Policy findings retained for a separate review
+
+Anaplan `Engineer I–IV`, Alkami's misspelled `Software Engieer`, ABC Fitness
+`Principal Engineer`, and JAGGAER `Principal Developer, Agentic AI` expose title
+family gaps. InvoiceCloud's Python role passes current rules because `.NET/Java`
+is mentioned as optional exposure outside a recognized optional heading. These
+observations were recorded without broadening global filters in an onboarding
+batch. The table reports existing-policy results, not a new manual ranking.
+
+### Validation and state safety
+
+All 42 adapters have focused mocked tests. The complete suite passes **642 tests**;
+all 418 registry/config/fetcher/state relationships are validated. Live fetcher
+and matcher checks sent no notifications. Four representative pipelines
+(Truveta, Billtrust, Cognite, Amtech) also passed actual runner formatting,
+stubbed delivery, temporary-state advancement, and repeat-run dedup checks.
+All 42 new ledgers remained `[]` after verification; existing tracked job-history
+files were untouched. No secrets, environment files, recipients, or browser
+session data were added. Existing notification and referral schedules were not
+changed by this company-coverage task.
+
+The repository-wide validation also caught a pre-existing Costco/T-Mobile config
+defect: their description filters were boolean `true`, but the runner requires a
+list of terms. Replaced both with the established narrow .NET/AI term list (one
+shared YAML anchor), without disabling the opt-in filter or widening global
+matching. Two regressions verify both tracks pass and broad-only skills do not.

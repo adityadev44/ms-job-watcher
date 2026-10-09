@@ -1,0 +1,86 @@
+"""India jobs from Toast's verified Greenhouse board (toast), checked 2026-10-09.
+The whole board includes descriptions; keyword/location query arguments are ignored.
+"""
+from __future__ import annotations
+import html
+import re
+import time
+import requests
+
+_LIST_URL = "https://boards-api.greenhouse.io/v1/boards/toast/jobs"
+_HEADERS = {"User-Agent": "Mozilla/5.0 Chrome/131.0.0.0 Safari/537.36", "Accept": "application/json"}
+_india_cache = []
+_content_cache = {}
+_cache_filled = False
+_cache_error = None
+
+class RateLimitError(Exception):
+    """Board unavailable after bounded retries."""
+
+def _get(url, timeout):
+    for attempt in range(3):
+        try:
+            response = requests.get(url, headers=_HEADERS, timeout=timeout)
+            response.raise_for_status()
+            return response.json()
+        except (requests.RequestException, ValueError) as exc:
+            if attempt == 2:
+                raise RateLimitError(f"Toast request failed: {exc}") from exc
+            time.sleep(2 ** attempt)
+
+def _text(raw):
+    return " ".join(re.sub(r"<[^>]+>", " ", html.unescape(html.unescape(raw or ""))).split())
+
+def _date(job):
+    return (job.get("first_published") or "")[:10]
+
+def _fill_cache(timeout):
+    global _cache_filled, _cache_error
+    if _cache_filled:
+        if _cache_error:
+            raise _cache_error
+        return
+    _cache_filled = True
+    try:
+        jobs = _get(_LIST_URL + "?content=true", timeout)["jobs"]
+        for job in jobs:
+            location = (job.get("location") or {}).get("name", "")
+            # Greenhouse offices carry full country/state names even where
+            # the headline location is bare Chennai or Bangalore. Use them
+            # so new India offices are discovered without expanding a whitelist.
+            india_offices = [office.get("location") or office.get("name") or ""
+                for office in (job.get("offices") or [])
+                if re.search(r"\bindia\b", (office.get("location") or "") + " " + (office.get("name") or ""), re.I)]
+            if india_offices:
+                location = "; ".join(india_offices)
+            if not re.search(r"\b(india|bengaluru|bangalore|hyderabad)\b", location, re.I):
+                continue
+            # A global multi-site posting can include Korea alongside India.
+            # Retain its genuine India segment instead of relabelling Seoul.
+            parts = [part.strip() for part in location.split(";")]
+            location = "; ".join(part for part in parts if re.search(r"\b(india|bengaluru|bangalore|hyderabad)\b", part, re.I))
+            if not re.search(r"\bindia\b", location, re.I):
+                location += ", India"
+            job_id = str(job.get("id") or "")
+            if not job_id or not job.get("title") or not job.get("absolute_url"):
+                continue
+            _content_cache[job_id] = (_text(job.get("content")), _date(job))
+            _india_cache.append({"id": job_id, "title": job["title"], "location": location,
+                "posting_date": _date(job), "application_url": job["absolute_url"]})
+    except (RateLimitError, KeyError, TypeError) as exc:
+        _cache_error = RateLimitError(f"Toast board cache failed: {exc}")
+        raise _cache_error from exc
+
+def fetch_jobs(keyword, location, *, num=20, start=0, sort_by="date", timeout=20):
+    _fill_cache(timeout)
+    return _india_cache[start:start + num]
+
+def fetch_job_description(application_url, timeout=20):
+    match = re.search(r"(?:/jobs/|[?&]gh_jid=)(\d+)", application_url or "")
+    if not match:
+        raise RateLimitError("Toast: invalid job URL")
+    job_id = match.group(1)
+    if job_id not in _content_cache:
+        job = _get(_LIST_URL + "/" + job_id + "?content=true", timeout)
+        _content_cache[job_id] = (_text(job.get("content")), _date(job))
+    return _content_cache[job_id]
