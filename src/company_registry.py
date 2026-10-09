@@ -36,6 +36,20 @@ class CompanyPipeline:
 # slug, alert/display source, strict description filter.  The remaining names
 # follow the conventions used by the non-Microsoft adapters.
 _PIPELINE_DATA = (
+    ("asana", "Asana", False),
+    ("notion", "Notion", False),
+    ("mondaycom", "monday.com", False),
+    ("clickup", "ClickUp", False),
+    ("airtable", "Airtable", False),
+    ("miro", "Miro", False),
+    ("figma", "Figma", False),
+    ("box", "Box", False),
+    ("dropbox", "Dropbox", False),
+    ("github", "GitHub", False),
+    ("jetbrains", "JetBrains", False),
+    ("datadog", "Datadog", False),
+    ("elastic", "Elastic", False),
+    ("newrelic", "New Relic", False),
     ("arctera", "Arctera", False),
     ("rapid7", "Rapid7", False),
     ("zendesk", "Zendesk", False),
@@ -466,6 +480,7 @@ _PIPELINE_DATA = (
 
 _IGNORES_KEYWORDS = frozenset(
     {
+        "asana", "notion", "mondaycom", "clickup", "airtable", "miro", "figma", "box", "dropbox", "github", "jetbrains", "datadog", "elastic", "newrelic",
         "arctera", "rapid7", "zendesk", "litmos", "kuehnenagel", "mythic", "graphcore",
         "isolved", "citizensfinancial",
         "codec", "fuelcycle", "rakuten",

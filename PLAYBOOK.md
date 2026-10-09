@@ -1,18 +1,102 @@
 # Job Watcher Playbook
 
+## Atlassian-peer onboarding (2026-10-09): 427 → 441
+
+Two agents first read this playbook, then investigated groups of ten and seven.
+Shared registry/config/documentation changes were integrated centrally.
+
+| Employer | Verified source | Global / India / policy matches |
+| --- | --- | --- |
+| Asana | Greenhouse `asana` | 101 / 0 / 0 |
+| Airtable | Greenhouse `airtable` | 4 / 0 / 0 |
+| Figma | Greenhouse `figma` | 153 / 1 / 0 |
+| Box | Greenhouse `boxinc` | 130 / 0 / 0 |
+| Dropbox | Greenhouse `dropbox` | 32 / 0 / 0 |
+| Notion | Ashby `notion` | 133 / 4 / 0 |
+| ClickUp | Ashby `clickup` | 48 / 0 / 0 |
+| monday.com | Ashby `monday.com` | 94 / 0 / 0 |
+| Miro | Employer Next.js inventory and vacancy details | 24 / 0 / 0 |
+| GitHub | Official public iCIMS API | 73 / 0 / 0 |
+| JetBrains | Greenhouse `jetbrains` | 59 / 0 / 0 |
+| Datadog | Greenhouse `datadog` | 431 / 8 / 0 |
+| Elastic | Greenhouse `elastic` | 417 / 18 / 1 |
+| New Relic | Greenhouse `newrelic` | 50 / 9 / 0 |
+
+The verified match is Elastic Agentic AI Engineer, requisition 8247206,
+Bangalore, India, AI / ML / Python track. These are dated investigation counts,
+not permanent inventories. Working zero-India boards remain monitored.
+No alerts were sent during investigation and production ledgers were untouched.
+Each new ledger starts empty for normal future delivery. No scheduler changes.
+
+**Three remaining dispositions:** HubSpot is pending: its current official public
+GraphQL API (`https://wtcfns.hubspot.com/careers/graphql`) returns HTTP 200 but
+upstream `404: Not Found` errors and `jobs:null`; old Greenhouse `hubspotjobs`
+is also 404. Treat this as failure, not zero vacancies. Recheck the official
+frontend and its Jobs query before onboarding; do not install a broken stub.
+HashiCorp's official Open positions link now goes to IBM's HashiCorp search.
+Existing IBM India query returned zero HashiCorp postings today, which does not
+prove comprehensive child coverage. Confluent has 20 explicitly named India
+roles on the existing IBM source. Its legacy Ashby board retains one India role,
+but official linkage and non-overlap are unverified. Revisit that residual
+migration question rather than claiming complete coverage or adding duplicates.
+
+**Reusable lessons:**
+
+- Acquisition is not enough to infer parent coverage: verify current official
+  hiring destination and actual requisitions. GitHub still needs its own board
+  despite Microsoft ownership; HashiCorp explicitly routes to IBM.
+- A live legacy board can coexist with migrated parent roles. Compare IDs and
+  official links before creating duplicate seen-job ledgers.
+- JetBrains' EU-branded Greenhouse board works through the standard public API;
+  do not invent an EU API hostname. Verify exact tenant names (`boxinc`,
+  `monday.com`) from employer links rather than guessing.
+- GitHub requires descriptions, qualifications and responsibilities together;
+  validate employer identity, total count, full pagination and duplicate IDs.
+- Ashby secondary locations and structured country/city must be preserved.
+  Explicit foreign country overrides ambiguous city; remote/APAC is not India.
+- Decode escaped HTML and strip introductory employer AI marketing only at
+  explicit role-heading boundaries. Preserve nested requirement content.
+- Use original `first_published` / `publishedAt`, never update time. Miro has no
+  verified original date, so leave it blank rather than fabricate freshness.
+- All fourteen fetchers cache complete descriptions for their callbacks, but
+  listing dictionaries omit description bodies: ignore-keywords true,
+  inline-descriptions false, server-location/newest-first/browser flags false.
+  Current India pools fit max_listings 200. Recheck this cap as hiring grows.
+
+Primary evidence: [Asana jobs](https://asana.com/jobs/all),
+[Airtable careers](https://airtable.com/careers),
+[Figma careers](https://www.figma.com/careers/),
+[Box hiring](https://job-boards.greenhouse.io/boxinc),
+[Dropbox jobs](https://www.dropbox.jobs/en/jobs/),
+[Notion careers](https://www.notion.com/careers),
+[ClickUp careers](https://clickup.com/careers),
+[monday.com careers](https://monday.com/careers),
+[Miro jobs](https://miro.com/careers/open-positions/),
+[GitHub careers](https://github.com/about/careers),
+[JetBrains jobs](https://www.jetbrains.com/careers/jobs/),
+[Datadog official requisition](https://careers.datadoghq.com/detail/6512321/?gh_jid=6512321),
+[Elastic official matching requisition](https://jobs.elastic.co/jobs?gh_jid=8247206),
+[New Relic careers](https://newrelic.com/careers),
+[HashiCorp careers](https://www.hashicorp.com/en/careers),
+[IBM HashiCorp search](https://www.ibm.com/careers/search?q=hashicorp).
+
+Verification: 734 tests passed and all 441 registry/config/fetcher contracts
+validated. Tests cover malformed inventories, pagination, country eligibility,
+cached descriptions, original dates and escaped/nested marketing boundaries.
+
 Reference for maintaining this project and adding new company pipelines.
 
 ---
 
 ## What This System Does
 
-Runs 427 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 441 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
 ### Current integration status (2026-10-09)
 
 `src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
 
-- **427 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave added 42 sources to 376; the workaround pass added isolved and Citizens Financial, then the lower-priority pass added seven more. LiveRamp and Wayfair remain blocked; Truist has partial partner coverage through the existing Infosys pipeline, not a separate verified India feed.
+- **441 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave added 42 sources to 376; the workaround pass added isolved and Citizens Financial, the lower-priority pass added seven more, and the Atlassian-peer wave added fourteen. LiveRamp and Wayfair remain blocked; Truist has partial partner coverage through the existing Infosys pipeline. HubSpot is pending an upstream careers API recovery. HashiCorp routes to IBM; Confluent has verified IBM listings with residual legacy-board uncertainty.
 - **This repository belongs to Shivangi's MS/software-engineering search.** GitHub Actions reads its recipient list from this repository's `ALERT_RECIPIENT` secret; as of 2026-09-23 it is `shivangikant31@gmail.com`. The separate `adityadev44/ai-job-watcher` repository belongs to Ambrish Dev's aviation/MRO search and uses its own `ALERT_RECIPIENT` secret (`ambrishdev@rediffmail.com`). Never copy notification secrets between these repositories. Cancel already-running jobs before a recipient change because they retain the old secret value for their lifetime.
 - Historical “remaining,” “unresolved,” and skip lists below are snapshots from their dated investigation. Re-check the registry and later entries before acting on them; several September 8 items were subsequently resolved.
 
@@ -261,11 +345,48 @@ The table below is a partial, historical integration reference. `src/company_reg
 ### Parallel onboarding discipline
 
 For a batch, every agent must first read the current onboarding, filter, and
-validation instructions, then investigate one assigned group of five similar
-employers. Agents own only their assigned fetchers, focused tests, and new empty
+validation instructions, then investigate one assigned group of similar
+employers. Follow the user's requested group size (the Atlassian-peer wave uses
+10, with a final remainder group of 7); otherwise use five. Agents own only
+their assigned fetchers, focused tests, and new empty
 seen-state files. The coordinator owns shared registry/config wiring, inventory
 counts, documentation, the complete test run, and the final commit/push. This
 prevents overlapping edits and incomplete registry/config/state combinations.
+
+### Source recovery and coverage decisions
+
+Apply the October 9 source-recovery lessons to new employers, not only the
+specific companies where the problems first appeared:
+
+1. Trace current official careers and application links before choosing an ATS
+   tenant. Rebrands and acquisitions can move hiring into a parent's board;
+   tenant names may be unrelated to the employer name. Verify legal employer or
+   role identity, not just marketing text naming several portfolio brands.
+2. If a branded frontend is blocked, look for its public ATS, employer JSON
+   export, embedded JobPosting JSON-LD or server-rendered job inventory. Use only
+   verified public sources. Do not automate CAPTCHA solving or treat indexed,
+   closed postings as a current inventory.
+3. An HTTP 200 maintenance page or empty HTTP 202 response is not zero vacancies.
+   Validate response schema, advertised count, page progression and complete
+   description data. Retain a failed-scan error on later calls in the same scan.
+4. Keyword “India” can be autocorrected or ignored. Prefer structured country
+   facets and fields. Resolve ambiguous multi-location jobs with real details;
+   preserve city/state evidence and explicitly India-eligible remote labels.
+   A global remote role is not automatically available to an India candidate.
+5. Separate employer marketing from actual requirements. Decode HTML entities
+   before extracting text. Use original publication fields where present, never
+   convert a modification timestamp or “30+ days” into a precise posting date.
+6. Compare a proposed subsidiary/partner board with existing parent coverage.
+   The same requisitions must not be added under a second company ledger just
+   to make the inventory count larger. Record verified parent coverage instead;
+   only create a separate pipeline when it adds independently verified scope.
+7. A proven working board with no India vacancies can be monitored. A broken
+   board cannot be registered as an empty-return placeholder. Keep exact blocker
+   evidence and optional manual fallbacks separate from automated coverage.
+8. Test real fetcher/matcher behavior without notifications, then test formatting
+   and delivery/state advancement using injected notifiers and temporary files.
+   Leave production job history and delivery credentials untouched. The existing
+   registry-driven workflow does not need a new schedule for each added company.
 
 Verify employer identity and current application destinations, not just a
 plausible ATS token. A working source with genuinely zero current India jobs

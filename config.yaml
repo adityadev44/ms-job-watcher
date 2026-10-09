@@ -6274,6 +6274,104 @@ graphcore_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+asana_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+notion_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+mondaycom_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+clickup_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+airtable_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+miro_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+figma_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+box_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+dropbox_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+github_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+jetbrains_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+datadog_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+elastic_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+newrelic_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"
