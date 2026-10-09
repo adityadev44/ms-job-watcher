@@ -6211,6 +6211,20 @@ rakuten_search:
   locations: *india_locations
   exclude_locations: *default_exclude_locations
 
+isolved_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
+citizensfinancial_search:
+  max_listings: 200
+  inter_page_delay: 0.2
+  keywords: *default_keywords
+  locations: *india_locations
+  exclude_locations: *default_exclude_locations
+
 notifications:
   email:
     recipient: ""     # e.g. "you@example.com"

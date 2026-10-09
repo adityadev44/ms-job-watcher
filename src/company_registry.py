@@ -36,6 +36,8 @@ class CompanyPipeline:
 # slug, alert/display source, strict description filter.  The remaining names
 # follow the conventions used by the non-Microsoft adapters.
 _PIPELINE_DATA = (
+    ("isolved", "isolved", False),
+    ("citizensfinancial", "Citizens Financial Group", False),
     ("abcfitness", "ABC Fitness", False),
     ("abinbev", "AB InBev GCC", False),
     ("abb", "ABB", False),
@@ -457,6 +459,7 @@ _PIPELINE_DATA = (
 
 _IGNORES_KEYWORDS = frozenset(
     {
+        "isolved", "citizensfinancial",
         "codec", "fuelcycle", "rakuten",
         "coherehealth", "deutscheboerse", "hcahealthcare", "providence", "voya",
         "amtechsoftware", "celonis", "coupang", "hyland", "meltwater", "nemetschek", "reltio", "serko", "smartsheet", "sonatype", "toast", "wise",
@@ -513,6 +516,7 @@ _SUPPORTS_LOCATION = frozenset(
 )
 _INLINE_DESCRIPTIONS = frozenset(
     {
+        "isolved",
         "codec", "fuelcycle",
         "coherehealth", "deutscheboerse", "hcahealthcare",
         "amtechsoftware", "celonis", "coupang", "reltio", "smartsheet", "sonatype", "toast",

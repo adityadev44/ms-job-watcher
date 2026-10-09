@@ -6,13 +6,13 @@ Reference for maintaining this project and adding new company pipelines.
 
 ## What This System Does
 
-Runs 418 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
+Runs 420 registered company pipelines through continuous GitHub Actions execution with scheduled safety nets (actual start times and scan duration can vary). Filters for India-based **.NET/C#** and **AI/ML/Python** software engineering roles — either track qualifies, a job doesn't need both — and sends Telegram + email alerts only for jobs not seen before, each one tagged `[.NET / C#]` or `[AI / ML / Python]` (or both, for a genuinely hybrid role) so the two tracks are easy to tell apart in one feed. Each company has its own fetcher, registry entry, seen-jobs file, and config section; orchestration is shared.
 
 ### Current integration status (2026-10-09)
 
 `src/company_registry.py` is authoritative. The dated waves below preserve investigation history; their old counts and “remaining” lists must not be read as current status.
 
-- **418 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave below adds 42 verified sources to the pre-wave inventory of 376; five investigated firms remain deferred with evidence.
+- **420 registered pipelines.** The registry, exact inventory test, configuration, fetcher files, and state files agree. Registration is not a claim that every board currently has matching jobs or that every historical pipeline is healthy. The October 9 GCC Index wave added 42 sources to 376; the subsequent workaround pass added isolved and Citizens Financial. LiveRamp and Wayfair remain blocked; Truist has partial partner coverage through the existing Infosys pipeline, not a separate verified India feed.
 - **This repository belongs to Shivangi's MS/software-engineering search.** GitHub Actions reads its recipient list from this repository's `ALERT_RECIPIENT` secret; as of 2026-09-23 it is `shivangikant31@gmail.com`. The separate `adityadev44/ai-job-watcher` repository belongs to Ambrish Dev's aviation/MRO search and uses its own `ALERT_RECIPIENT` secret (`ambrishdev@rediffmail.com`). Never copy notification secrets between these repositories. Cancel already-running jobs before a recipient change because they retain the old secret value for their lifetime.
 - Historical “remaining,” “unresolved,” and skip lists below are snapshots from their dated investigation. Re-check the registry and later entries before acting on them; several September 8 items were subsequently resolved.
 
@@ -2235,6 +2235,9 @@ generic worldwide-remote job was relabelled as an India vacancy.
 
 ### Deferred candidates, not silently added
 
+Historical first-pass findings below are superseded where noted by the workaround
+follow-up immediately after this table.
+
 | Employer | Evidence and disposition |
 |---|---|
 | isolved | Official isolvedhire board reports HTTP 503 unexpected downtime in requests, Chromium, and Firefox. Recheck after recovery; no stub. |
@@ -2242,6 +2245,51 @@ generic worldwide-remote job was relabelled as an India vacancy.
 | Wayfair | Official listings and details return HTTP 429 / PerimeterX human verification in requests and Chromium. Old Greenhouse board returns 404. No working alternative verified. |
 | Truist | Official Phenom country facet exposes USA only; Workday cities/states likewise have no India locations. No independent India hiring source found. |
 | Citizens Financial | Official countries currently expose United States and Remote only. Its India GCC is operated with Cognizant; generic partner roles were not duplicated or mislabelled as Citizens. |
+
+### Deferred-source workaround follow-up (2026-10-09): 418 → 420
+
+User authorized implementation, playbook update, testing, commit and push.
+
+| Employer | Current disposition | Verified evidence / limitations |
+|---|---|---|
+| isolved | Added `isolved` | Downtime recovered. Public `https://isolved.isolvedhire.com/jobsandemployment/` exposes 32 unique live listing links, 6 Hyderabad/IND cards. Each detail embeds full JobPosting JSON-LD (5,330–11,087 plain-text description characters for the India set). Card and structured country both must identify India. Current matcher: 6 fetched, 0 matches; manager/title exclusions and broad-only Azure/Python explain rejections. |
+| Citizens Financial | Added `citizensfinancial`, functioning zero-India monitor | Followed official jobs.citizensbank.com account links to `hcgn.fa.us2.oraclecloud.com`, Oracle CX_1. Public recruitingCEJobRequisitions API is accessible; complete global pagination currently exposes 464 US jobs, no India roles. Real detail ID 49604 returns 4,031 description characters. Future India primary/secondary locations are filtered using country evidence, never inferred from GCC announcements or US-remote labels. |
+| Truist | Existing Infosys partner coverage; no duplicate adapter | Checked all 1,618 current Infosys India listings and descriptions. One explicitly mentions Truist: `INFSYS-EXTERNAL-254351`, CISNGE - Senior Associate Hardware Asset Management, Hyderabad. JD says “Coordinate with Truist vendor partners to track devices and returns.” It is not a target .NET/applied-AI engineering role. Existing Infosys pipeline will evaluate future client roles under unchanged global filters; this is partial partner coverage, not a complete Truist feed. |
+| Citizens partner channel | Existing Cognizant coverage retained | Checked all 539 India postings in the current Cognizant RSS cache, not merely fetch_jobs' default first 20. None explicitly names Citizens. Official Cognizant announcement confirms the Hyderabad partnership. Citizens' May 1, 2026 applicant privacy policy includes CFG Technology and Operations India Private Limited, but this does not prove an India vacancy. Do not relabel generic Cognizant jobs. |
+| LiveRamp | Still deferred | Official India careers page points to wd5 LiveRampCareers; service-interruption redirect and CXS HTTP 403/S22 persist. No verified alternative unattended source. Human-reviewed recruiter/LinkedIn discovery is an optional fallback, not an installed integration. |
+| Wayfair | Still deferred | Official public careers listing is still human-verification gated. An indexed old job URL explicitly says no longer active; indexed results are not proof of a current opening. No CAPTCHA automation, stale-job feed, or empty-return stub added. Human-reviewed discovery remains optional. |
+
+Implementation lessons:
+
+- isolved's visible description is Vue-rendered, but its JSON-LD contains the
+  actual role requirements. Read this instead of treating the near-empty visible
+  HTML body as a missing JD. Validate the listing marker and advertised count
+  against unique links; partial or downtime pages must raise, not report zero.
+- Citizens' keyword “India” is autocorrected to “infra”; keyword search is not
+  a country filter. Walk the full board using offsets and structured countries.
+  Reject malformed, prematurely empty, missing-ID and repeated pages. Retain
+  persistent first-scan errors so later keyword calls cannot silently hide failure.
+- Both adapters use bounded HTTP retries, existing shared filters and empty new
+  seen ledgers. isolved descriptions are cached with inventory; Citizens uses the
+  verified Oracle detail endpoint. Neither requires a browser or new credentials.
+- The existing registry-discovering GitHub workflow needs no schedule change.
+  Partner postings retain the actual Infosys/Cognizant employer and existing
+  deduplication; they are not duplicated into misleading client-branded feeds.
+
+Validation: **657 tests passed**, all **420** pipeline/config/fetcher/state
+contracts validated. Focused tests cover parsing, publication dates, India versus
+Indiana/US-remote, pagination, genuine zero, sticky failure, repeated pages,
+descriptions and retry exhaustion. Injected notifier tests use temporary ledgers
+and verify success-only state advancement for both new pipelines. Live fetcher
+and matcher checks sent no alerts and left production ledgers unchanged. Global
+matching policy, delivery credentials and LinkedIn schedules were not modified.
+
+Primary sources: [isolved board](https://isolved.isolvedhire.com/jobsandemployment/),
+[Citizens policy](https://jobs.citizensbank.com/Job-Applicant-Privacy-Policy),
+[Citizens/Cognizant announcement](https://news.cognizant.com/Citizens-Financial-Group-Partners-with-Cognizant-to-Open-Global-Capability-Center-in-Hyderabad),
+[verified Infosys posting](https://career.infosys.com/jobdesc?jobReferenceCode=INFSYS-EXTERNAL-254351&sourceId=1),
+[LiveRamp India](https://liveramp.com/careers/india),
+[Wayfair careers](https://www.aboutwayfair.com/careers).
 
 ### Source-specific lessons
 
