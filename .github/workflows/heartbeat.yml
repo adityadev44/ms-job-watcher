@@ -1,17 +1,9 @@
 name: Heartbeat
 
-# Fires every 10 minutes and does nothing — its completion event triggers
-# Job Watcher via workflow_run. This is the primary cadence driver.
-#
-# Why a separate workflow instead of self-referential workflow_run on
-# watcher.yml itself: GitHub blocks same-workflow workflow_run triggers
-# entirely (empirically confirmed 2026-09-07 — two completed runs produced
-# zero workflow_run events despite correct YAML). Cross-workflow triggers
-# work normally. The Heartbeat approach is equivalent to the previous
-# external cron service that called workflow_dispatch every ~15 min.
 on:
-  schedule:
-    - cron: '*/10 * * * *'
+  # Disabled for local-primary mode. Manual dispatch remains available for
+  # emergency verification without starting an automatic watcher chain.
+  workflow_dispatch:
 
 jobs:
   ping:
